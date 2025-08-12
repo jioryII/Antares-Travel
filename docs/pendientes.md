@@ -1,1 +1,0 @@
-# documentar pendientes del codigo
