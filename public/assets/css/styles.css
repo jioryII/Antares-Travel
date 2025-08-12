@@ -1,0 +1,22 @@
+@layer components {
+  .nav-link {
+    @apply px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors;
+  }
+
+  .btn-primary {
+    @apply px-6 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all transform hover:scale-105;
+  }
+
+  .destination-card {
+    @apply bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow;
+  }
+}
+
+/* Animaciones personalizadas */
+.hover-scale {
+  transition: transform 0.3s ease;
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
