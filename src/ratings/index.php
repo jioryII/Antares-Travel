@@ -1,5 +1,5 @@
 <?php
-// index.php
+// index.php >
 // Página simple que muestra 1 persona a calificar (puedes adaptar target_person dinámicamente)
 $target_person = "Juan Pérez";
 $client_id = "454921920428-o397pan3nhq05ss36c64o4hov91416v4.apps.googleusercontent.com";
@@ -21,7 +21,7 @@ $client_id = "454921920428-o397pan3nhq05ss36c64o4hov91416v4.apps.googleuserconte
     .small{font-size:.9rem;color:#6b7280}
     .row{display:flex;gap:1rem;align-items:center}
     .muted{color:#94a3b8;font-size:.85rem}
-  </style>
+  </style> 
 
   <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
