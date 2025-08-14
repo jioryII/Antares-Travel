@@ -1,24 +1,16 @@
 -- ==========================================
--- 1. ROLES Y USUARIOS
+-- 1. USUARIOS
 -- ==========================================
-CREATE TABLE roles (
-    id_rol INT AUTO_INCREMENT PRIMARY KEY,
-    nombre_rol VARCHAR(50) NOT NULL -- Ej: 'Administrador', 'Empresario', 'Usuario'
-);
-
 CREATE TABLE usuarios (
     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
-    id_rol INT NOT NULL,
-    nombre VARCHAR(100) NOT NULL,
-    apellido VARCHAR(100),
+    nombre VARCHAR(100),
     email VARCHAR(150) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    telefono VARCHAR(20),
-    direccion VARCHAR(255),
     foto_perfil VARCHAR(255),
-    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_rol) REFERENCES roles(id_rol)
+    proveedor_login ENUM('google','facebook') NOT NULL,
+    id_proveedor VARCHAR(255) NOT NULL,
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
 
 -- ==========================================
 -- 2. GUIAS, IDIOMAS, CHOFERES Y VEHÍCULOS
