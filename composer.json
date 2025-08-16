@@ -14,5 +14,7 @@
             "email": "andiquispe942@gmail.com"
         }
     ],
-    "require": {}
+    "require": {
+        "google/apiclient": "2.15"
+    }
 }
