@@ -12,6 +12,7 @@ Antares_travel/ `archivo base`
       conexion.php `archivo de conexion a la base de datos`
       routes.php `rutas de archivos del sistema`
     modules/ `modulos en especifico como funciones reservar` 
+    usuarios/ `para la administracion de modulos de usuarios`
     views/ `vistas reutilizables de html`
   storage/ `datos cargados en la plataforma como perfiles de usuario, fotos dinamicos`
   vendor/ `dependencias y librerias php no modificables`
