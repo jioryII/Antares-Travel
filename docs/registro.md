@@ -16,11 +16,11 @@
 
   ### 🔹 Flujo cubierto
   1. **Detección automática:**  
-    - La app verifica si el usuario ya tiene una sesión activa de Google o Facebook en el navegador.
+    - La app verifica si el usuario ya tiene una sesión activa de Google tipo popup
   2. **Inicio de sesión automático:**  
     - Si se detecta sesión activa, se inicia sesión de manera inmediata sin intervención del usuario.
   3. **Solicitud de inicio social:**  
-    - Si no hay sesión activa, se solicita iniciar sesión con Google o Facebook.
+    - Si no hay sesión activa, se solicita iniciar sesión con Google, Facebook, manual o otros.
   4. **Ingreso fluido:**  
     - Una vez autenticado, el usuario puede navegar sin interrupciones ni pasos adicionales.
 
@@ -33,3 +33,6 @@
 **##############################################################**
 **##############################################################**
 ---
+
+## 📅 2025-08-16 — se adiciono una nueva tabla de administradores
+  - se implemento dicha tabla para administrar el modulo de administradores de manera mas controlada y para evitar posible percanses a futuro

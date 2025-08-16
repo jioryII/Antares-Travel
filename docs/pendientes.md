@@ -1,4 +1,4 @@
-# documentar pendientes del codigo
+# registro de tareas pendientes
 
 - adecuar la tabla de usuarios sobre login automatico
 # desarrollar la funcion de login en landing page 
