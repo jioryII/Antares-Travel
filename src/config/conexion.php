@@ -9,16 +9,15 @@
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 $servername = "localhost";
-$username = "root";
-$password = "admin942";
-$dbname = "db_antares";
+$username   = "root";
+$password   = "admin942";
+$dbname     = "db_antares";
 
 try {
     // Crear conexión
     $conn = new mysqli($servername, $username, $password, $dbname);
     $conn->set_charset("utf8mb4"); // Soporte para acentos y emojis
     // echo "✅ Conexión exitosa a la base de datos MySQL"; // opcional para debug
-
 } catch (mysqli_sql_exception $e) {
     // Captura errores de conexión
     echo "❌ Error de conexión MySQL: " . $e->getMessage();
