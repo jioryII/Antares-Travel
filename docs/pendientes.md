@@ -1,5 +1,41 @@
-# registro de tareas pendientes
+# 📝 Registro de Tareas Pendientes
 
-- adecuar la tabla de usuarios sobre login automatico
-# desarrollar la funcion de login en landing page 
-# documentacion de la base de datos (diane)
+---
+
+## 🔧 Funcionalidades y Mejoras
+
+- [x] **Adecuar la tabla de usuarios** para login automático.
+- [x] **Desarrollar la función de login** en la landing page.
+- [ ] **Implementar el archivo de rutas** (`routes.php`) para gestionar las URLs del sistema.
+
+---
+
+## 📚 Documentación
+
+- [ ] Documentación de la base de datos _(Diane)_
+
+---
+
+## 👤 Avatar de Usuario
+
+- [ ] Adecuar el avatar de usuario _(Andi)_
+  - Al actualizar la cuenta manual con Google Auth, el avatar se actualiza y el código busca la ruta del avatar físico.
+
+---
+
+## 🔗 Implementar OAuth con Proveedores
+
+- [ ] Microsoft
+- [x] Google
+- [ ] Apple
+- [ ] Facebook
+- [ ] Teléfono
+
+> \*Considerar implementar OAuth con Telegram, Discord, Twitter, Instagram y otros en futuras versiones
+
+---
+
+## Diseño de landing page
+
+- [ ] Diseñar la landing page con un estilo atractivo y moderno.
+- [ ] Imprimir datos dinamicos de la base de datos en la landing page.

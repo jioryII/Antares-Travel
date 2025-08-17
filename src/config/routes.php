@@ -1,40 +1,40 @@
-
 <?php
 
 return [
-    // Rutas de Autenticación
-    'login' => 'AuthController@login',
-    'register' => 'AuthController@register',
-    'logout' => 'AuthController@logout',
-    'forgot-password' => 'AuthController@forgotPassword',
+    'index' => 'index.php',
+    // Autenticación
+    'login'                  => 'src/auth/login.php',
+    'register'               => 'src/auth/register.php',
+    'logout'                 => 'src/auth/logout.php',
+    'forgot-password'        => 'src/auth/forgot_password.php',
+    'verificar-email'        => 'src/auth/verificar_email.php',
+    'reenviar-verificacion'  => 'src/auth/reenviar_verificacion.php',
+    'oauth/callback'         => 'src/auth/oauth_callback.php',
 
-    // Rutas de Usuario
-    'user/profile' => 'UserController@profile',
-    'user/update' => 'UserController@update',
-    'user/delete' => 'UserController@delete',
+    // Usuario
+    'user/profile'           => 'src/auth/profile.php',
+    'user/update'            => 'src/auth/update.php',
+    'user/delete'            => 'src/auth/delete.php',
 
-    // Rutas de Reservas
-    'bookings' => 'BookingController@index',
-    'bookings/create' => 'BookingController@create',
-    'bookings/edit/{id}' => 'BookingController@edit',
-    'bookings/delete/{id}' => 'BookingController@delete',
+    // Reservas
+    'bookings'               => 'src/bookings/index.php',
+    'bookings/create'        => 'src/bookings/create.php',
+    'bookings/edit/{id}'     => 'src/bookings/edit.php',
+    'bookings/delete/{id}'   => 'src/bookings/delete.php',
 
-    // Rutas de Destinos
-    'destinations' => 'DestinationController@index',
-    'destinations/{id}' => 'DestinationController@show',
-    'destinations/search' => 'DestinationController@search',
+    // Destinos
+    'destinations'           => 'src/destinations/index.php',
+    'destinations/{id}'      => 'src/destinations/show.php',
+    'destinations/search'    => 'src/destinations/search.php',
 
-    // Rutas de Admin
-    'admin/dashboard' => [
-        'controller' => 'AdminController@dashboard',
-        'middleware' => ['auth', 'admin']
+    // Admin
+    'admin/dashboard'        => [
+        'file'      => 'src/admin/dashboard.php',
+        'middleware'=> ['auth', 'admin']
     ],
-    
-    // Rutas con métodos HTTP específicos
-    'api/users' => [
-        'GET' => 'ApiController@getUsers',
-        'POST' => 'ApiController@createUser',
-        'PUT' => 'ApiController@updateUser',
-        'DELETE' => 'ApiController@deleteUser'
-    ]
+
+    // Documentación
+    'docs'                   => 'src/docs/documentacion.md',
+    'docs/pendientes'        => 'src/docs/pendientes.md',
+    'docs/registro'          => 'src/docs/registro.md',
 ];
