@@ -12,6 +12,14 @@
         {
             "name": "Andiquis",
             "email": "andiquispe942@gmail.com"
+        },
+        {
+            "name": "Dianed",
+            "email": "user@example.com"
+        },
+        {
+            "name": "Yajael",
+            "email": "user@example.com"
         }
     ],
     "require": {
