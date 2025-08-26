@@ -10,7 +10,7 @@ mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 $servername = "localhost";
 $username   = "root";
-$password   = "admin942";
+$password   = "1234";
 $dbname     = "db_antares";
 
 try {
