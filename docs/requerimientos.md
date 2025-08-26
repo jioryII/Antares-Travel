@@ -1,10 +1,3 @@
-# requerimientos
+vamos a desarrollar un sistema de gestion de una aplicacion de turismo del lado del administrador
 
-desarrollar un sitio web dinamico
-
-# login
-  debe ser compatible con correos gmail, hotmail, facebook y otros
-
-# debe tener dos login 
-  uno de usuarios con login automatico
-  otro login manual para admin con validacion de correo y por mensaje
+en el sistema independiente del login y registro de usuarios normales debe haber otro modulo del login y registro de administradores de manera especifica
