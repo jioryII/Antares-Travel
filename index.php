@@ -50,22 +50,21 @@ if (isset($_GET['logout'])) {
                     <button class="lang-btn active" data-lang="es">ES</button>
                     <button class="lang-btn" data-lang="en">EN</button>
                 </div>
-                <?php if (!isset($_SESSION['user_email'])): ?>
-                    <a href="src/auth/login.php" class="btn btn-secondary" data-es="Iniciar Sesión" data-en="Login">
-                        <i class="fas fa-user"></i>
-                        Iniciar Sesión
-                    </a>
-                    <a href="src/auth/register.php" class="btn btn-primary" data-es="Registrarse" data-en="Sign Up">
-                        <i class="fas fa-user-plus"></i>
-                        <span>Registrarse</span>
-                    </a>
-                <?php else: ?>
-                    <div class="flex items-center gap-3">
-                        <img src="<?php echo $_SESSION['user_picture']; ?>" alt="Avatar" class="w-10 h-10 rounded-full">
-                        <span class="font-semibold"><?php echo $_SESSION['user_name']; ?></span>
+                        <?php if (!isset($_SESSION['user_email'])): ?>
+                            <a href="src/auth/login.php?lang=<?php echo isset($_GET['lang']) ? $_GET['lang'] : 'es'; ?>" class="btn btn-secondary" data-es="Iniciar Sesión" data-en="Login">
+                                <i class="fas fa-user"></i>
+                                Iniciar Sesión
+                            </a>
+                            <a href="src/auth/register.php?lang=<?php echo isset($_GET['lang']) ? $_GET['lang'] : 'es'; ?>" class="btn btn-primary" data-es="Registrarse" data-en="Sign Up">
+                                <i class="fas fa-user-plus"></i>
+                                <span>Registrarse</span>
+                            </a>
+                            <?php else: ?>
+                    <div class="user-profile">
+                        <img src="<?php echo htmlspecialchars($_SESSION['user_picture']); ?>" alt="Avatar de usuario">
+                        <span><?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
                         <a href="index.php?logout=1" class="btn btn-primary" data-es="Cerrar Sesión" data-en="Logout">
                             <i class="fas fa-sign-out-alt"></i>
-                            <span>Cerrar Sesión</span>
                         </a>
                     </div>
                 <?php endif; ?>
@@ -88,25 +87,24 @@ if (isset($_GET['logout'])) {
                 <button class="lang-btn active" data-lang="es">ES</button>
                 <button class="lang-btn" data-lang="en">EN</button>
             </div>
-            <?php if (!isset($_SESSION['user_email'])): ?>
-                <a href="src/auth/login.php" class="btn btn-secondary" data-es="Iniciar Sesión" data-en="Login">
-                    <i class="fas fa-user"></i>
-                    <span>Iniciar Sesión</span>
-                </a>
-                <a href="src/auth/register.php" class="btn btn-primary" data-es="Registrarse" data-en="Sign Up">
-                    <i class="fas fa-user-plus"></i>
-                    <span>Registrarse</span>
-                </a>
-            <?php else: ?>
-                <div class="flex items-center gap-3">
-                    <img src="<?php echo $_SESSION['user_picture']; ?>" alt="Avatar" class="w-10 h-10 rounded-full">
-                    <span class="font-semibold"><?php echo $_SESSION['user_name']; ?></span>
-                    <a href="index.php?logout=1" class="btn btn-primary" data-es="Cerrar Sesión" data-en="Logout">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>Cerrar Sesión</span>
+                <?php if (!isset($_SESSION['user_email'])): ?>
+                    <a href="src/auth/login.php?lang=<?php echo isset($_GET['lang']) ? $_GET['lang'] : 'es'; ?>" class="btn btn-secondary" data-es="Iniciar Sesión" data-en="Login">
+                        <i class="fas fa-user"></i>
+                        <span>Iniciar Sesión</span>
                     </a>
-                </div>
-            <?php endif; ?>
+                    <a href="src/auth/register.php?lang=<?php echo isset($_GET['lang']) ? $_GET['lang'] : 'es'; ?>" class="btn btn-primary" data-es="Registrarse" data-en="Sign Up">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Registrarse</span>
+                    </a>
+                    <?php else: ?>
+                <div class="user-profile">
+                        <img src="<?php echo htmlspecialchars($_SESSION['user_picture']); ?>" alt="Avatar de usuario">
+                        <span><?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
+                        <a href="index.php?logout=1" class="btn btn-primary" data-es="Cerrar Sesión" data-en="Logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </a>
+                    </div>
+                <?php endif; ?>
         </div>
     </div>
     <section id="inicio" class="hero">
@@ -177,7 +175,7 @@ if (isset($_GET['logout'])) {
                            data-en="Explore the mysterious Inca citadel, declared a World Heritage Site. An experience that combines ancient history, impressive architecture, and dreamlike landscapes.">
                             Explora la misteriosa ciudadela inca, declarada Patrimonio de la Humanidad. Una experiencia que combina historia milenaria, arquitectura impresionante y paisajes de ensueño.
                         </p>
-                        <a href="destinos.php" class="btn btn-secondary" data-es="Ver Más Destinos" data-en="View More Destinations">
+                        <a href="destinos.php" class="btn btn-secondary protected-link" data-es="Ver Más Destinos" data-en="View More Destinations">
                             <i class="fas fa-eye"></i>
                             <span>Ver Más Destinos</span>
                         </a>
@@ -251,7 +249,7 @@ if (isset($_GET['logout'])) {
                            data-en="Certified guide with deep knowledge of Inca culture and Andean archaeology. Expert in trekking routes and ancestral ceremonies.">
                             Guía certificado con profundo conocimiento de la cultura inca y arqueología andina. Experto en rutas de trekking y ceremonias ancestrales.
                         </p>
-                        <a href="guias.php" class="btn btn-secondary" data-es="Ver Todos los Guías" data-en="View All Guides">
+                        <a href="guias.php" class="btn btn-secondary protected-link" data-es="Ver Todos los Guías" data-en="View All Guides">
                             <i class="fas fa-users"></i>
                             <span>Ver Todos los Guías</span>
                         </a>
@@ -356,6 +354,57 @@ if (isset($_GET['logout'])) {
                     <i class="fas fa-images"></i>
                     <span>Ver Más Fotos</span>
                 </a>
+            </div>
+        </div>
+    </section>
+
+    <section id="comentarios" class="section comments-section">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2 class="section-title" data-es="Lo que dicen nuestros viajeros" data-en="What Our Travelers Say">Lo que dicen nuestros viajeros</h2>
+                <p class="section-subtitle" data-es="Experiencias reales de quienes han viajado con nosotros." data-en="Real experiences from those who have traveled with us.">Experiencias reales de quienes han viajado con nosotros.</p>
+            </div>
+            
+            <div class="comments-header">
+                <div class="filters">
+                    <button class="filter-btn active" data-filter="recent" data-es="Más Recientes" data-en="Most Recent">Más Recientes</button>
+                    <button class="filter-btn" data-filter="highest" data-es="Mejor Valorados" data-en="Highest Rated">Mejor Valorados</button>
+                    <button class="filter-btn" data-filter="lowest" data-es="Menor Valoración" data-en="Lowest Rated">Menor Valoración</button>
+                </div>
+            </div>
+
+            <div class="comments-grid" id="comments-container">
+
+            </div>
+
+            <div class="add-comment-section">
+                <?php if ($is_logged_in): ?>
+                    <h3 data-es="Comparte tu experiencia" data-en="Share Your Experience">Comparte tu experiencia</h3>
+                    <form id="comment-form">
+                        <div class="form-group star-rating-input">
+                            <input type="radio" id="star5" name="rating" value="5"><label for="star5" title="5 estrellas">★</label>
+                            <input type="radio" id="star4" name="rating" value="4"><label for="star4" title="4 estrellas">★</label>
+                            <input type="radio" id="star3" name="rating" value="3"><label for="star3" title="3 estrellas">★</label>
+                            <input type="radio" id="star2" name="rating" value="2"><label for="star2" title="2 estrellas">★</label>
+                            <input type="radio" id="star1" name="rating" value="1"><label for="star1" title="1 estrella">★</label>
+                        </div>
+                        <div class="form-group">
+                            <textarea name="comment" rows="4" required data-es-placeholder="Escribe tu comentario aquí..." data-en-placeholder="Write your comment here..."></textarea>
+                        </div>
+                        <div style="text-align: center;">
+                            <button type="submit" class="btn btn-primary" data-es="Publicar Comentario" data-en="Post Comment">
+                                <i class="fas fa-paper-plane"></i>
+                                <span>Publicar Comentario</span>
+                            </button>
+                        </div>
+                    </form>
+                <?php else: ?>
+                    <div class="login-prompt">
+                        <h3 data-es="¿Quieres dejar un comentario?" data-en="Want to leave a comment?">¿Quieres dejar un comentario?</h3>
+                        <p data-es="Inicia sesión para compartir tu experiencia con la comunidad." data-en="Log in to share your experience with the community."></p>
+                        <a href="src/auth/login.php" class="btn btn-primary" data-es="Iniciar Sesión" data-en="Login">Iniciar Sesión</a>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </section>
@@ -737,6 +786,140 @@ if (isset($_GET['logout'])) {
 
         document.body.style.opacity = '0';
         document.body.style.transition = 'opacity 0.3s ease-in-out';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const langButtons = document.querySelectorAll('.lang-btn');
+            const translatableElements = document.querySelectorAll('[data-es], [data-en]');
+            let currentLang = localStorage.getItem('language') || 'es';
+
+            function updateLanguage(lang) {
+                translatableElements.forEach(el => {
+                    const text = el.getAttribute(`data-${lang}`);
+                    if (text) {
+
+                        const icon = el.querySelector('i');
+                        if (el.tagName === 'A' || el.tagName === 'BUTTON' && el.querySelector('span')) {
+                            el.querySelector('span').textContent = text;
+                        } else {
+                            el.textContent = text;
+                        }
+                        if(icon) el.prepend(icon);
+                    }
+
+                    const placeholderText = el.getAttribute(`data-${lang}-placeholder`);
+                    if(placeholderText) {
+                        el.placeholder = placeholderText;
+                    }
+                });
+
+                document.documentElement.lang = lang;
+                currentLang = lang;
+                langButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.lang === lang));
+                localStorage.setItem('language', lang);
+            }
+
+            langButtons.forEach(btn => {
+                btn.addEventListener('click', () => updateLanguage(btn.dataset.lang));
+            });
+            
+            updateLanguage(currentLang);
+
+            document.querySelectorAll('.protected-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                if (!isLoggedIn) {
+                    e.preventDefault();
+                    const lang = localStorage.getItem('language') || 'es';
+                    const originalHref = this.getAttribute('href');
+                    if (originalHref.includes('login')) {
+                        window.location.href = `src/auth/login.php?lang=${lang}`;
+                    } else {
+                        window.location.href = `src/auth/login.php?lang=${lang}`;
+                    }
+                }
+            });
+        });
+
+            const commentsContainer = document.getElementById('comments-container');
+            const filterBtns = document.querySelectorAll('.filter-btn');
+
+            async function fetchComments(filter = 'recent') {
+                try {
+
+                    const response = await fetch(`src/api/fetch_comments.php?filter=${filter}`);
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    
+                    const comments = await response.json();
+                    commentsContainer.innerHTML = ''; 
+
+                    if (comments.length === 0) {
+                        commentsContainer.innerHTML = `<p data-es="No hay comentarios aún. ¡Sé el primero!" data-en="No comments yet. Be the first!">No hay comentarios aún. ¡Sé el primero!</p>`;
+                    } else {
+                        comments.forEach(comment => {
+                            const stars = '★'.repeat(comment.calificacion) + '☆'.repeat(5 - comment.calificacion);
+                            const commentCard = `
+                                <div class="comment-card">
+                                    <div class="comment-card-header">
+                                        <img src="${comment.avatar_url || 'imagenes/default_avatar.png'}" alt="Avatar">
+                                        <div>
+                                            <div class="comment-user-name">${comment.nombre}</div>
+                                            <div class="comment-rating">${stars}</div>
+                                        </div>
+                                    </div>
+                                    <p class="comment-body">${comment.comentario}</p>
+                                </div>
+                            `;
+                            commentsContainer.innerHTML += commentCard;
+                        });
+                    }
+                    updateLanguage(currentLang);
+                } catch (error) {
+                    console.error('Error fetching comments:', error);
+                    commentsContainer.innerHTML = `<p data-es="Error al cargar comentarios." data-en="Error loading comments.">Error al cargar comentarios.</p>`;
+                }
+            }
+            
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    fetchComments(btn.dataset.filter);
+                });
+            });
+
+            fetchComments();
+            
+            const commentForm = document.getElementById('comment-form');
+            if(commentForm) {
+                commentForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    const formData = new FormData(this);
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`;
+
+                    try {
+                        const response = await fetch('src/api/submit_comment.php', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        const result = await response.json();
+
+                        if(result.success) {
+                            fetchComments();
+                            this.reset();
+                        } else {
+                            alert('Error: ' + result.message);
+                        }
+                    } catch (error) {
+                        console.error('Error submitting comment:', error);
+                        alert('Hubo un error al enviar tu comentario.');
+                    } finally {
+                        submitBtn.disabled = false;
+                        updateLanguage(currentLang);
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html>
