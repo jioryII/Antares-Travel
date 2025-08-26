@@ -12,7 +12,7 @@
 
 ## 📚 Documentación
 
-- [ ] Documentación de la base de datos _(Diane)_
+- [x] Documentación de la base de datos _(Diane)_
 
 ---
 
@@ -28,8 +28,6 @@
 - [ ] Microsoft
 - [x] Google
 - [ ] Apple
-- [ ] Facebook
-- [ ] Teléfono
 
 > \*Considerar implementar OAuth con Telegram, Discord, Twitter, Instagram y otros en futuras versiones
 
