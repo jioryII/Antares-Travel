@@ -35,5 +35,7 @@
 
 ## Diseño de landing page
 
-- [ ] Diseñar la landing page con un estilo atractivo y moderno.
+- [x] Diseñar la landing page con un estilo atractivo y moderno.
 - [ ] Imprimir datos dinamicos de la base de datos en la landing page.
+- [ ] eliminar el texto de cerrar sesión en el botón del avatar y dejar solo el ícono, con la finalidad de no incitar al usuario a cerrar sesión.
+
