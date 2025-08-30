@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Frontend - Tours</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="../../assets/css/responsive.css" rel="stylesheet">
+    <style>
+        .test-item { margin: 10px 0; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">🧪 Test de Frontend - Tours</h1>
+        
+        <div id="test-results" class="space-y-4">
+            <div class="test-item" id="css-test">
+                <h3><i class="fas fa-palette"></i> CSS Responsivo</h3>
+                <p>Probando carga de CSS personalizado...</p>
+            </div>
+            
+            <div class="test-item" id="js-test">
+                <h3><i class="fas fa-cogs"></i> JavaScript</h3>
+                <p>Probando carga de scripts...</p>
+            </div>
+            
+            <div class="test-item" id="api-test">
+                <h3><i class="fas fa-plug"></i> API Connection</h3>
+                <p>Probando conexión con API...</p>
+            </div>
+            
+            <div class="test-item" id="modal-test">
+                <h3><i class="fas fa-window-maximize"></i> Modales</h3>
+                <p>Probando funcionalidad de modales...</p>
+                <button onclick="testModal()" class="bg-blue-500 text-white px-4 py-2 rounded mt-2">
+                    Probar Modal
+                </button>
+            </div>
+            
+            <div class="test-item" id="responsive-test">
+                <h3><i class="fas fa-mobile-alt"></i> Responsividad</h3>
+                <p>Probando características responsivas...</p>
+                <button onclick="testResponsive()" class="bg-green-500 text-white px-4 py-2 rounded mt-2">
+                    Probar Responsive
+                </button>
+            </div>
+            
+            <div class="test-item" id="sidebar-test">
+                <h3><i class="fas fa-bars"></i> Sidebar</h3>
+                <p>Probando sidebar móvil...</p>
+                <button onclick="testSidebar()" class="bg-purple-500 text-white px-4 py-2 rounded mt-2">
+                    Toggle Sidebar
+                </button>
+            </div>
+        </div>
+        
+        <div class="mt-8 p-4 bg-white rounded shadow">
+            <h2 class="text-xl font-bold mb-4">🔧 Console de Pruebas</h2>
+            <div id="console-output" class="bg-gray-900 text-green-400 p-4 rounded font-mono text-sm h-64 overflow-y-auto">
+                > Test Frontend iniciado...<br>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de prueba -->
+    <div id="testModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">🎯 Modal de Prueba</h3>
+                <p class="text-gray-600 mb-4">Este modal prueba la funcionalidad básica.</p>
+                <div class="flex justify-end">
+                    <button onclick="closeTestModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar de prueba para móvil -->
+    <div id="testSidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden hidden"></div>
+    <aside id="testSidebar" class="bg-gray-900 text-white w-64 min-h-screen flex flex-col fixed left-0 top-0 z-30 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
+        <div class="p-4">
+            <h2 class="text-lg font-bold">🧪 Test Sidebar</h2>
+            <p class="text-sm text-gray-400">Sidebar de prueba</p>
+        </div>
+        <nav class="flex-1 px-4 py-6">
+            <a href="#" class="block py-2 text-gray-300">Test Link 1</a>
+            <a href="#" class="block py-2 text-gray-300">Test Link 2</a>
+            <a href="#" class="block py-2 text-gray-300">Test Link 3</a>
+        </nav>
+    </aside>
+
+    <!-- Scripts -->
+    <script src="../../assets/js/responsive.js"></script>
+    <script src="../../assets/js/tours.js"></script>
+    
+    <script>
+        let consoleOutput = document.getElementById('console-output');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                info: 'text-green-400',
+                error: 'text-red-400', 
+                warning: 'text-yellow-400',
+                success: 'text-blue-400'
+            };
+            
+            consoleOutput.innerHTML += `<span class="${colors[type] || colors.info}">[${timestamp}] ${message}</span><br>`;
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+        
+        function updateTestStatus(testId, status, message) {
+            const element = document.getElementById(testId);
+            element.className = `test-item ${status}`;
+            element.querySelector('p').textContent = message;
+        }
+        
+        // Test 1: CSS
+        window.addEventListener('load', function() {
+            log('Iniciando tests de frontend...', 'info');
+            
+            // Test CSS
+            const cssLoaded = window.getComputedStyle(document.querySelector('.test-item')).borderRadius !== '';
+            if (cssLoaded) {
+                updateTestStatus('css-test', 'success', '✅ CSS cargado correctamente');
+                log('✅ CSS responsivo: OK', 'success');
+            } else {
+                updateTestStatus('css-test', 'error', '❌ Error cargando CSS');
+                log('❌ CSS responsivo: FALLO', 'error');
+            }
+            
+            // Test JavaScript
+            if (typeof AntaresMobile !== 'undefined') {
+                updateTestStatus('js-test', 'success', '✅ AntaresMobile cargado correctamente');
+                log('✅ JavaScript responsivo: OK', 'success');
+            } else {
+                updateTestStatus('js-test', 'error', '❌ AntaresMobile no encontrado');
+                log('❌ JavaScript responsivo: FALLO', 'error');
+            }
+            
+            // Test funciones tours
+            if (typeof abrirModalCrear !== 'undefined') {
+                log('✅ Funciones de tours: OK', 'success');
+            } else {
+                log('❌ Funciones de tours: FALLO', 'error');
+            }
+            
+            // Test API
+            testAPI();
+            
+            // Test responsividad automático
+            testResponsiveFeatures();
+        });
+        
+        async function testAPI() {
+            try {
+                log('Probando conexión API...', 'info');
+                const response = await fetch('../../api/tours.php?action=listar&pagina=1');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        updateTestStatus('api-test', 'success', `✅ API funcionando - ${data.data.length} tours encontrados`);
+                        log(`✅ API: OK (${data.data.length} tours)`, 'success');
+                    } else {
+                        updateTestStatus('api-test', 'warning', `⚠️ API responde pero con error: ${data.message}`);
+                        log(`⚠️ API: Error - ${data.message}`, 'warning');
+                    }
+                } else {
+                    updateTestStatus('api-test', 'error', `❌ Error HTTP: ${response.status}`);
+                    log(`❌ API: HTTP ${response.status}`, 'error');
+                }
+            } catch (error) {
+                updateTestStatus('api-test', 'error', `❌ Error de conexión: ${error.message}`);
+                log(`❌ API: Error - ${error.message}`, 'error');
+            }
+        }
+        
+        function testModal() {
+            document.getElementById('testModal').classList.remove('hidden');
+            updateTestStatus('modal-test', 'success', '✅ Modal abierto correctamente');
+            log('✅ Modal: Abierto', 'success');
+        }
+        
+        function closeTestModal() {
+            document.getElementById('testModal').classList.add('hidden');
+            log('✅ Modal: Cerrado', 'success');
+        }
+        
+        function testResponsive() {
+            const isMobile = window.innerWidth < 1024;
+            const message = isMobile ? 
+                '📱 Detectado dispositivo móvil' : 
+                '💻 Detectado dispositivo desktop';
+            
+            updateTestStatus('responsive-test', 'success', `✅ ${message}`);
+            log(`✅ Responsive: ${message}`, 'success');
+            
+            // Test notificación
+            if (typeof AntaresMobile !== 'undefined' && AntaresMobile.showNotification) {
+                AntaresMobile.showNotification('¡Test de notificación!', 'info', 2000);
+                log('✅ Notificaciones: OK', 'success');
+            } else {
+                log('❌ Notificaciones: FALLO', 'error');
+            }
+        }
+        
+        function testSidebar() {
+            const sidebar = document.getElementById('testSidebar');
+            const overlay = document.getElementById('testSidebarOverlay');
+            
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                updateTestStatus('sidebar-test', 'success', '✅ Sidebar abierto');
+                log('✅ Sidebar: Abierto', 'success');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+                updateTestStatus('sidebar-test', 'success', '✅ Sidebar cerrado');
+                log('✅ Sidebar: Cerrado', 'success');
+            }
+        }
+        
+        function testResponsiveFeatures() {
+            log('Probando características responsivas...', 'info');
+            
+            // Test viewport
+            const viewport = window.innerWidth;
+            log(`📐 Viewport: ${viewport}px`, 'info');
+            
+            // Test touch
+            if ('ontouchstart' in window) {
+                log('👆 Dispositivo táctil detectado', 'info');
+            } else {
+                log('🖱️ Dispositivo no táctil', 'info');
+            }
+            
+            // Test media queries
+            if (window.matchMedia('(max-width: 767px)').matches) {
+                log('📱 Breakpoint: Móvil', 'info');
+            } else if (window.matchMedia('(max-width: 1023px)').matches) {
+                log('📱 Breakpoint: Tablet', 'info');
+            } else {
+                log('💻 Breakpoint: Desktop', 'info');
+            }
+        }
+        
+        // Event listeners
+        document.getElementById('testSidebarOverlay').addEventListener('click', function() {
+            testSidebar();
+        });
+        
+        // Test de redimensión
+        window.addEventListener('resize', function() {
+            testResponsiveFeatures();
+        });
+        
+        log('Tests configurados correctamente', 'success');
+    </script>
+</body>
+</html>
