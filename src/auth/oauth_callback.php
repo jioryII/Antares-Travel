@@ -6,7 +6,7 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 // Conexión a MySQLi
 $mysqli = $conn; // Usamos la conexión de conexion.php
 
-$provider = $_GET['provider'] ?? null;
+$provider = $_GET['provider'] ?? 'google';
 
 if (!$provider) {
     die("❌ Proveedor no especificado.");
@@ -17,9 +17,9 @@ switch ($provider) {
     // ---------------- GOOGLE ----------------
     case "google":
         $client = new Google_Client();
-    $client->setClientId("454921920428-o397pan3nhq05ss36c64o4hov91416v4.apps.googleusercontent.com");
-        $client->setClientSecret("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"); // Cambia por tu secret real
-        $client->setRedirectUri("https://jiory.opalstacked.com/Antares-Travel/src/auth/oauth_callback.php?provider=google");
+        $client->setClientId("454921920428-o397pan3nhq05ss36c64o4hov91416v4.apps.googleusercontent.com");
+        $client->setClientSecret("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");
+        $client->setRedirectUri("https://jiory.opalstacked.com/Antares-Travel/src/auth/oauth_callback.php");
 
 
         $client->addScope("email");
