@@ -20,11 +20,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     if ($usuario && password_verify($password, $usuario['password_hash'])) {
         if ($usuario['email_verificado']) {
+            $_SESSION['user_id'] = $usuario['id_usuario'];
             $_SESSION['user_email'] = $usuario['email'];
             $_SESSION['user_name']  = $usuario['nombre'];
             $_SESSION['user_picture'] = isset($usuario['avatar_url']) 
-              ? "http://localhost/Antares-Travel/" . $usuario['avatar_url'] 
-              : "http://localhost/Antares-Travel/storage/uploads/avatars/default.png";
+              ? "/Antares-Travel/" . $usuario['avatar_url'] 
+              : "/Antares-Travel/storage/uploads/avatars/default.png";
             header("Location: ./../../index.php");
             exit;
         } else {
@@ -140,16 +141,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             text-align: center;
             margin-bottom: 40px;
             position: relative;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
         }
 
         .login-title {
@@ -440,144 +431,21 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 transform: translateY(0);
             }
         }
-
-        @media (max-width: 768px) {
-            .login-wrapper {
-                padding: 15px;
-            }
-
-            .login-card {
-                padding: 40px 25px;
-                margin: 10px;
-                border-radius: 5px;
-            }
-
-            .login-title {
-                font-size: 1.8rem;
-            }
-
-            .social-providers {
-                display: grid;
-                grid-template-columns: repeat(5, 1fr);
-                gap: 12px;
-                justify-content: center;
-            }
-
-            .social-btn {
-                width: 55px;
-                height: 55px;
-            }
-
-            .form-input {
-                padding: 16px 50px 16px 18px;
-                font-size: 15px;
-            }
-
-            .login-btn {
-                padding: 16px;
-                font-size: 15px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .login-card {
-                padding: 30px 20px;
-            }
-
-            .login-title {
-                font-size: 1.6rem;
-            }
-
-            .social-providers {
-                grid-template-columns: repeat(auto-fit, minmax(50px, auto));
-                gap: 10px;
-                justify-content: center; 
-            }
-
-            .social-btn {
-                width: 50px;
-                height: 50px;
-            }
-
-            .social-btn i {
-                font-size: 1.3rem;
-            }
-        }
-
-        .login-card {
-            background-attachment: fixed;
-        }
-
-        .floating-elements {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            overflow: hidden;
-        }
-
-        .floating-element {
-            position: absolute;
-            background: rgba(162, 119, 65, 0.1);
-            border-radius: 50%;
-            animation: floatMove 15s infinite linear;
-        }
-
-        .floating-element:nth-child(1) {
-            width: 20px;
-            height: 20px;
-            top: 20%;
-            left: 10%;
-            animation-delay: -5s;
-        }
-
-        .floating-element:nth-child(2) {
-            width: 15px;
-            height: 15px;
-            top: 60%;
-            left: 90%;
-            animation-delay: -10s;
-        }
-
-        .floating-element:nth-child(3) {
-            width: 25px;
-            height: 25px;
-            top: 80%;
-            left: 20%;
-            animation-delay: -15s;
-        }
-
-        @keyframes floatMove {
-            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
-        }
     </style>
 </head>
 <body>
     <div class="login-container">
-
-    <div style="position: absolute; top: 20px; right: 20px; z-index: 10;">
-        <div class="lang-switch">
-            <button class="lang-btn" data-lang="es">ES</button>
-            <button class="lang-btn" data-lang="en">EN</button>
+        <div style="position: absolute; top: 20px; right: 20px; z-index: 10;">
+            <div class="lang-switch">
+                <button class="lang-btn" data-lang="es">ES</button>
+                <button class="lang-btn" data-lang="en">EN</button>
+            </div>
         </div>
-    </div>
-        <div class="floating-elements">
-            <div class="floating-element"></div>
-            <div class="floating-element"></div>
-            <div class="floating-element"></div>
-        </div>
-
         <div class="login-wrapper">
             <div class="login-card">
                 <div class="login-header">
                     <div class="login-logo">
                         <img src="../../imagenes/antares_logozz2.png" alt="Antares Travel Logo" style="max-width: 150px; height: auto; margin-bottom: 20px; display: block; margin-left: auto; margin-right: auto;">
-                        <i class=""></i>
                     </div>
                     <h2 class="login-title">Bienvenido de vuelta</h2>
                     <p class="login-subtitle">Inicia sesión en tu cuenta de Antares Travel</p>
@@ -635,15 +503,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 </div>
 
                 <div class="social-providers" style="--i: 5">
-                    <a href="oauth_callback.php?provider=google" class="social-btn" title="Google">
-                        <i class="fab fa-google google"></i>
-                    </a>
-                    <a href="oauth_callback.php?provider=apple" class="social-btn" title="Apple">
-                        <i class="fab fa-apple apple"></i>
-                    </a>
-                    <a href="oauth_callback.php?provider=microsoft" class="social-btn" title="Microsoft">
-                        <i class="fab fa-windows microsoft"></i>
-                    </a>
+                    <a href="oauth_callback.php?provider=google" class="social-btn" title="Google"><i class="fab fa-google google"></i></a>
+                    <a href="oauth_callback.php?provider=apple" class="social-btn" title="Apple"><i class="fab fa-apple apple"></i></a>
+                    <a href="oauth_callback.php?provider=microsoft" class="social-btn" title="Microsoft"><i class="fab fa-windows microsoft"></i></a>
                 </div>
 
                 <div class="register-link" style="--i: 6">
@@ -654,8 +516,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     </div>
 
     <script>
-
-        
         const initialLang = '<?php echo $lang; ?>';
         localStorage.setItem('language', initialLang);
 
@@ -680,32 +540,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             formGroups.forEach((group, index) => {
                 group.style.animationDelay = `${(index + 1) * 0.1}s`;
             });
-
-            createParticles();
         });
-
-        function createParticles() {
-            const container = document.querySelector('.floating-elements');
-            
-            for (let i = 0; i < 5; i++) {
-                setTimeout(() => {
-                    const particle = document.createElement('div');
-                    particle.className = 'floating-element';
-                    particle.style.left = Math.random() * 100 + '%';
-                    particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
-                    particle.style.animationDelay = Math.random() * 5 + 's';
-                    container.appendChild(particle);
-                
-                    setTimeout(() => {
-                        if (particle.parentNode) {
-                            particle.parentNode.removeChild(particle);
-                        }
-                    }, 20000);
-                }, i * 2000);
-            }
-        }
-
-        setInterval(createParticles, 10000);
 
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             const btn = document.querySelector('.login-btn');
@@ -729,40 +564,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             
             input.addEventListener('blur', function() {
                 this.parentNode.style.transform = 'translateY(0)';
-            });
-            const langButtons = document.querySelectorAll('.lang-btn');
-
-            const langElements = document.querySelectorAll('[data-es][data-en]');
-            let currentLang = initialLang || 'es';
-
-            function updateLanguage(lang) {
-                langElements.forEach(element => {
-                    const text = element.getAttribute(`data-${lang}`);
-                    if (text) {
-                        if (element.querySelector('i')) {
-                            const icon = element.querySelector('i').outerHTML;
-                            element.innerHTML = `${icon} <span>${text}</span>`;
-                        } else {
-                            element.textContent = text;
-                        }
-                    }
-                });
-                
-                document.documentElement.lang = lang;
-                currentLang = lang;
-                localStorage.setItem('language', lang);
-                
-                langButtons.forEach(btn => {
-                    btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
-                });
-            }
-            updateLanguage(currentLang);
-
-            langButtons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const lang = btn.getAttribute('data-lang');
-                    updateLanguage(lang);
-                });
             });
         });
     </script>

@@ -11,7 +11,7 @@ mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 $servername = "opal18.opalstack.com";
 $username   = "jiory";
 $password   = "3fwPqEHLOwWT680";
-$dbname = "db_antares";
+$dbname     = "db_antares";
 
 try {
     // Crear conexión
