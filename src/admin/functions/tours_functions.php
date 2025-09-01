@@ -28,133 +28,58 @@ function getToursDatabase() {
 }
 
 /**
- * Obtener lista de tours con filtros avanzados y paginación
- */
-function obtenerToursConFiltros($pagina = 1, $por_pagina = 10, $filtros = []) {
-    try {
-        $pdo = getToursDatabase();
-        
-        // Construir WHERE dinámico
-        $where_conditions = [];
-        $params = [];
-        
-        // Búsqueda por texto
-        if (!empty($filtros['busqueda'])) {
-            $where_conditions[] = "(t.titulo LIKE :busqueda OR t.descripcion LIKE :busqueda OR t.ubicacion LIKE :busqueda)";
-            $params[':busqueda'] = '%' . $filtros['busqueda'] . '%';
-        }
-        
-        // Filtro por dificultad
-        if (!empty($filtros['dificultad'])) {
-            $where_conditions[] = "t.dificultad = :dificultad";
-            $params[':dificultad'] = $filtros['dificultad'];
-        }
-        
-        // Filtro por capacidad mínima
-        if (!empty($filtros['capacidad_min']) && $filtros['capacidad_min'] > 0) {
-            $where_conditions[] = "t.capacidad_maxima >= :capacidad_min";
-            $params[':capacidad_min'] = $filtros['capacidad_min'];
-        }
-        
-        // Filtro por imagen
-        if (!empty($filtros['tiene_imagen'])) {
-            if ($filtros['tiene_imagen'] === 'si') {
-                $where_conditions[] = "t.imagen_principal IS NOT NULL AND t.imagen_principal != ''";
-            } elseif ($filtros['tiene_imagen'] === 'no') {
-                $where_conditions[] = "(t.imagen_principal IS NULL OR t.imagen_principal = '')";
-            }
-        }
-        
-        // Filtros por precio
-        if (!empty($filtros['precio_min']) && $filtros['precio_min'] > 0) {
-            $where_conditions[] = "t.precio >= :precio_min";
-            $params[':precio_min'] = $filtros['precio_min'];
-        }
-        
-        if (!empty($filtros['precio_max']) && $filtros['precio_max'] > 0) {
-            $where_conditions[] = "t.precio <= :precio_max";
-            $params[':precio_max'] = $filtros['precio_max'];
-        }
-        
-        // Construir WHERE clause
-        $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
-        
-        // Contar total de registros
-        $count_sql = "SELECT COUNT(*) as total FROM tours t $where_clause";
-        $count_stmt = $pdo->prepare($count_sql);
-        $count_stmt->execute($params);
-        $total = $count_stmt->fetch()['total'];
-        
-        // Calcular offset y total de páginas
-        $offset = ($pagina - 1) * $por_pagina;
-        $total_paginas = ceil($total / $por_pagina);
-        
-        // Consulta principal con los campos requeridos
-        $sql = "
-            SELECT 
-                t.id_tour,
-                t.titulo,
-                t.precio,
-                t.duracion,
-                t.imagen_principal,
-                t.incluye,
-                t.dificultad,
-                t.capacidad_maxima,
-                t.fecha_creacion,
-                t.activo,
-                r.nombre as region_nombre
-            FROM tours t
-            LEFT JOIN regiones r ON t.region_id = r.id_region
-            $where_clause
-            ORDER BY t.fecha_creacion DESC
-            LIMIT :offset, :limit
-        ";
-        
-        $stmt = $pdo->prepare($sql);
-        
-        // Agregar parámetros de paginación
-        $params[':offset'] = $offset;
-        $params[':limit'] = $por_pagina;
-        
-        $stmt->execute($params);
-        $tours = $stmt->fetchAll();
-        
-        return [
-            'success' => true,
-            'data' => $tours,
-            'total' => $total,
-            'total_paginas' => $total_paginas,
-            'pagina_actual' => $pagina
-        ];
-        
-    } catch (Exception $e) {
-        error_log("Error en obtenerToursConFiltros: " . $e->getMessage());
-        return [
-            'success' => false,
-            'message' => 'Error al obtener los tours: ' . $e->getMessage(),
-            'data' => [],
-            'total' => 0,
-            'total_paginas' => 1,
-            'pagina_actual' => 1
-        ];
-    }
-}
-
-/**
  * Obtener lista de tours con filtros y paginación
  * Función compatible con el index.php actual
  */
-function obtenerTours($pagina = 1, $por_pagina = 10, $busqueda = '') {
+function obtenerTours($pagina = 1, $por_pagina = 10, $filtros = []) {
     try {
         $pdo = getToursDatabase();
         
-        // Construir filtros basados en los parámetros
-        $filtros = [];
-        if (!empty($busqueda)) {
-            $filtros['busqueda'] = $busqueda;
+        // Variables para construir la consulta
+        $where_conditions = [];
+        $params = [];
+        $join_clauses = [];
+        
+        // JOINs necesarios
+        $join_clauses[] = "LEFT JOIN regiones r ON t.id_region = r.id_region";
+        $join_clauses[] = "LEFT JOIN guias g ON t.id_guia = g.id_guia";
+        $join_clauses[] = "LEFT JOIN reservas res ON t.id_tour = res.id_tour";
+        $join_clauses[] = "LEFT JOIN reservas res_conf ON t.id_tour = res_conf.id_tour AND res_conf.estado = 'Confirmada'";
+        
+        // Filtro de búsqueda por título y descripción
+        if (!empty($filtros['busqueda'])) {
+            $busqueda = trim($filtros['busqueda']);
+            $where_conditions[] = "(LOWER(t.titulo) LIKE LOWER(:busqueda) OR LOWER(t.descripcion) LIKE LOWER(:busqueda))";
+            $params['busqueda'] = "%" . $busqueda . "%";
         }
         
-        // Construir consulta base
+        // Filtro por región
+        if (!empty($filtros['region']) && is_numeric($filtros['region'])) {
+            $where_conditions[] = "t.id_region = :region";
+            $params['region'] = intval($filtros['region']);
+        }
+        
+        // Filtro por estado de guía
+        if (!empty($filtros['guia_estado'])) {
+            if ($filtros['guia_estado'] === 'con_guia') {
+                $where_conditions[] = "t.id_guia IS NOT NULL";
+            } elseif ($filtros['guia_estado'] === 'sin_guia') {
+                $where_conditions[] = "t.id_guia IS NULL";
+            }
+        }
+        
+        // Filtro por rango de precio
+        if (!empty($filtros['precio_min']) && is_numeric($filtros['precio_min'])) {
+            $where_conditions[] = "t.precio >= :precio_min";
+            $params['precio_min'] = floatval($filtros['precio_min']);
+        }
+        
+        if (!empty($filtros['precio_max']) && is_numeric($filtros['precio_max'])) {
+            $where_conditions[] = "t.precio <= :precio_max";
+            $params['precio_max'] = floatval($filtros['precio_max']);
+        }
+        
+        // Construir consulta principal
         $sql = "
             SELECT 
                 t.id_tour,
@@ -184,48 +109,53 @@ function obtenerTours($pagina = 1, $por_pagina = 10, $busqueda = '') {
                 COALESCE(SUM(res_conf.monto_total), 0) AS ingresos_generados
                 
             FROM tours t
-            LEFT JOIN regiones r ON t.id_region = r.id_region
-            LEFT JOIN guias g ON t.id_guia = g.id_guia
-            LEFT JOIN reservas res ON t.id_tour = res.id_tour
-            LEFT JOIN reservas res_conf ON t.id_tour = res_conf.id_tour AND res_conf.estado = 'Confirmada'
-        ";
+            " . implode(" ", $join_clauses);
         
-        $where_conditions = [];
-        $params = [];
-        
-        // Aplicar filtro de búsqueda
-        if (!empty($busqueda)) {
-            $where_conditions[] = "(t.titulo LIKE :busqueda OR t.descripcion LIKE :busqueda OR t.lugar_salida LIKE :busqueda OR t.lugar_llegada LIKE :busqueda)";
-            $params['busqueda'] = "%" . $busqueda . "%";
-        }
-        
-        // Agregar WHERE si hay condiciones
+        // Agregar condiciones WHERE
         if (!empty($where_conditions)) {
             $sql .= " WHERE " . implode(" AND ", $where_conditions);
         }
         
-        $sql .= " GROUP BY t.id_tour ORDER BY t.id_tour DESC";
+        $sql .= " GROUP BY t.id_tour, t.titulo, t.descripcion, t.precio, t.duracion, 
+                  t.lugar_salida, t.lugar_llegada, t.hora_salida, t.hora_llegada, 
+                  t.imagen_principal, r.id_region, r.nombre_region, g.id_guia, 
+                  g.nombre, g.apellido, g.estado
+                  ORDER BY t.id_tour DESC";
         
-        // Contar total para paginación
-        $count_sql = "SELECT COUNT(DISTINCT t.id_tour) as total FROM tours t";
+        // Consulta para contar el total (sin paginación)
+        $count_sql = "
+            SELECT COUNT(DISTINCT t.id_tour) as total 
+            FROM tours t
+            " . implode(" ", $join_clauses);
+        
         if (!empty($where_conditions)) {
             $count_sql .= " WHERE " . implode(" AND ", $where_conditions);
         }
         
+        // Obtener total de registros
         $stmt_count = $pdo->prepare($count_sql);
-        $stmt_count->execute($params);
+        foreach ($params as $key => $value) {
+            $stmt_count->bindValue(':' . $key, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+        $stmt_count->execute();
         $total = $stmt_count->fetch()['total'];
         
-        // Aplicar paginación
+        // Aplicar paginación a la consulta principal
         $offset = ($pagina - 1) * $por_pagina;
         $sql .= " LIMIT :limite OFFSET :offset";
-        $params['limite'] = $por_pagina;
-        $params['offset'] = $offset;
         
+        // Preparar y ejecutar consulta principal
         $stmt = $pdo->prepare($sql);
+        
+        // Bind de parámetros de filtros
         foreach ($params as $key => $value) {
             $stmt->bindValue(':' . $key, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
         }
+        
+        // Bind de parámetros de paginación
+        $stmt->bindValue(':limite', $por_pagina, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        
         $stmt->execute();
         $tours = $stmt->fetchAll();
         
@@ -236,7 +166,9 @@ function obtenerTours($pagina = 1, $por_pagina = 10, $busqueda = '') {
             'pagina_actual' => $pagina,
             'limite' => $por_pagina,
             'total_paginas' => ceil($total / $por_pagina),
-            'filtros_aplicados' => $filtros
+            'filtros_aplicados' => $filtros,
+            'debug_sql' => $sql, // Para debug si es necesario
+            'debug_params' => $params
         ];
         
     } catch (Exception $e) {
@@ -246,7 +178,8 @@ function obtenerTours($pagina = 1, $por_pagina = 10, $busqueda = '') {
             'message' => 'Error al obtener tours: ' . $e->getMessage(),
             'data' => [],
             'total' => 0,
-            'total_paginas' => 1
+            'total_paginas' => 1,
+            'error_detalle' => $e->getMessage()
         ];
     }
 }
@@ -369,13 +302,13 @@ function crearTour($datos) {
             'descripcion' => $datos['descripcion'],
             'precio' => $datos['precio'],
             'duracion' => $datos['duracion'],
-            'id_region' => !empty($datos['id_region']) ? $datos['id_region'] : null,
-            'lugar_salida' => $datos['lugar_salida'],
-            'lugar_llegada' => $datos['lugar_llegada'],
+            'id_region' => null, // Campo eliminado del formulario
+            'lugar_salida' => null, // Campo eliminado del formulario
+            'lugar_llegada' => null, // Campo eliminado del formulario
             'hora_salida' => !empty($datos['hora_salida']) ? $datos['hora_salida'] : null,
             'hora_llegada' => !empty($datos['hora_llegada']) ? $datos['hora_llegada'] : null,
             'imagen_principal' => $datos['imagen_principal'] ?? null,
-            'id_guia' => !empty($datos['id_guia']) ? $datos['id_guia'] : null
+            'id_guia' => null // Campo eliminado del formulario
         ];
         
         $stmt->execute($params);
@@ -448,12 +381,12 @@ function actualizarTour($id_tour, $datos) {
             'descripcion' => $datos['descripcion'],
             'precio' => $datos['precio'],
             'duracion' => $datos['duracion'],
-            'id_region' => !empty($datos['id_region']) ? $datos['id_region'] : null,
-            'lugar_salida' => $datos['lugar_salida'],
-            'lugar_llegada' => $datos['lugar_llegada'],
+            'id_region' => null, // Campo eliminado del formulario
+            'lugar_salida' => null, // Campo eliminado del formulario
+            'lugar_llegada' => null, // Campo eliminado del formulario
             'hora_salida' => !empty($datos['hora_salida']) ? $datos['hora_salida'] : null,
             'hora_llegada' => !empty($datos['hora_llegada']) ? $datos['hora_llegada'] : null,
-            'id_guia' => !empty($datos['id_guia']) ? $datos['id_guia'] : null,
+            'id_guia' => null, // Campo eliminado del formulario
             'id_tour' => $id_tour
         ];
         
@@ -726,273 +659,6 @@ function procesarImagenTour($archivo, $id_tour = null) {
     } catch (Exception $e) {
         error_log("Error procesando imagen: " . $e->getMessage());
         return ['success' => false, 'message' => 'Error al procesar imagen'];
-    }
-}
-
-/**
- * Crear un nuevo tour con todos los campos obligatorios
- */
-function crearTourCompleto($datos) {
-    try {
-        $pdo = getToursDatabase();
-        $pdo->beginTransaction();
-        
-        // Validar campos obligatorios
-        $campos_obligatorios = [
-            'titulo' => 'Título',
-            'descripcion' => 'Descripción',
-            'precio' => 'Precio',
-            'duracion' => 'Duración',
-            'region_id' => 'Región',
-            'dificultad' => 'Dificultad',
-            'capacidad_maxima' => 'Capacidad máxima',
-            'incluye' => 'Incluye',
-            'no_incluye' => 'No incluye',
-            'lugar_salida' => 'Lugar de salida',
-            'ubicacion' => 'Ubicación'
-        ];
-        
-        foreach ($campos_obligatorios as $campo => $nombre) {
-            if (empty($datos[$campo])) {
-                throw new Exception("El campo '$nombre' es obligatorio");
-            }
-        }
-        
-        // Validar datos específicos
-        if (!is_numeric($datos['precio']) || $datos['precio'] <= 0) {
-            throw new Exception("El precio debe ser un número positivo");
-        }
-        
-        if (!is_numeric($datos['capacidad_maxima']) || $datos['capacidad_maxima'] <= 0) {
-            throw new Exception("La capacidad máxima debe ser un número positivo");
-        }
-        
-        // Procesar imagen si existe
-        $imagen_principal = null;
-        if (isset($_FILES['imagen_principal']) && $_FILES['imagen_principal']['error'] === UPLOAD_ERR_OK) {
-            $resultado_imagen = procesarImagenTour($_FILES['imagen_principal']);
-            if ($resultado_imagen['success']) {
-                $imagen_principal = $resultado_imagen['ruta'];
-            } else {
-                throw new Exception($resultado_imagen['message']);
-            }
-        }
-        
-        // Preparar datos para inserción
-        $sql = "
-            INSERT INTO tours (
-                titulo, descripcion, precio, duracion, region_id, dificultad,
-                capacidad_maxima, incluye, no_incluye, lugar_salida, ubicacion,
-                imagen_principal, guia_id, lugar_llegada, hora_salida, hora_llegada,
-                recomendaciones, que_llevar, politicas, activo, fecha_creacion
-            ) VALUES (
-                :titulo, :descripcion, :precio, :duracion, :region_id, :dificultad,
-                :capacidad_maxima, :incluye, :no_incluye, :lugar_salida, :ubicacion,
-                :imagen_principal, :guia_id, :lugar_llegada, :hora_salida, :hora_llegada,
-                :recomendaciones, :que_llevar, :politicas, 1, NOW()
-            )
-        ";
-        
-        $stmt = $pdo->prepare($sql);
-        
-        $params = [
-            ':titulo' => trim($datos['titulo']),
-            ':descripcion' => trim($datos['descripcion']),
-            ':precio' => floatval($datos['precio']),
-            ':duracion' => trim($datos['duracion']),
-            ':region_id' => intval($datos['region_id']),
-            ':dificultad' => trim($datos['dificultad']),
-            ':capacidad_maxima' => intval($datos['capacidad_maxima']),
-            ':incluye' => trim($datos['incluye']),
-            ':no_incluye' => trim($datos['no_incluye']),
-            ':lugar_salida' => trim($datos['lugar_salida']),
-            ':ubicacion' => trim($datos['ubicacion']),
-            ':imagen_principal' => $imagen_principal,
-            ':guia_id' => !empty($datos['guia_id']) ? intval($datos['guia_id']) : null,
-            ':lugar_llegada' => !empty($datos['lugar_llegada']) ? trim($datos['lugar_llegada']) : null,
-            ':hora_salida' => !empty($datos['hora_salida']) ? trim($datos['hora_salida']) : null,
-            ':hora_llegada' => !empty($datos['hora_llegada']) ? trim($datos['hora_llegada']) : null,
-            ':recomendaciones' => !empty($datos['recomendaciones']) ? trim($datos['recomendaciones']) : null,
-            ':que_llevar' => !empty($datos['que_llevar']) ? trim($datos['que_llevar']) : null,
-            ':politicas' => !empty($datos['politicas']) ? trim($datos['politicas']) : null
-        ];
-        
-        $stmt->execute($params);
-        $id_tour = $pdo->lastInsertId();
-        
-        $pdo->commit();
-        
-        return [
-            'success' => true,
-            'message' => 'Tour creado exitosamente',
-            'id_tour' => $id_tour
-        ];
-        
-    } catch (Exception $e) {
-        if (isset($pdo)) {
-            $pdo->rollBack();
-        }
-        error_log("Error creando tour: " . $e->getMessage());
-        return [
-            'success' => false,
-            'message' => $e->getMessage()
-        ];
-    }
-}
-
-/**
- * Editar un tour existente
- */
-function editarTour($id_tour, $datos) {
-    try {
-        $pdo = getToursDatabase();
-        $pdo->beginTransaction();
-        
-        // Validar que el tour existe
-        $tour_existente = obtenerTourPorId($id_tour);
-        if (!$tour_existente['success']) {
-            throw new Exception('Tour no encontrado');
-        }
-        
-        // Validar campos obligatorios
-        $campos_obligatorios = [
-            'titulo' => 'Título',
-            'descripcion' => 'Descripción',
-            'precio' => 'Precio',
-            'duracion' => 'Duración',
-            'region_id' => 'Región',
-            'dificultad' => 'Dificultad',
-            'capacidad_maxima' => 'Capacidad máxima',
-            'incluye' => 'Incluye',
-            'lugar_salida' => 'Lugar de salida',
-            'ubicacion' => 'Ubicación'
-        ];
-        
-        foreach ($campos_obligatorios as $campo => $nombre) {
-            if (empty($datos[$campo])) {
-                throw new Exception("El campo '$nombre' es obligatorio");
-            }
-        }
-        
-        // Validar datos específicos
-        if (!is_numeric($datos['precio']) || $datos['precio'] <= 0) {
-            throw new Exception("El precio debe ser un número positivo");
-        }
-        
-        if (!is_numeric($datos['capacidad_maxima']) || $datos['capacidad_maxima'] <= 0) {
-            throw new Exception("La capacidad máxima debe ser un número positivo");
-        }
-        
-        // Procesar imagen si existe
-        $imagen_principal = $tour_existente['data']['imagen_principal']; // Mantener la existente
-        if (isset($_FILES['imagen_principal']) && $_FILES['imagen_principal']['error'] === UPLOAD_ERR_OK) {
-            $resultado_imagen = procesarImagenTour($_FILES['imagen_principal'], $id_tour);
-            if ($resultado_imagen['success']) {
-                $imagen_principal = $resultado_imagen['ruta'];
-            } else {
-                throw new Exception($resultado_imagen['message']);
-            }
-        }
-        
-        // Preparar datos para actualización
-        $sql = "
-            UPDATE tours SET
-                titulo = :titulo,
-                descripcion = :descripcion,
-                precio = :precio,
-                duracion = :duracion,
-                region_id = :region_id,
-                dificultad = :dificultad,
-                capacidad_maxima = :capacidad_maxima,
-                incluye = :incluye,
-                no_incluye = :no_incluye,
-                lugar_salida = :lugar_salida,
-                ubicacion = :ubicacion,
-                imagen_principal = :imagen_principal,
-                guia_id = :guia_id,
-                lugar_llegada = :lugar_llegada,
-                hora_salida = :hora_salida,
-                hora_llegada = :hora_llegada,
-                recomendaciones = :recomendaciones,
-                que_llevar = :que_llevar,
-                politicas = :politicas,
-                fecha_modificacion = NOW()
-            WHERE id_tour = :id_tour
-        ";
-        
-        $stmt = $pdo->prepare($sql);
-        
-        $params = [
-            ':id_tour' => intval($id_tour),
-            ':titulo' => trim($datos['titulo']),
-            ':descripcion' => trim($datos['descripcion']),
-            ':precio' => floatval($datos['precio']),
-            ':duracion' => trim($datos['duracion']),
-            ':region_id' => intval($datos['region_id']),
-            ':dificultad' => trim($datos['dificultad']),
-            ':capacidad_maxima' => intval($datos['capacidad_maxima']),
-            ':incluye' => trim($datos['incluye']),
-            ':no_incluye' => !empty($datos['no_incluye']) ? trim($datos['no_incluye']) : null,
-            ':lugar_salida' => trim($datos['lugar_salida']),
-            ':ubicacion' => trim($datos['ubicacion']),
-            ':imagen_principal' => $imagen_principal,
-            ':guia_id' => !empty($datos['guia_id']) ? intval($datos['guia_id']) : null,
-            ':lugar_llegada' => !empty($datos['lugar_llegada']) ? trim($datos['lugar_llegada']) : null,
-            ':hora_salida' => !empty($datos['hora_salida']) ? trim($datos['hora_salida']) : null,
-            ':hora_llegada' => !empty($datos['hora_llegada']) ? trim($datos['hora_llegada']) : null,
-            ':recomendaciones' => !empty($datos['recomendaciones']) ? trim($datos['recomendaciones']) : null,
-            ':que_llevar' => !empty($datos['que_llevar']) ? trim($datos['que_llevar']) : null,
-            ':politicas' => !empty($datos['politicas']) ? trim($datos['politicas']) : null
-        ];
-        
-        $stmt->execute($params);
-        
-        $pdo->commit();
-        
-        return [
-            'success' => true,
-            'message' => 'Tour actualizado exitosamente'
-        ];
-        
-    } catch (Exception $e) {
-        if (isset($pdo)) {
-            $pdo->rollBack();
-        }
-        error_log("Error editando tour: " . $e->getMessage());
-        return [
-            'success' => false,
-            'message' => $e->getMessage()
-        ];
-    }
-}
-
-/**
- * Cambiar estado de un tour (activo/inactivo)
- */
-function cambiarEstadoTour($id_tour, $estado = 1) {
-    try {
-        $pdo = getToursDatabase();
-        
-        $sql = "UPDATE tours SET activo = :estado WHERE id_tour = :id_tour";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([
-            ':estado' => intval($estado),
-            ':id_tour' => intval($id_tour)
-        ]);
-        
-        $estado_texto = $estado ? 'activado' : 'desactivado';
-        
-        return [
-            'success' => true,
-            'message' => "Tour $estado_texto exitosamente"
-        ];
-        
-    } catch (Exception $e) {
-        error_log("Error cambiando estado de tour: " . $e->getMessage());
-        return [
-            'success' => false,
-            'message' => 'Error al cambiar estado del tour'
-        ];
     }
 }
 
