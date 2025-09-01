@@ -19,7 +19,7 @@ switch ($provider) {
         $client = new Google_Client();
     $client->setClientId("454921920428-o397pan3nhq05ss36c64o4hov91416v4.apps.googleusercontent.com");
         $client->setClientSecret("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"); // Cambia por tu secret real
-        $client->setRedirectUri("http://localhost/Antares-Travel/src/auth/oauth_callback.php?provider=google");
+        $client->setRedirectUri("https://jiory.opalstacked.com/Antares-Travel/src/auth/oauth_callback.php?provider=google");
 
 
         $client->addScope("email");
