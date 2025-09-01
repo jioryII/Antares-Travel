@@ -3,110 +3,118 @@ require_once __DIR__ . '/../auth/middleware.php';
 $admin = obtenerAdminActual();
 ?>
 
-<header class="bg-gradient-to-r from-gray-50/95 via-white/95 to-blue-50/95 shadow-xl border-b border-blue-100/50 fixed top-0 left-0 right-0 z-30 backdrop-blur-lg bg-white/90">
-    <div class="flex items-center justify-between px-4 lg:px-6 py-3 lg:py-4">
-        <!-- Espacio en blanco para que el navbar no tape el contenido -->
-        <div class="hidden lg:block" style="width: 240px;"></div>
+<header class="bg-gradient-to-r from-slate-50/95 via-white/95 to-gray-50/95 backdrop-blur-lg shadow-lg border-b border-gray-200/60 fixed top-0 left-0 right-0 z-20 before:absolute before:inset-0 before:bg-gradient-to-r before:from-blue-500/5 before:via-transparent before:to-purple-500/5 before:pointer-events-none">
+    <div class="relative flex items-center justify-between px-4 lg:px-8 py-4">
+        <!-- Espacio para el sidebar -->
+        <div class="hidden lg:block" style="width: 256px;"></div>
 
         <!-- Botón hamburguesa para móvil -->
-        <button id="sidebarToggle" class="lg:hidden p-2 text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400/50 shadow-sm">
+        <button id="sidebarToggle" class="lg:hidden p-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300">
             <i class="fas fa-bars text-lg"></i>
         </button>
 
-        <!-- Logo y título -->
+        <!-- Logo y título corporativo -->
         <div class="flex items-center">
-            <div class="flex items-center space-x-3">
-                <div class="w-8 h-8 bg-gradient-to-br from-blue-500 via-purple-600 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110">
-                    <i class="fas fa-compass text-white text-sm drop-shadow-sm"></i>
+            <div class="flex items-center space-x-4">
+                <div class="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center shadow-sm">
+                    <i class="fas fa-map-marked-alt text-white text-lg"></i>
                 </div>
                 <div class="hidden sm:block">
-                    <h1 class="text-lg lg:text-xl font-bold bg-gradient-to-r from-blue-700 via-purple-600 to-blue-800 bg-clip-text text-transparent drop-shadow-sm">
+                    <h1 class="text-xl font-light text-gray-900 tracking-tight">
                         Antares Travel
                     </h1>
-                    <p class="text-xs text-gray-600/80 font-medium">Panel de Administración</p>
+                    <p class="text-sm text-gray-600 font-medium">Sistema de Administración</p>
                 </div>
                 <div class="sm:hidden">
-                    <h1 class="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">AT</h1>
+                    <h1 class="text-lg font-semibold text-gray-900">AT</h1>
                 </div>
             </div>
         </div>
 
-        <!-- Información del usuario y acciones -->
-        <div class="flex items-center space-x-2 lg:space-x-4">
-            <!-- Notificaciones -->
+        <!-- Panel de usuario profesional -->
+        <div class="flex items-center space-x-3 lg:space-x-4">
+            <!-- Indicador de notificaciones -->
             <div class="relative">
-                <button class="p-2 text-gray-500 hover:text-blue-700 hover:bg-blue-50 rounded-xl transition-all duration-300 relative group shadow-sm hover:shadow-md">
+                <button class="p-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all duration-200 relative">
                     <i class="fas fa-bell text-lg"></i>
-                    <span class="absolute -top-1 -right-1 px-1.5 py-0.5 text-xs bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-full min-w-5 h-5 flex items-center justify-center font-medium shadow-lg animate-pulse">3</span>
+                    <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium shadow-sm">3</span>
                 </button>
-                <div class="absolute top-full right-0 mt-2 w-2 h-2 bg-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </div>
 
-            <!-- Información del admin -->
-            <div class="flex items-center space-x-2 lg:space-x-3 bg-gradient-to-r from-blue-50/80 to-purple-50/80 rounded-xl px-3 py-2 border border-blue-200/50 hover:border-blue-300/70 transition-all duration-300 shadow-sm hover:shadow-md backdrop-blur-sm">
+            <!-- Información del administrador -->
+            <div class="flex items-center space-x-3 bg-gray-50 rounded-lg px-4 py-2.5 border border-gray-200 hover:border-gray-300 transition-all duration-200">
                 <div class="flex items-center space-x-3">
                     <div class="relative">
-                        <div class="w-9 h-9 bg-gradient-to-br from-blue-500 via-purple-600 to-cyan-500 rounded-full flex items-center justify-center shadow-lg ring-2 ring-white/50 hover:ring-blue-200 transition-all duration-300">
-                            <i class="fas fa-user text-white text-sm drop-shadow-sm"></i>
+                        <div class="w-9 h-9 bg-slate-900 rounded-lg flex items-center justify-center shadow-sm">
+                            <i class="fas fa-user text-white text-sm"></i>
                         </div>
-                        <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white shadow-sm animate-pulse"></div>
+                        <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
                     </div>
                     <div class="hidden lg:block">
-                        <p class="text-sm font-semibold text-gray-800"><?php echo htmlspecialchars($admin['nombre']); ?></p>
+                        <p class="text-sm font-semibold text-gray-900"><?php echo htmlspecialchars($admin['nombre']); ?></p>
                         <div class="flex items-center space-x-1">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 border border-blue-200/50">
-                                <i class="fas fa-crown mr-1 text-xs text-blue-600"></i>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                                <i class="fas fa-shield-alt mr-1 text-xs"></i>
                                 <?php echo htmlspecialchars($admin['rol'] ?? 'Administrador'); ?>
                             </span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Dropdown menu -->
+                <!-- Menú desplegable corporativo -->
                 <div class="relative" id="userDropdown">
-                    <button onclick="toggleDropdown()" class="p-1 text-gray-500 hover:text-blue-700 transition-colors duration-300 hover:bg-blue-50 rounded-lg">
+                    <button onclick="toggleDropdown()" class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all duration-200">
                         <i class="fas fa-chevron-down text-sm"></i>
                     </button>
                     
-                    <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-56 bg-white/95 backdrop-blur-lg rounded-xl shadow-2xl ring-1 ring-blue-200/50 z-50 border border-blue-100/50 overflow-hidden">
-                        <div class="bg-gradient-to-r from-blue-50/90 to-purple-50/90 px-4 py-3 border-b border-blue-200/50">
+                    <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg ring-1 ring-gray-200 z-50 border border-gray-100 overflow-hidden">
+                        <div class="bg-gray-50 px-4 py-4 border-b border-gray-200">
                             <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 via-purple-600 to-cyan-500 rounded-full flex items-center justify-center shadow-lg">
-                                    <i class="fas fa-user text-white drop-shadow-sm"></i>
+                                <div class="w-12 h-12 bg-slate-900 rounded-lg flex items-center justify-center shadow-sm">
+                                    <i class="fas fa-user text-white"></i>
                                 </div>
                                 <div>
-                                    <p class="font-semibold text-gray-800 text-sm"><?php echo htmlspecialchars($admin['nombre']); ?></p>
+                                    <p class="font-semibold text-gray-900 text-sm"><?php echo htmlspecialchars($admin['nombre']); ?></p>
                                     <p class="text-xs text-gray-600"><?php echo htmlspecialchars($admin['email'] ?? 'admin@antares.com'); ?></p>
                                 </div>
                             </div>
                         </div>
-                        <div class="py-2">
-                            <a href="../mi_perfil/index.php" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-blue-50/80 hover:text-blue-700 transition-all duration-300 group">
-                                <div class="w-8 h-8 bg-blue-50 group-hover:bg-blue-100 rounded-lg flex items-center justify-center mr-3 transition-colors">
-                                    <i class="fas fa-user-circle text-blue-600 group-hover:text-blue-700"></i>
+                        <div class="py-1">
+                            <a href="../mi_perfil/index.php" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors group">
+                                <div class="w-8 h-8 bg-gray-100 group-hover:bg-gray-200 rounded-lg flex items-center justify-center mr-3 transition-colors">
+                                    <i class="fas fa-user-circle text-gray-600"></i>
                                 </div>
                                 <div>
                                     <p class="font-medium">Mi Perfil</p>
-                                    <p class="text-xs text-gray-500">Configurar información personal</p>
+                                    <p class="text-xs text-gray-500">Configuración personal</p>
                                 </div>
                             </a>
-                            <a href="../../config/settings.php" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50/80 hover:text-gray-800 transition-all duration-300 group">
-                                <div class="w-8 h-8 bg-gray-50 group-hover:bg-gray-100 rounded-lg flex items-center justify-center mr-3 transition-colors">
-                                    <i class="fas fa-cog text-gray-600 group-hover:text-gray-700"></i>
+                            <a href="../soporte/settings.php" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors group">
+                                <div class="w-8 h-8 bg-gray-100 group-hover:bg-gray-200 rounded-lg flex items-center justify-center mr-3 transition-colors">
+                                    <i class="fas fa-cog text-gray-600"></i>
                                 </div>
                                 <div>
                                     <p class="font-medium">Configuración</p>
                                     <p class="text-xs text-gray-500">Ajustes del sistema</p>
                                 </div>
                             </a>
-                            <div class="border-t border-blue-100/50 my-2"></div>
-                            <a href="../../auth/logout.php" class="flex items-center px-4 py-3 text-sm text-red-600 hover:bg-red-50/80 hover:text-red-700 transition-all duration-300 group">
+                            <a href="../soporte/manual_usuario.php" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors group">
+                                <div class="w-8 h-8 bg-gray-100 group-hover:bg-gray-200 rounded-lg flex items-center justify-center mr-3 transition-colors">
+                                    <i class="fas fa-book text-gray-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium">Manual de Usuario</p>
+                                    <p class="text-xs text-gray-500">Documentación</p>
+                                </div>
+                            </a>
+                            <div class="border-t border-gray-200 my-1"></div>
+                            <a href="../../auth/logout.php" class="flex items-center px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors group">
                                 <div class="w-8 h-8 bg-red-50 group-hover:bg-red-100 rounded-lg flex items-center justify-center mr-3 transition-colors">
                                     <i class="fas fa-sign-out-alt text-red-600"></i>
                                 </div>
                                 <div>
                                     <p class="font-medium">Cerrar Sesión</p>
-                                    <p class="text-xs text-red-500">Salir del panel de control</p>
+                                    <p class="text-xs text-red-500">Salir del sistema</p>
                                 </div>
                             </a>
                         </div>
@@ -118,64 +126,76 @@ $admin = obtenerAdminActual();
 </header>
 
 <script>
+// Función para alternar el dropdown del usuario
 function toggleDropdown() {
     const dropdown = document.getElementById('dropdownMenu');
     const isHidden = dropdown.classList.contains('hidden');
     
     if (isHidden) {
         dropdown.classList.remove('hidden');
-        // Animación de entrada
         setTimeout(() => {
             dropdown.style.transform = 'translateY(0)';
             dropdown.style.opacity = '1';
         }, 10);
     } else {
-        // Animación de salida
-        dropdown.style.transform = 'translateY(-10px)';
+        dropdown.style.transform = 'translateY(-8px)';
         dropdown.style.opacity = '0';
         setTimeout(() => {
             dropdown.classList.add('hidden');
-        }, 200);
+        }, 150);
     }
 }
 
-// Cerrar dropdown cuando se hace clic fuera
+// Cerrar dropdown al hacer clic fuera
 document.addEventListener('click', function(event) {
     const dropdown = document.getElementById('userDropdown');
     const menu = document.getElementById('dropdownMenu');
     
     if (!dropdown.contains(event.target)) {
         if (!menu.classList.contains('hidden')) {
-            menu.style.transform = 'translateY(-10px)';
+            menu.style.transform = 'translateY(-8px)';
             menu.style.opacity = '0';
             setTimeout(() => {
                 menu.classList.add('hidden');
-            }, 200);
+            }, 150);
         }
     }
 });
 
-// Toggle sidebar para móvil
+// Inicialización del header
 document.addEventListener('DOMContentLoaded', function() {
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebarOverlay');
     
-    // Inicializar estilos del dropdown
+    // Configurar estilos iniciales del dropdown
     const dropdownMenu = document.getElementById('dropdownMenu');
     if (dropdownMenu) {
-        dropdownMenu.style.transform = 'translateY(-10px)';
+        dropdownMenu.style.transform = 'translateY(-8px)';
         dropdownMenu.style.opacity = '0';
-        dropdownMenu.style.transition = 'all 0.2s ease-in-out';
+        dropdownMenu.style.transition = 'all 0.15s ease-in-out';
     }
     
+    // Agregar estilos elegantes al header
+    const header = document.querySelector('header');
+    if (header) {
+        // Crear el efecto glass elegante
+        header.style.backgroundImage = `
+            linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.95) 50%, rgba(241,245,249,0.98) 100%),
+            radial-gradient(ellipse at top, rgba(59,130,246,0.1) 0%, transparent 50%),
+            radial-gradient(ellipse at bottom right, rgba(147,51,234,0.08) 0%, transparent 50%)
+        `;
+        header.style.backdropFilter = 'blur(16px) saturate(180%)';
+        header.style.borderImage = 'linear-gradient(90deg, rgba(59,130,246,0.3), rgba(147,51,234,0.2), rgba(59,130,246,0.3)) 1';
+    }
+    
+    // Funcionalidad del toggle del sidebar
     if (sidebarToggle && sidebar) {
         sidebarToggle.addEventListener('click', function() {
-            // Usar la función global toggleSidebar del sidebar
             if (typeof window.toggleSidebar === 'function') {
                 window.toggleSidebar();
             } else {
-                // Fallback si la función no está disponible aún
+                // Fallback básico
                 const isVisible = sidebar.classList.contains('show');
                 if (isVisible) {
                     sidebar.classList.remove('show');
@@ -190,7 +210,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Cerrar sidebar en móvil cuando se hace clic en el overlay
+    // Cerrar sidebar en móvil al hacer clic en overlay
     if (overlay) {
         overlay.addEventListener('click', function() {
             sidebar.classList.remove('show');
@@ -199,79 +219,57 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Efecto de scroll en el header
+    // Efectos de scroll en el header con retracción
     let lastScroll = 0;
-    const header = document.querySelector('header');
     
     window.addEventListener('scroll', () => {
         const currentScroll = window.pageYOffset;
         
+        // Cambiar sombra y efectos según el scroll
         if (currentScroll <= 0) {
-            header.classList.remove('shadow-lg');
-            header.classList.add('shadow-sm');
-        } else {
-            header.classList.remove('shadow-sm');
+            header.classList.remove('shadow-2xl');
             header.classList.add('shadow-lg');
+            // Efecto más sutil en la parte superior
+            header.style.backgroundImage = `
+                linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.95) 50%, rgba(241,245,249,0.98) 100%),
+                radial-gradient(ellipse at top, rgba(59,130,246,0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom right, rgba(147,51,234,0.08) 0%, transparent 50%)
+            `;
+        } else {
+            header.classList.remove('shadow-lg');
+            header.classList.add('shadow-2xl');
+            // Efecto más intenso al hacer scroll
+            header.style.backgroundImage = `
+                linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.96) 50%, rgba(241,245,249,0.98) 100%),
+                radial-gradient(ellipse at top, rgba(59,130,246,0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at bottom right, rgba(147,51,234,0.12) 0%, transparent 60%)
+            `;
         }
         
         // Ocultar/mostrar header al hacer scroll
         if (currentScroll > lastScroll && currentScroll > 100) {
+            // Scrolling hacia abajo - ocultar header
             header.style.transform = 'translateY(-100%)';
         } else {
+            // Scrolling hacia arriba - mostrar header
             header.style.transform = 'translateY(0)';
         }
         
         lastScroll = currentScroll;
     });
     
-    // Añadir transición al header
-    header.style.transition = 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out';
-    
-    // Efecto hover en las notificaciones
-    const notificationBtn = document.querySelector('[data-notification]') || document.querySelector('.fa-bell').parentElement;
-    if (notificationBtn) {
-        notificationBtn.addEventListener('mouseenter', function() {
-            const badge = this.querySelector('span');
-            if (badge) {
-                badge.style.transform = 'scale(1.2)';
-                badge.style.transition = 'transform 0.2s ease-in-out';
-            }
-        });
-        
-        notificationBtn.addEventListener('mouseleave', function() {
-            const badge = this.querySelector('span');
-            if (badge) {
-                badge.style.transform = 'scale(1)';
-            }
-        });
-    }
-    
-    // Efecto de typing en el título (opcional)
-    const titleElement = document.querySelector('h1');
-    if (titleElement && titleElement.textContent === 'Antares Travel') {
-        const originalText = titleElement.textContent;
-        titleElement.textContent = '';
-        
-        let i = 0;
-        const typeEffect = setInterval(() => {
-            if (i < originalText.length) {
-                titleElement.textContent += originalText.charAt(i);
-                i++;
-            } else {
-                clearInterval(typeEffect);
-            }
-        }, 100);
-    }
+    // Transición suave para el header
+    header.style.transition = 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out, background-image 0.3s ease-in-out';
 });
 
-// Función para mostrar notificaciones toast (opcional)
+// Función para mostrar notificaciones (simplificada)
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
-    notification.className = `fixed top-20 right-4 z-50 px-6 py-4 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 ${
-        type === 'success' ? 'bg-green-500 text-white' :
-        type === 'error' ? 'bg-red-500 text-white' :
-        type === 'warning' ? 'bg-yellow-500 text-white' :
-        'bg-blue-500 text-white'
+    notification.className = `fixed top-20 right-4 z-50 px-4 py-3 rounded-lg shadow-lg transform translate-x-full transition-transform duration-200 ${
+        type === 'success' ? 'bg-green-600 text-white' :
+        type === 'error' ? 'bg-red-600 text-white' :
+        type === 'warning' ? 'bg-yellow-600 text-white' :
+        'bg-blue-600 text-white'
     }`;
     
     notification.innerHTML = `
@@ -282,23 +280,23 @@ function showNotification(message, type = 'info') {
                 type === 'warning' ? 'fa-exclamation-triangle' :
                 'fa-info-circle'
             }"></i>
-            <span>${message}</span>
+            <span class="text-sm font-medium">${message}</span>
         </div>
     `;
     
     document.body.appendChild(notification);
     
-    // Mostrar notificación
     setTimeout(() => {
         notification.style.transform = 'translateX(0)';
-    }, 100);
+    }, 50);
     
-    // Ocultar después de 3 segundos
     setTimeout(() => {
         notification.style.transform = 'translateX(100%)';
         setTimeout(() => {
-            document.body.removeChild(notification);
-        }, 300);
+            if (document.body.contains(notification)) {
+                document.body.removeChild(notification);
+            }
+        }, 200);
     }, 3000);
 }
 </script>

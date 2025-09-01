@@ -1,57 +1,170 @@
-/* Estilos específicos para Mi Perfil */
+/* Estilos específicos para Mi Perfil - Diseño Formal */
 
-.debug-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+/* Tarjetas principales con estilo ejecutivo */
+.executive-card {
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.executive-card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+    transform: translateY(-2px);
+}
+
+/* Gradiente formal para el header de perfil */
+.profile-header-gradient {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
     position: relative;
     overflow: hidden;
 }
 
-.debug-card::before {
+.profile-header-gradient::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.2"/><circle cx="20" cy="80" r="0.5" fill="white" opacity="0.2"/><circle cx="80" cy="30" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.05) 50%, transparent 70%);
     pointer-events: none;
 }
 
-.info-card {
+/* Efectos de hover profesionales */
+.professional-hover {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid transparent;
 }
 
-.info-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-    border-color: rgba(59, 130, 246, 0.2);
+.professional-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
-.profile-gradient {
-    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+/* Estilo para botones ejecutivos */
+.executive-button {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    padding: 12px 24px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
 }
 
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 1rem;
+.executive-button:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+    box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+    transform: translateY(-2px);
 }
 
-.debug-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
+/* Panel de debug con estilo corporativo */
+.debug-panel {
+    background: linear-gradient(135deg, #f1f5f9 0%, #ffffff 100%);
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
 }
 
-.debug-info-item {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+.debug-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 50%, #06b6d4 100%);
+}
+
+/* Estadísticas con estilo formal */
+.stat-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid #e2e8f0;
     border-radius: 12px;
-    padding: 1.5rem;
-    transition: all 0.3s ease;
+    padding: 24px;
+    text-align: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stat-card:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 8px 25px -5px rgba(59, 130, 246, 0.1);
+}
+
+/* Animaciones suaves */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* Tipografía formal */
+.formal-heading {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 300;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+}
+
+.formal-text {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+}
+
+/* Contenedores con espaciado profesional */
+.executive-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* Responsive design para dispositivos móviles */
+@media (max-width: 768px) {
+    .executive-card {
+        margin-bottom: 20px;
+        border-radius: 8px;
+    }
+    
+    .profile-header-gradient {
+        padding: 24px 16px;
+    }
+    
+    .executive-button {
+        width: 100%;
+        margin-top: 12px;
+    }
+}
+
+/* Efectos de focus para accesibilidad */
+.executive-button:focus,
+.professional-hover:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* Esquema de colores corporativo */
+:root {
+    --primary-blue: #1e40af;
+    --secondary-slate: #475569;
+    --accent-purple: #7c3aed;
+    --success-green: #059669;
+    --warning-orange: #d97706;
+    --error-red: #dc2626;
+    --neutral-gray: #6b7280;
+    --background-gray: #f8fafc;
 }
 
 .debug-info-item:hover {

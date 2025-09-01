@@ -116,6 +116,28 @@ try {
                 $resultado = crearTour($datos);
                 echo json_encode($resultado);
                 
+            } elseif ($action === 'actualizar') {
+                // Actualización via POST (formulario con imagen)
+                $id_tour = intval($_GET['id'] ?? 0);
+                if ($id_tour <= 0) {
+                    throw new Exception('ID de tour inválido');
+                }
+                
+                $datos = $_POST;
+                
+                // Procesar imagen si se envió
+                if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === UPLOAD_ERR_OK) {
+                    $resultado_imagen = procesarImagenTour($_FILES['imagen']);
+                    if ($resultado_imagen['success']) {
+                        $datos['imagen_principal'] = $resultado_imagen['ruta'];
+                    } else {
+                        throw new Exception('Error procesando imagen: ' . $resultado_imagen['message']);
+                    }
+                }
+                
+                $resultado = actualizarTour($id_tour, $datos);
+                echo json_encode($resultado);
+                
             } elseif ($action === 'upload_imagen') {
                 if (!isset($_FILES['imagen'])) {
                     throw new Exception('No se recibió archivo de imagen');

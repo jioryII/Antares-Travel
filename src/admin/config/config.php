@@ -3,10 +3,10 @@
 // Configuración principal de Antares Travel Admin
 
 // Configuración de Base de Datos
-define('DB_HOST', 'localhost');
+define('DB_HOST', 'opal18.opalstack.com');
 define('DB_NAME', 'db_antares');
-define('DB_USER', 'root');
-define('DB_PASS', 'admin942');
+define('DB_USER', 'jiory');
+define('DB_PASS', '3fwPqEHLOwWT680');
 define('DB_CHARSET', 'utf8mb4');
 
 // Configuración de la aplicación

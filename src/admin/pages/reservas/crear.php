@@ -245,7 +245,7 @@ try {
                                     </h3>
                                 </div>
                                 <div class="p-6">
-                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700">Precio por Persona</label>
                                             <p id="tourPrecio" class="mt-1 text-lg font-semibold text-green-600">-</p>
@@ -253,10 +253,6 @@ try {
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700">Duración</label>
                                             <p id="tourDuracion" class="mt-1 text-gray-900">-</p>
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700">Región</label>
-                                            <p id="tourRegion" class="mt-1 text-gray-900">-</p>
                                         </div>
                                     </div>
                                 </div>
@@ -367,7 +363,6 @@ try {
                 
                 document.getElementById('tourPrecio').textContent = formatCurrency(precioPorPersona);
                 document.getElementById('tourDuracion').textContent = selectedOption.dataset.duracion || '-';
-                document.getElementById('tourRegion').textContent = selectedOption.dataset.region || '-';
                 
                 tourInfo.classList.remove('hidden');
             } else {
