@@ -926,7 +926,6 @@ if (isset($_GET['logout'])) {
                 </div>
                 <?php if (!$is_logged_in): ?>
                     <button class="btn btn-primary" onclick="toggleGoogleSignin()">Iniciar con Google</button>
-                    <button class="btn btn-secondary" onclick="forceGooglePrompt()" style="background: #4285f4; color: white; border-color: #4285f4;">🔄 One Tap</button>
                     <a href="src/auth/login.php" class="btn btn-secondary">
                         <i class="fas fa-user"></i> Iniciar Sesión
                     </a>
@@ -984,16 +983,6 @@ if (isset($_GET['logout'])) {
 
     <div class="google-signin-container" id="googleSignin">
         <button class="close-btn" onclick="toggleGoogleSignin()">×</button>
-        <div id="g_id_onload"
-             data-client_id="<?php echo htmlspecialchars($client->getClientId()); ?>"
-             data-context="signin"
-             data-ux_mode="popup"
-             data-login_uri="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>"
-             data-auto_prompt="true"
-             data-auto_select="false"
-             data-cancel_on_tap_outside="false"
-             data-itp_support="true">
-        </div>
         <div id="g_id_signin"
              data-type="standard"
              data-size="large"
@@ -1461,13 +1450,14 @@ if (isset($_GET['logout'])) {
             // Verificar que la librería de Google esté cargada
             if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
                 try {
-                    // Solo inicializar el callback, el HTML maneja el resto
                     google.accounts.id.initialize({
                         client_id: '<?php echo htmlspecialchars($client->getClientId()); ?>',
-                        callback: handleCredentialResponse
+                        callback: handleCredentialResponse,
+                        auto_select: false,
+                        cancel_on_tap_outside: false
                     });
 
-                    // Renderizar solo el botón manual (el popup automático se maneja via HTML)
+                    // Renderizar el botón en el contenedor
                     google.accounts.id.renderButton(
                         document.getElementById("g_id_signin"),
                         {
@@ -1479,18 +1469,6 @@ if (isset($_GET['logout'])) {
                             logo_alignment: "left"
                         }
                     );
-
-                    // Mostrar el popup automáticamente cuando se carga la página (solo si no está logueado)
-                    <?php if (!$is_logged_in): ?>
-                    setTimeout(() => {
-                        google.accounts.id.prompt((notification) => {
-                            console.log('🔔 One Tap notification:', notification);
-                            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-                                console.log('⚠️ One Tap no se mostró:', notification.getNotDisplayedReason() || notification.getSkippedReason());
-                            }
-                        });
-                    }, 1000);
-                    <?php endif; ?>
 
                     console.log('✅ Google One Tap inicializado correctamente');
                 } catch (error) {
@@ -1517,28 +1495,6 @@ if (isset($_GET['logout'])) {
                 form.submit();
             } catch (error) {
                 console.error('❌ Error procesando credential:', error);
-            }
-        }
-
-        // Función para forzar el popup de One Tap (para testing)
-        function forceGooglePrompt() {
-            if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
-                console.log('🔄 Forzando Google One Tap...');
-                google.accounts.id.prompt((notification) => {
-                    console.log('🔔 One Tap notification:', notification);
-                    if (notification.isNotDisplayed()) {
-                        console.log('⚠️ One Tap no se mostró:', notification.getNotDisplayedReason());
-                        alert('One Tap no disponible: ' + notification.getNotDisplayedReason());
-                    } else if (notification.isSkippedMoment()) {
-                        console.log('⚠️ One Tap omitido:', notification.getSkippedReason());
-                        alert('One Tap omitido: ' + notification.getSkippedReason());
-                    } else {
-                        console.log('✅ One Tap mostrado correctamente');
-                    }
-                });
-            } else {
-                console.log('❌ Google Identity Services no cargado');
-                alert('Google Identity Services no está cargado');
             }
         }
 
