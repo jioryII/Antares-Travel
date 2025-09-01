@@ -24,3 +24,42 @@ window.addEventListener('scroll', function () {
     nav.classList.remove('shadow-lg')
   }
 })
+
+
+const langButtons = document.querySelectorAll('.lang-btn');
+const langElements = document.querySelectorAll('[data-es][data-en]');
+let currentLang = localStorage.getItem('language') || 'es';
+
+function updateLanguage(lang) {
+    langElements.forEach(element => {
+        const text = element.getAttribute(`data-${lang}`);
+        if (text) {
+            const icon = element.querySelector('i');
+            const span = element.querySelector('span');
+
+            if (span) {
+                span.textContent = text;
+            } else if (!icon) {
+                element.textContent = text;
+            } else {
+                element.innerHTML = `${icon.outerHTML} <span>${text}</span>`;
+            }
+        }
+    });
+    document.documentElement.lang = lang;
+    currentLang = lang;
+    localStorage.setItem('language', lang);
+
+    langButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+    });
+}
+
+langButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        const lang = btn.getAttribute('data-lang');
+        updateLanguage(lang);
+    });
+});
+
+updateLanguage(currentLang);

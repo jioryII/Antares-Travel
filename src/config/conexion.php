@@ -8,9 +8,9 @@
 
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
-$servername = "localhost";
-$username   = "root";
-$password   = "1234";
+$servername = "opal18.opalstack.com";
+$username   = "jiory";
+$password   = "3fwPqEHLOwWT680";
 $dbname     = "db_antares";
 
 try {
