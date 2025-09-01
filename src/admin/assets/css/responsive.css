@@ -1,0 +1,213 @@
+/* Estilos responsivos para el panel de administración de Antares Travel */
+
+/* Mejoras para el sidebar móvil */
+@media (max-width: 1024px) {
+    /* Ocultar sidebar por defecto en móviles */
+    #sidebar {
+        transform: translateX(-100%);
+    }
+    
+    /* Mostrar sidebar cuando está activo */
+    #sidebar.show {
+        transform: translateX(0);
+    }
+    
+    /* Overlay para cerrar sidebar */
+    #sidebarOverlay.show {
+        display: block !important;
+    }
+}
+
+/* Ajustes específicos para tabletas */
+@media (min-width: 768px) and (max-width: 1023px) {
+    /* Reducir espaciado en tabletas */
+    .container-padding {
+        padding: 1rem;
+    }
+    
+    /* Grids responsivos para tabletas */
+    .tablet-cols-2 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .tablet-cols-3 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Mejoras para móviles */
+@media (max-width: 767px) {
+    /* Formularios más cómodos en móvil */
+    .form-input-mobile {
+        font-size: 16px; /* Evita zoom en iOS */
+        padding: 12px;
+    }
+    
+    /* Botones más grandes en móvil */
+    .btn-mobile {
+        min-height: 44px;
+        font-size: 14px;
+    }
+    
+    /* Cards con menos padding */
+    .card-mobile {
+        padding: 1rem;
+    }
+    
+    /* Texto más legible en móvil */
+    .text-mobile {
+        font-size: 14px;
+        line-height: 1.5;
+    }
+    
+    /* Esconder elementos menos importantes en móvil */
+    .hide-mobile {
+        display: none !important;
+    }
+}
+
+/* Animaciones suaves para transiciones */
+.transition-sidebar {
+    transition: transform 0.3s ease-in-out;
+}
+
+.transition-overlay {
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* Estados hover mejorados */
+.nav-item:hover {
+    background-color: rgba(55, 65, 81, 0.8);
+    transform: translateX(2px);
+    transition: all 0.2s ease;
+}
+
+/* Indicadores de carga */
+.loading-spinner {
+    border: 2px solid #f3f4f6;
+    border-top: 2px solid #3b82f6;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Mejoras de accesibilidad */
+.focus-visible:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* Estados de elementos interactivos */
+.interactive-element {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.interactive-element:hover {
+    opacity: 0.8;
+}
+
+.interactive-element:active {
+    transform: scale(0.98);
+}
+
+/* Tipografía responsiva */
+.heading-responsive {
+    font-size: clamp(1.25rem, 2.5vw, 2rem);
+}
+
+.text-responsive {
+    font-size: clamp(0.875rem, 1.5vw, 1rem);
+}
+
+/* Espaciado responsivo */
+.spacing-responsive {
+    margin: clamp(0.5rem, 2vw, 2rem);
+    padding: clamp(0.5rem, 2vw, 1.5rem);
+}
+
+/* Grid adaptativo */
+.grid-responsive {
+    display: grid;
+    gap: clamp(1rem, 2vw, 2rem);
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+/* Contenedores fluidos */
+.container-fluid {
+    width: 100%;
+    max-width: 100%;
+    padding-left: clamp(1rem, 2vw, 2rem);
+    padding-right: clamp(1rem, 2vw, 2rem);
+}
+
+/* Mejoras para charts en móvil */
+@media (max-width: 767px) {
+    .chart-container {
+        position: relative;
+        height: 250px !important;
+        width: 100%;
+    }
+    
+    .chart-container canvas {
+        max-height: 250px !important;
+    }
+}
+
+/* Estados específicos para formularios */
+.form-error {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.form-success {
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* Scrollbar personalizado para webkit */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Utilidades para debugging */
+.debug-border {
+    border: 1px solid red !important;
+}
+
+.debug-background {
+    background-color: rgba(255, 0, 0, 0.1) !important;
+}
+
+/* Print styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .print-full-width {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+}
