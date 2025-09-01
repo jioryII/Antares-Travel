@@ -1551,8 +1551,7 @@ if (isset($_GET['logout'])) {
                 translateSelect.dispatchEvent(new Event('change'));
             }
         }
-
-        // Navbar scroll effect
+        
         function initializeNavbar() {
             window.addEventListener('scroll', () => {
                 const navbar = document.querySelector('.navbar');
@@ -1566,7 +1565,6 @@ if (isset($_GET['logout'])) {
             });
         }
 
-        // Smooth scrolling
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -1589,7 +1587,6 @@ if (isset($_GET['logout'])) {
             });
         });
 
-        // Close mobile menu and sign-in when clicking outside
         document.addEventListener('click', function(event) {
             const mobileNav = document.getElementById('mobileNav');
             const mobileMenu = document.querySelector('.mobile-menu');
@@ -1609,7 +1606,6 @@ if (isset($_GET['logout'])) {
         });
     </script>
 
-    <!-- Hidden div for Google Translate -->
     <div id="google_translate_element" style="display: none;"></div>
 </body>
-</html>
+</html>j
