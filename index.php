@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once _DIR_ . '/src/funtions/google_auth.php';
+require_once __DIR__ . '/src/functions/google_auth.php';
 
 $client = getGoogleClient();
 
