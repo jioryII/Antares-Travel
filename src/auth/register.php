@@ -54,7 +54,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $stmt->bind_param("iss", $idUsuario, $token, $fechaExpiracion);
 
                 if ($stmt->execute()) {
-                    $link = "http://localhost/Antares-Travel/src/auth/verificar_email.php?token=" . $token;
+                    $link = "https://jiory.opalstacked.com/Antares-Travel/src/auth/verificar_email.php?token=" . $token;
                     if (enviarCorreoVerificacion($email, $nombre, $link)) {
                         $popup = true;
                     } else {
