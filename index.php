@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once __DIR__ . '/src/functions/google_auth.php';
+require_once __DIR__ . '/src/funtions/google_auth.php';
 
 $client = getGoogleClient();
 
@@ -983,12 +983,7 @@ if (isset($_GET['logout'])) {
 
     <div class="google-signin-container" id="googleSignin">
         <button class="close-btn" onclick="toggleGoogleSignin()">×</button>
-        <div id="g_id_onload"
-             data-client_id="<?php echo htmlspecialchars($client->getClientId()); ?>"
-             data-login_uri="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>"
-             data-auto_prompt="false">
-        </div>
-        <div class="g_id_signin"
+        <div id="g_id_signin"
              data-type="standard"
              data-size="large"
              data-theme="outline"
@@ -1427,18 +1422,67 @@ if (isset($_GET['logout'])) {
                 spans[0].style.transform = 'none';
                 spans[1].style.opacity = '1';
                 spans[2].style.transform = 'none';
+                
+                // Re-renderizar el botón cuando se abre el popup
+                if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+                    setTimeout(() => {
+                        try {
+                            google.accounts.id.renderButton(
+                                document.getElementById("g_id_signin"),
+                                {
+                                    type: "standard",
+                                    size: "large", 
+                                    theme: "outline",
+                                    text: "sign_in_with",
+                                    shape: "rectangular",
+                                    logo_alignment: "left"
+                                }
+                            );
+                        } catch (error) {
+                            console.log('🔄 Re-renderizando botón Google...');
+                        }
+                    }, 100);
+                }
             }
         }
 
         function initializeGoogleSignin() {
-            window.onGoogleLibraryLoad = function() {
-                google.accounts.id.initialize({
-                    client_id: '<?php echo htmlspecialchars($client->getClientId()); ?>',
-                    callback: handleCredentialResponse
-                });
-            };
+            // Verificar que la librería de Google esté cargada
+            if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+                try {
+                    google.accounts.id.initialize({
+                        client_id: '<?php echo htmlspecialchars($client->getClientId()); ?>',
+                        callback: handleCredentialResponse,
+                        auto_select: false,
+                        cancel_on_tap_outside: false
+                    });
 
-            function handleCredentialResponse(response) {
+                    // Renderizar el botón en el contenedor
+                    google.accounts.id.renderButton(
+                        document.getElementById("g_id_signin"),
+                        {
+                            type: "standard",
+                            size: "large",
+                            theme: "outline",
+                            text: "sign_in_with",
+                            shape: "rectangular",
+                            logo_alignment: "left"
+                        }
+                    );
+
+                    console.log('✅ Google One Tap inicializado correctamente');
+                } catch (error) {
+                    console.error('❌ Error inicializando Google One Tap:', error);
+                }
+            } else {
+                console.log('⏳ Esperando carga de Google Identity Services...');
+                setTimeout(initializeGoogleSignin, 100);
+            }
+        }
+
+        function handleCredentialResponse(response) {
+            try {
+                console.log('📨 Credential recibido:', response);
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = '<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>';
@@ -1449,6 +1493,8 @@ if (isset($_GET['logout'])) {
                 form.appendChild(input);
                 document.body.appendChild(form);
                 form.submit();
+            } catch (error) {
+                console.error('❌ Error procesando credential:', error);
             }
         }
 
