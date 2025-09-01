@@ -45,85 +45,138 @@ function formatBytes($bytes, $precision = 2) {
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="styles.css" rel="stylesheet">
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-100">
     <?php include '../../components/header.php'; ?>
     
     <div class="flex">
         <?php include '../../components/sidebar.php'; ?>
         
         <!-- Contenido principal -->
-        <div class="flex-1 lg:ml-64 pt-16 lg:pt-0 min-h-screen">
-            <div class="p-4 lg:p-8">
+        <div class="flex-1 lg:ml-64 pt-16 lg:pt-0 min-h-screen bg-gray-100">
+            <div class="p-6 lg:p-10">
                 <!-- Encabezado -->
-                <div class="mb-6 lg:mb-8">
+                <div class="mb-8 lg:mb-12">
                     <br><br><br>
-                    <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
-                        <i class="fas fa-user-circle text-blue-600 mr-3"></i>Mi Perfil
-                    </h1>
-                    <p class="text-sm lg:text-base text-gray-600">Información personal y configuración de cuenta</p>
-                </div>
-
-                <!-- Información del Usuario -->
-                <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8 mb-6 lg:mb-8">
-                    <!-- Tarjeta de Perfil -->
-                    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-                        <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-8">
-                            <div class="flex items-center">
-                                <div class="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-6">
-                                    <i class="fas fa-user text-white text-3xl"></i>
-                                </div>
-                                <div>
-                                    <h2 class="text-2xl font-bold text-white"><?php echo htmlspecialchars($admin['nombre']); ?></h2>
-                                    <p class="text-blue-100"><?php echo htmlspecialchars($admin['email']); ?></p>
-                                    <span class="inline-block mt-2 px-3 py-1 bg-white bg-opacity-20 rounded-full text-sm text-white">
-                                        <i class="fas fa-crown mr-1"></i><?php echo htmlspecialchars($admin['rol']); ?>
-                                    </span>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 lg:p-8">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h1 class="text-3xl lg:text-4xl font-light text-gray-900 mb-2">
+                                    Mi Perfil Profesional
+                                </h1>
+                                <p class="text-gray-600 font-medium">Panel de administración • Gestión de cuenta</p>
+                            </div>
+                            <div class="hidden lg:block">
+                                <div class="flex items-center space-x-4">
+                                    <div class="text-right">
+                                        <p class="text-sm text-gray-500">Última sesión</p>
+                                        <p class="font-semibold text-gray-900"><?php echo date('d/m/Y H:i'); ?></p>
+                                    </div>
+                                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-shield-alt text-green-600"></i>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="p-6">
-                            <div class="space-y-4">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-gray-600">Último acceso:</span>
-                                    <span class="font-medium"><?php echo date('d/m/Y H:i'); ?></span>
+                    </div>
+                </div>
+
+                <!-- Información del Usuario -->
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-8 lg:gap-10 mb-8 lg:mb-12">
+                    <!-- Tarjeta de Perfil Principal -->
+                    <div class="xl:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div class="bg-gradient-to-r from-slate-900 to-blue-900 px-8 py-10">
+                            <div class="flex items-center">
+                                <div class="w-24 h-24 bg-white bg-opacity-20 rounded-xl flex items-center justify-center mr-8 backdrop-blur-sm">
+                                    <i class="fas fa-user-tie text-white text-4xl"></i>
                                 </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-gray-600">Estado:</span>
-                                    <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-                                        <i class="fas fa-circle text-green-500 mr-1"></i>Activo
-                                    </span>
+                                <div class="flex-1">
+                                    <h2 class="text-3xl font-light text-white mb-2"><?php echo htmlspecialchars($admin['nombre']); ?></h2>
+                                    <p class="text-blue-100 text-lg mb-3"><?php echo htmlspecialchars($admin['email']); ?></p>
+                                    <div class="flex items-center space-x-4">
+                                        <span class="inline-flex items-center px-4 py-2 bg-white bg-opacity-20 backdrop-blur-sm rounded-full text-white font-medium">
+                                            <i class="fas fa-star mr-2"></i><?php echo htmlspecialchars($admin['rol']); ?>
+                                        </span>
+                                        <span class="inline-flex items-center px-4 py-2 bg-green-500 bg-opacity-20 backdrop-blur-sm rounded-full text-green-100 font-medium">
+                                            <i class="fas fa-circle text-green-400 mr-2 text-xs"></i>En línea
+                                        </span>
+                                    </div>
                                 </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-gray-600">Sesión ID:</span>
-                                    <span class="font-mono text-sm text-gray-800 bg-gray-100 px-2 py-1 rounded">
-                                        <?php echo substr(session_id(), 0, 10) . '...'; ?>
-                                    </span>
+                            </div>
+                        </div>
+                        <div class="p-8">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-6">Información de la Sesión</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                                        <span class="text-gray-600 font-medium">Último acceso</span>
+                                        <span class="text-gray-900 font-semibold"><?php echo date('d/m/Y H:i'); ?></span>
+                                    </div>
+                                    <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                                        <span class="text-gray-600 font-medium">Estado de cuenta</span>
+                                        <span class="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                                            <i class="fas fa-check-circle mr-1"></i>Verificada
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                                        <span class="text-gray-600 font-medium">ID de Sesión</span>
+                                        <span class="font-mono text-sm text-gray-800 bg-gray-50 px-3 py-1 rounded-lg">
+                                            <?php echo substr(session_id(), 0, 12) . '...'; ?>
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                                        <span class="text-gray-600 font-medium">Nivel de acceso</span>
+                                        <span class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                                            <i class="fas fa-key mr-1"></i>Completo
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Estadísticas Rápidas -->
-                    <div class="bg-white rounded-lg shadow-lg p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                            <i class="fas fa-chart-bar text-blue-600 mr-2"></i>Estadísticas Rápidas
+                    <!-- Panel de Estadísticas -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+                            <i class="fas fa-chart-line text-blue-600 mr-3"></i>Resumen Ejecutivo
                         </h3>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="text-center p-4 bg-blue-50 rounded-lg">
-                                <div class="text-2xl font-bold text-blue-600"><?php echo number_format($stats['total_tours'] ?? 0); ?></div>
-                                <div class="text-sm text-gray-600">Tours Activos</div>
+                        <div class="space-y-6">
+                            <div class="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-blue-600 font-medium text-sm">Tours Disponibles</p>
+                                        <p class="text-2xl font-bold text-blue-800"><?php echo number_format($stats['total_tours'] ?? 0); ?></p>
+                                    </div>
+                                    <i class="fas fa-map-marked-alt text-blue-600 text-2xl"></i>
+                                </div>
                             </div>
-                            <div class="text-center p-4 bg-green-50 rounded-lg">
-                                <div class="text-2xl font-bold text-green-600"><?php echo number_format($stats['total_reservas'] ?? 0); ?></div>
-                                <div class="text-sm text-gray-600">Total Reservas</div>
+                            <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-green-600 font-medium text-sm">Reservas Totales</p>
+                                        <p class="text-2xl font-bold text-green-800"><?php echo number_format($stats['total_reservas'] ?? 0); ?></p>
+                                    </div>
+                                    <i class="fas fa-calendar-check text-green-600 text-2xl"></i>
+                                </div>
                             </div>
-                            <div class="text-center p-4 bg-yellow-50 rounded-lg">
-                                <div class="text-2xl font-bold text-yellow-600"><?php echo number_format($stats['total_usuarios'] ?? 0); ?></div>
-                                <div class="text-sm text-gray-600">Usuarios</div>
+                            <div class="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-purple-600 font-medium text-sm">Usuarios Activos</p>
+                                        <p class="text-2xl font-bold text-purple-800"><?php echo number_format($stats['total_usuarios'] ?? 0); ?></p>
+                                    </div>
+                                    <i class="fas fa-users text-purple-600 text-2xl"></i>
+                                </div>
                             </div>
-                            <div class="text-center p-4 bg-purple-50 rounded-lg">
-                                <div class="text-2xl font-bold text-purple-600"><?php echo number_format($stats['reservas_pendientes'] ?? 0); ?></div>
-                                <div class="text-sm text-gray-600">Pendientes</div>
+                            <div class="bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-orange-600 font-medium text-sm">Pendientes</p>
+                                        <p class="text-2xl font-bold text-orange-800"><?php echo number_format($stats['reservas_pendientes'] ?? 0); ?></p>
+                                    </div>
+                                    <i class="fas fa-clock text-orange-600 text-2xl"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -131,97 +184,179 @@ function formatBytes($bytes, $precision = 2) {
 
                 <!-- Información de Debug (Solo si DEBUG_MODE está activo) -->
                 <?php if (DEBUG_MODE): ?>
-                <div class="mb-6 lg:mb-8">
-                    <div class="debug-card rounded-lg shadow-lg overflow-hidden">
-                        <div class="px-6 py-4 border-b border-white border-opacity-20">
-                            <h3 class="text-xl font-semibold flex items-center">
-                                <i class="fas fa-bug mr-3"></i>Información de Debug
-                                <span class="ml-3 px-2 py-1 bg-white bg-opacity-20 rounded-full text-sm">
-                                    Modo Desarrollo
+                <div class="mb-8 lg:mb-12">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div class="bg-gradient-to-r from-slate-800 to-slate-900 px-8 py-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-xl font-light text-white flex items-center">
+                                        <i class="fas fa-code mr-3"></i>Panel de Desarrollo
+                                    </h3>
+                                    <p class="text-slate-300 text-sm mt-1">Información técnica y diagnósticos del sistema</p>
+                                </div>
+                                <span class="px-4 py-2 bg-yellow-500 bg-opacity-20 backdrop-blur-sm rounded-full text-yellow-200 text-sm font-medium">
+                                    <i class="fas fa-exclamation-triangle mr-1"></i>Modo Debug Activo
                                 </span>
-                            </h3>
-                            <p class="text-blue-100 text-sm mt-1">Información técnica del sistema y aplicación</p>
+                            </div>
                         </div>
-                        <div class="p-6">
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="p-8">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                                 <!-- Información del Usuario Admin -->
-                                <div class="bg-white bg-opacity-10 rounded-lg p-4">
-                                    <h4 class="font-semibold text-white mb-3 flex items-center">
-                                        <i class="fas fa-user-shield mr-2"></i>Usuario Admin
+                                <div class="bg-slate-50 rounded-lg p-6 border border-slate-200">
+                                    <h4 class="font-semibold text-slate-900 mb-4 flex items-center">
+                                        <i class="fas fa-user-shield text-blue-600 mr-2"></i>Administrador
                                     </h4>
-                                    <div class="space-y-2 text-sm text-blue-100">
-                                        <div><strong>Nombre:</strong> <?php echo htmlspecialchars($admin['nombre']); ?></div>
-                                        <div><strong>Email:</strong> <?php echo htmlspecialchars($admin['email']); ?></div>
-                                        <div><strong>Rol:</strong> <?php echo htmlspecialchars($admin['rol']); ?></div>
-                                        <div><strong>ID:</strong> <?php echo htmlspecialchars($admin['id'] ?? 'N/A'); ?></div>
+                                    <div class="space-y-3 text-sm">
+                                        <div class="flex justify-between">
+                                            <span class="text-slate-600">Nombre:</span>
+                                            <span class="font-medium text-slate-900"><?php echo htmlspecialchars($admin['nombre']); ?></span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-slate-600">Email:</span>
+                                            <span class="font-medium text-slate-900"><?php echo htmlspecialchars($admin['email']); ?></span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-slate-600">Rol:</span>
+                                            <span class="font-medium text-slate-900"><?php echo htmlspecialchars($admin['rol']); ?></span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-slate-600">ID:</span>
+                                            <span class="font-mono text-slate-900"><?php echo htmlspecialchars($admin['id'] ?? 'N/A'); ?></span>
+                                        </div>
                                     </div>
                                 </div>
 
                                 <!-- Estadísticas de Debug -->
-                                <div class="bg-white bg-opacity-10 rounded-lg p-4">
-                                    <h4 class="font-semibold text-white mb-3 flex items-center">
-                                        <i class="fas fa-database mr-2"></i>Estadísticas
+                                <div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
+                                    <h4 class="font-semibold text-slate-900 mb-4 flex items-center">
+                                        <i class="fas fa-database text-blue-600 mr-2"></i>Base de Datos
                                     </h4>
-                                    <div class="space-y-2 text-sm text-blue-100">
-                                        <div><strong>Total estadísticas:</strong> <?php echo count($stats); ?></div>
-                                        <div><strong>Reservas recientes:</strong> <?php echo count($reservas_recientes); ?></div>
-                                        <div><strong>Modo Debug:</strong> <?php echo DEBUG_MODE ? 'Activo' : 'Inactivo'; ?></div>
-                                        <div><strong>Base de datos:</strong> <?php echo DB_NAME; ?></div>
+                                    <div class="space-y-3 text-sm">
+                                        <div class="flex justify-between">
+                                            <span class="text-slate-600">Estadísticas:</span>
+                                            <span class="font-medium text-slate-900"><?php echo count($stats); ?> registros</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-slate-600">Reservas recientes:</span>
+                                            <span class="font-medium text-slate-900"><?php echo count($reservas_recientes); ?></span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-slate-600">Debug activo:</span>
+                                            <span class="font-medium text-green-600"><?php echo DEBUG_MODE ? 'Sí' : 'No'; ?></span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-slate-600">Base de datos:</span>
+                                            <span class="font-mono text-slate-900"><?php echo DB_NAME; ?></span>
+                                        </div>
                                     </div>
                                 </div>
 
                                 <!-- Información del Sistema -->
-                                <div class="bg-white bg-opacity-10 rounded-lg p-4">
-                                    <h4 class="font-semibold text-white mb-3 flex items-center">
-                                        <i class="fas fa-server mr-2"></i>Sistema
+                                <div class="bg-green-50 rounded-lg p-6 border border-green-200">
+                                    <h4 class="font-semibold text-slate-900 mb-4 flex items-center">
+                                        <i class="fas fa-server text-green-600 mr-2"></i>Sistema
                                     </h4>
-                                    <div class="space-y-2 text-sm text-blue-100">
-                                        <div><strong>PHP:</strong> <?php echo $system_info['php_version']; ?></div>
-                                        <div><strong>Zona horaria:</strong> <?php echo $system_info['timezone']; ?></div>
-                                        <div><strong>Memoria actual:</strong> <?php echo $system_info['memory_usage']; ?></div>
-                                        <div><strong>Memoria pico:</strong> <?php echo $system_info['memory_peak']; ?></div>
+                                    <div class="space-y-3 text-sm">
+                                        <div class="flex justify-between">
+                                            <span class="text-slate-600">PHP:</span>
+                                            <span class="font-medium text-slate-900"><?php echo $system_info['php_version']; ?></span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-slate-600">Zona horaria:</span>
+                                            <span class="font-medium text-slate-900"><?php echo $system_info['timezone']; ?></span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-slate-600">Memoria:</span>
+                                            <span class="font-medium text-slate-900"><?php echo $system_info['memory_usage']; ?></span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-slate-600">Pico memoria:</span>
+                                            <span class="font-medium text-slate-900"><?php echo $system_info['memory_peak']; ?></span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Información Detallada del Sistema -->
-                            <div class="mt-6 bg-white bg-opacity-10 rounded-lg p-4">
-                                <h4 class="font-semibold text-white mb-3 flex items-center">
-                                    <i class="fas fa-info-circle mr-2"></i>Información Detallada del Sistema
+                            <div class="mt-8 bg-slate-50 rounded-lg p-6 border border-slate-200">
+                                <h4 class="font-semibold text-slate-900 mb-4 flex items-center">
+                                    <i class="fas fa-info-circle text-slate-600 mr-2"></i>Detalles Técnicos del Servidor
                                 </h4>
-                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 text-sm text-blue-100">
-                                    <div>
-                                        <div class="mb-2"><strong>Servidor:</strong> <?php echo $system_info['server_software']; ?></div>
-                                        <div class="mb-2"><strong>Tiempo actual:</strong> <?php echo $system_info['current_time']; ?></div>
-                                        <div class="mb-2"><strong>Session ID:</strong> <span class="font-mono"><?php echo $system_info['session_id']; ?></span></div>
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 text-sm">
+                                    <div class="space-y-3">
+                                        <div>
+                                            <span class="text-slate-600 block">Servidor:</span>
+                                            <span class="font-mono text-slate-900"><?php echo $system_info['server_software']; ?></span>
+                                        </div>
+                                        <div>
+                                            <span class="text-slate-600 block">Tiempo actual:</span>
+                                            <span class="font-mono text-slate-900"><?php echo $system_info['current_time']; ?></span>
+                                        </div>
+                                        <div>
+                                            <span class="text-slate-600 block">Session ID:</span>
+                                            <span class="font-mono text-slate-900 text-xs"><?php echo $system_info['session_id']; ?></span>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <div class="mb-2"><strong>Document Root:</strong> <span class="font-mono text-xs"><?php echo $system_info['document_root']; ?></span></div>
-                                        <div class="mb-2"><strong>User Agent:</strong> <span class="font-mono text-xs"><?php echo substr($system_info['user_agent'], 0, 50) . '...'; ?></span></div>
+                                    <div class="space-y-3">
+                                        <div>
+                                            <span class="text-slate-600 block">Document Root:</span>
+                                            <span class="font-mono text-slate-900 text-xs break-all"><?php echo $system_info['document_root']; ?></span>
+                                        </div>
+                                        <div>
+                                            <span class="text-slate-600 block">User Agent:</span>
+                                            <span class="font-mono text-slate-900 text-xs break-all"><?php echo substr($system_info['user_agent'], 0, 80) . '...'; ?></span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Configuración de la Aplicación -->
-                            <div class="mt-6 bg-white bg-opacity-10 rounded-lg p-4">
-                                <h4 class="font-semibold text-white mb-3 flex items-center">
-                                    <i class="fas fa-cogs mr-2"></i>Configuración de la Aplicación
+                            <div class="mt-8 bg-purple-50 rounded-lg p-6 border border-purple-200">
+                                <h4 class="font-semibold text-slate-900 mb-4 flex items-center">
+                                    <i class="fas fa-cogs text-purple-600 mr-2"></i>Configuración de la Aplicación
                                 </h4>
-                                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 text-sm text-blue-100">
-                                    <div>
-                                        <div class="mb-2"><strong>Base URL:</strong> <?php echo BASE_URL; ?></div>
-                                        <div class="mb-2"><strong>Admin URL:</strong> <?php echo ADMIN_URL; ?></div>
-                                        <div class="mb-2"><strong>Site Name:</strong> <?php echo SITE_NAME; ?></div>
+                                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 text-sm">
+                                    <div class="space-y-3">
+                                        <div>
+                                            <span class="text-slate-600 block">Base URL:</span>
+                                            <span class="font-mono text-slate-900"><?php echo BASE_URL; ?></span>
+                                        </div>
+                                        <div>
+                                            <span class="text-slate-600 block">Admin URL:</span>
+                                            <span class="font-mono text-slate-900"><?php echo ADMIN_URL; ?></span>
+                                        </div>
+                                        <div>
+                                            <span class="text-slate-600 block">Nombre del sitio:</span>
+                                            <span class="font-mono text-slate-900"><?php echo SITE_NAME; ?></span>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <div class="mb-2"><strong>DB Host:</strong> <?php echo DB_HOST; ?></div>
-                                        <div class="mb-2"><strong>DB Name:</strong> <?php echo DB_NAME; ?></div>
-                                        <div class="mb-2"><strong>DB Charset:</strong> <?php echo DB_CHARSET; ?></div>
+                                    <div class="space-y-3">
+                                        <div>
+                                            <span class="text-slate-600 block">DB Host:</span>
+                                            <span class="font-mono text-slate-900"><?php echo DB_HOST; ?></span>
+                                        </div>
+                                        <div>
+                                            <span class="text-slate-600 block">DB Name:</span>
+                                            <span class="font-mono text-slate-900"><?php echo DB_NAME; ?></span>
+                                        </div>
+                                        <div>
+                                            <span class="text-slate-600 block">DB Charset:</span>
+                                            <span class="font-mono text-slate-900"><?php echo DB_CHARSET; ?></span>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <div class="mb-2"><strong>Session Lifetime:</strong> <?php echo SESSION_LIFETIME; ?>s</div>
-                                        <div class="mb-2"><strong>Max File Size:</strong> <?php echo formatBytes(MAX_FILE_SIZE); ?></div>
-                                        <div class="mb-2"><strong>Records per Page:</strong> <?php echo RECORDS_PER_PAGE; ?></div>
+                                    <div class="space-y-3">
+                                        <div>
+                                            <span class="text-slate-600 block">Session Lifetime:</span>
+                                            <span class="font-mono text-slate-900"><?php echo SESSION_LIFETIME; ?>s</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-slate-600 block">Max File Size:</span>
+                                            <span class="font-mono text-slate-900"><?php echo formatBytes(MAX_FILE_SIZE); ?></span>
+                                        </div>
+                                        <div>
+                                            <span class="text-slate-600 block">Records per Page:</span>
+                                            <span class="font-mono text-slate-900"><?php echo RECORDS_PER_PAGE; ?></span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -230,50 +365,69 @@ function formatBytes($bytes, $precision = 2) {
                 </div>
                 <?php endif; ?>
 
-                <!-- Acciones Rápidas -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-                    <div class="info-card bg-white rounded-lg shadow p-6 text-center">
-                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                            <i class="fas fa-edit text-blue-600 text-xl"></i>
-                        </div>
-                        <h3 class="font-semibold text-gray-900 mb-2">Editar Perfil</h3>
-                        <p class="text-sm text-gray-600 mb-4">Actualiza tu información personal</p>
-                        <button class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                            Editar
-                        </button>
+                <!-- Panel de Acciones Profesionales -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Centro de Control</h3>
+                        <p class="text-gray-600">Gestión rápida de funciones administrativas</p>
                     </div>
-
-                    <div class="info-card bg-white rounded-lg shadow p-6 text-center">
-                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                            <i class="fas fa-key text-green-600 text-xl"></i>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <!-- Editar Perfil -->
+                        <div class="group bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200 hover:border-blue-300 transition-all duration-300 hover:shadow-lg">
+                            <div class="flex flex-col h-full">
+                                <div class="w-14 h-14 bg-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                                    <i class="fas fa-user-edit text-white text-xl"></i>
+                                </div>
+                                <h4 class="font-semibold text-gray-900 mb-2">Editar Perfil</h4>
+                                <p class="text-sm text-gray-600 mb-4 flex-grow">Actualizar información personal y preferencias</p>
+                                <button class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                                    Modificar
+                                </button>
+                            </div>
                         </div>
-                        <h3 class="font-semibold text-gray-900 mb-2">Cambiar Contraseña</h3>
-                        <p class="text-sm text-gray-600 mb-4">Actualiza tu contraseña</p>
-                        <button class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors">
-                            Cambiar
-                        </button>
-                    </div>
 
-                    <div class="info-card bg-white rounded-lg shadow p-6 text-center">
-                        <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                            <i class="fas fa-bell text-yellow-600 text-xl"></i>
+                        <!-- Seguridad -->
+                        <div class="group bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border border-green-200 hover:border-green-300 transition-all duration-300 hover:shadow-lg">
+                            <div class="flex flex-col h-full">
+                                <div class="w-14 h-14 bg-green-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                                    <i class="fas fa-shield-alt text-white text-xl"></i>
+                                </div>
+                                <h4 class="font-semibold text-gray-900 mb-2">Seguridad</h4>
+                                <p class="text-sm text-gray-600 mb-4 flex-grow">Cambiar contraseña y configurar autenticación</p>
+                                <button class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors font-medium">
+                                    Configurar
+                                </button>
+                            </div>
                         </div>
-                        <h3 class="font-semibold text-gray-900 mb-2">Notificaciones</h3>
-                        <p class="text-sm text-gray-600 mb-4">Configura tus alertas</p>
-                        <button class="w-full bg-yellow-600 text-white py-2 rounded-lg hover:bg-yellow-700 transition-colors">
-                            Configurar
-                        </button>
-                    </div>
 
-                    <div class="info-card bg-white rounded-lg shadow p-6 text-center">
-                        <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                            <i class="fas fa-sign-out-alt text-red-600 text-xl"></i>
+                        <!-- Preferencias -->
+                        <div class="group bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200 hover:border-purple-300 transition-all duration-300 hover:shadow-lg">
+                            <div class="flex flex-col h-full">
+                                <div class="w-14 h-14 bg-purple-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                                    <i class="fas fa-cog text-white text-xl"></i>
+                                </div>
+                                <h4 class="font-semibold text-gray-900 mb-2">Preferencias</h4>
+                                <p class="text-sm text-gray-600 mb-4 flex-grow">Notificaciones y configuración de la interfaz</p>
+                                <button class="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition-colors font-medium">
+                                    Personalizar
+                                </button>
+                            </div>
                         </div>
-                        <h3 class="font-semibold text-gray-900 mb-2">Cerrar Sesión</h3>
-                        <p class="text-sm text-gray-600 mb-4">Salir del sistema</p>
-                        <a href="../../auth/logout.php" class="block w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors">
-                            Salir
-                        </a>
+
+                        <!-- Cerrar Sesión -->
+                        <div class="group bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-6 border border-slate-200 hover:border-red-300 transition-all duration-300 hover:shadow-lg">
+                            <div class="flex flex-col h-full">
+                                <div class="w-14 h-14 bg-slate-600 group-hover:bg-red-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-all duration-300">
+                                    <i class="fas fa-sign-out-alt text-white text-xl"></i>
+                                </div>
+                                <h4 class="font-semibold text-gray-900 mb-2">Finalizar Sesión</h4>
+                                <p class="text-sm text-gray-600 mb-4 flex-grow">Cerrar sesión de forma segura</p>
+                                <a href="../../auth/logout.php" class="block w-full bg-slate-600 hover:bg-red-600 text-white py-3 rounded-lg transition-colors font-medium text-center">
+                                    Salir
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
