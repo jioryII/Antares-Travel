@@ -1,3 +1,4 @@
+
 <?php
 session_start();
 require_once __DIR__ . '/src/funtions/google_auth.php';
@@ -1008,7 +1009,7 @@ if (isset($_GET['logout'])) {
                     <a href="#tours" class="btn btn-primary">
                         <i class="fas fa-compass"></i><span>Explorar Tours</span>
                     </a>
-                    <a href="src/reservas/reservar.php" class="btn btn-secondary">
+                    <a href="src/reserva.php" class="btn btn-secondary">
                         <i class="fas fa-calendar-alt"></i><span>Reservar Ahora</span>
                     </a>
                 </div>
@@ -1087,17 +1088,10 @@ if (isset($_GET['logout'])) {
                                         <div><i class="fas fa-clock"></i> Hora: <?php echo date('H:i', strtotime($tour['hora_salida'])); ?></div>
                                     <?php endif; ?>
                                 </div>
-                                
-                                <div class="tour-price">
-                                    <?php if ($tour['precio'] > 0): ?>
-                                        S/. <?php echo number_format($tour['precio'], 2); ?>
-                                    <?php else: ?>
-                                        Consultar precio
-                                    <?php endif; ?>
-                                </div>
+
                                 
                                 <div class="tour-actions">
-                                    <a href="src/reservas/reservar.php?tour_id=<?php echo $tour['id_tour']; ?>" class="btn btn-primary">
+                                    <a href="src/reserva.php" class="btn btn-primary">
                                         <i class="fas fa-calendar-plus"></i> Reservar
                                     </a>
                                 </div>
@@ -1538,7 +1532,7 @@ if (isset($_GET['logout'])) {
             items[currentIndex].classList.add('active');
             
             const translateX = -currentIndex * 100;
-            carousel.style.transform = translateX(${translateX}%);
+            carousel.style.transform = `translateX(${translateX}%)`;
         }
 
         // Auto-play carousels
