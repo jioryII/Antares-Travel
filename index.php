@@ -1,4 +1,3 @@
-
 <?php
 session_start();
 require_once __DIR__ . '/src/funtions/google_auth.php';
@@ -28,7 +27,7 @@ if (isset($_GET['logout'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Antares Travel - Descubre el Mundo</title>
+    <title>Antares Travel Peru - Descubre el Mundo</title>
     <link rel="icon" type="image/png" href="imagenes/antares_logozz3.png">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -167,6 +166,7 @@ if (isset($_GET['logout'])) {
             font-weight: 600;
             transition: var(--transition);
             cursor: pointer;
+            height: 40px;
         }
 
         .btn-primary {
@@ -541,6 +541,23 @@ if (isset($_GET['logout'])) {
             background: var(--white);
         }
 
+        .guias-filters {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .guias-filters select {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--primary-light);
+            border-radius: 25px;
+            background: var(--white);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
         .guias-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -589,6 +606,55 @@ if (isset($_GET['logout'])) {
         /* Experiencias Section */
         .experiencias-section {
             background: var(--primary-bg);
+        }
+
+        .photos-mural {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .photo-item {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .photo-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .photo-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+            padding: 1rem;
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .photo-info .small-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 1px solid var(--white);
+        }
+
+        .photo-info span {
+            font-size: 0.9rem;
         }
 
         .carousel-container {
@@ -672,6 +738,39 @@ if (isset($_GET['logout'])) {
 
         .carousel-nav.next {
             right: 10px;
+        }
+
+        /* Add Experiencia Form */
+        .add-experiencia {
+            max-width: 600px;
+            margin: 40px auto 0;
+            text-align: center;
+        }
+
+        .add-experiencia form {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            margin-top: 20px;
+        }
+
+        .add-experiencia textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 10px;
+            border: 1px solid var(--primary-light);
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .add-experiencia input[type="file"] {
+            margin-bottom: 10px;
+        }
+
+        .add-experiencia p {
+            color: var(--text-light);
+            margin-bottom: 10px;
         }
 
         /* Footer */
@@ -825,6 +924,10 @@ if (isset($_GET['logout'])) {
                 right: 50%;
                 transform: translateX(50%);
             }
+
+            .photos-mural {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
         }
 
         @media (max-width: 480px) {
@@ -839,6 +942,10 @@ if (isset($_GET['logout'])) {
 
             .tour-card {
                 margin: 0 10px;
+            }
+
+            .guias-filters {
+                flex-direction: column;
             }
         }
 
@@ -887,13 +994,20 @@ if (isset($_GET['logout'])) {
     // Obtener guías desde la base de datos
     $guias_query = "SELECT g.*, 
                     (SELECT AVG(c.calificacion) FROM calificaciones_guias c WHERE c.id_guia = g.id_guia) as rating_promedio,
-                    (SELECT COUNT(*) FROM calificaciones_guias c WHERE c.id_guia = g.id_guia) as total_calificaciones
+                    (SELECT COUNT(*) FROM calificaciones_guias c WHERE c.id_guia = g.id_guia) as total_calificaciones,
+                    GROUP_CONCAT(gi.id_idioma SEPARATOR ',') as idiomas
                     FROM guias g 
+                    LEFT JOIN guia_idiomas gi ON gi.id_guia = g.id_guia
+                    GROUP BY g.id_guia
                     ORDER BY g.id_guia";
     $guias_result = mysqli_query($conn, $guias_query);
     if (!$guias_result) {
         die("Error executing guides query: " . mysqli_error($conn));
     }
+    
+    // Obtener idiomas
+    $idiomas_query = "SELECT * FROM idiomas ORDER BY nombre_idioma";
+    $idiomas_result = $conn->query($idiomas_query);
     
     // Obtener experiencias (fotos y comentarios)
     $experiencias_query = "SELECT e.*, u.nombre, u.avatar_url 
@@ -910,8 +1024,8 @@ if (isset($_GET['logout'])) {
     <nav class="navbar">
         <div class="nav-container">
             <a href="#inicio" class="logo">
-                <img src="imagenes/antares_logozz2.png" alt="Antares Travel Logo" height="50" loading="lazy">
-                ANTARES TRAVEL
+                <img src="imagenes/antares_logozz2.png" alt="Antares Travel Peru Logo" height="50" loading="lazy">
+                ANTARES TRAVEL PERU
             </a>
             <ul class="nav-links">
                 <li><a href="#inicio">Inicio</a></li>
@@ -924,9 +1038,9 @@ if (isset($_GET['logout'])) {
                 <div class="lang-switch">
                     <button class="lang-btn active" data-lang="es">ES</button>
                     <button class="lang-btn" data-lang="en">EN</button>
+                    <button class="lang-btn" data-lang="fr">FR</button>
                 </div>
                 <?php if (!$is_logged_in): ?>
-                    <button class="btn btn-primary" onclick="toggleGoogleSignin()">Iniciar con Google</button>
                     <a href="src/auth/login.php" class="btn btn-secondary">
                         <i class="fas fa-user"></i> Iniciar Sesión
                     </a>
@@ -961,6 +1075,7 @@ if (isset($_GET['logout'])) {
             <div class="lang-switch">
                 <button class="lang-btn active" data-lang="es">ES</button>
                 <button class="lang-btn" data-lang="en">EN</button>
+                <button class="lang-btn" data-lang="fr">FR</button>
             </div>
             <?php if (!$is_logged_in): ?>
                 <button class="btn btn-primary" onclick="toggleGoogleSignin()">Iniciar con Google</button>
@@ -1003,7 +1118,7 @@ if (isset($_GET['logout'])) {
         <div class="hero-bg"></div>
         <div class="container">
             <div class="hero-content">
-                <h1>Descubre el Mundo con Antares Travel</h1>
+                <h1>Descubre el Mundo con Antares Travel Peru</h1>
                 <p>Experiencias únicas que transforman tu forma de viajar. Desde aventuras épicas hasta escapadas relajantes, creamos momentos inolvidables en los destinos más extraordinarios del mundo.</p>
                 <div class="hero-buttons">
                     <a href="#tours" class="btn btn-primary">
@@ -1114,10 +1229,32 @@ if (isset($_GET['logout'])) {
                 <p class="section-subtitle">Conoce a nuestro equipo de guías profesionales, expertos locales que harán de tu experiencia algo memorable</p>
             </div>
 
-            <div class="guias-container">
+            <div class="guias-filters">
+                <select id="sortRating" onchange="filterGuias()">
+                    <option value="">Ordenar por recomendación</option>
+                    <option value="asc">Menos recomendado a más</option>
+                    <option value="desc">Más recomendado a menos</option>
+                </select>
+                <select id="filterStatus" onchange="filterGuias()">
+                    <option value="">Todos los estados</option>
+                    <option value="libre">Libre</option>
+                    <option value="ocupado">Ocupado</option>
+                </select>
+                <select id="filterLanguage" onchange="filterGuias()">
+                    <option value="">Todos los idiomas</option>
+                    <?php if ($idiomas_result): ?>
+                        <?php while($idioma = $idiomas_result->fetch_assoc()): ?>
+                            <option value="<?php echo $idioma['id_idioma']; ?>"><?php echo htmlspecialchars($idioma['nombre_idioma']); ?></option>
+                        <?php endwhile; ?>
+                    <?php endif; ?>
+                </select>
+            </div>
+
+            <div class="guias-container" id="guiasContainer">
                 <?php if ($guias_result && $guias_result->num_rows > 0): ?>
                     <?php while ($guia = $guias_result->fetch_assoc()): ?>
-                        <div class="guia-card">
+                        <?php $rating = floatval($guia['rating_promedio'] ?: 0); ?>
+                        <div class="guia-card" data-rating="<?php echo $rating; ?>" data-estado="<?php echo strtolower($guia['estado']); ?>" data-idiomas="<?php echo $guia['idiomas'] ?: ''; ?>">
                             <img src="<?php echo htmlspecialchars($guia['foto_url'] ?: 'imagenes/default-guide.jpg'); ?>" 
                                  alt="<?php echo htmlspecialchars($guia['nombre']); ?>" 
                                  class="guia-avatar">
@@ -1127,7 +1264,6 @@ if (isset($_GET['logout'])) {
                             
                             <div class="guia-rating">
                                 <?php 
-                                $rating = floatval($guia['rating_promedio'] ?: 0);
                                 $total_reviews = intval($guia['total_calificaciones'] ?: 0);
                                 for ($i = 1; $i <= 5; $i++): 
                                 ?>
@@ -1169,55 +1305,32 @@ if (isset($_GET['logout'])) {
                 <p class="section-subtitle">Descubre las increíbles experiencias y momentos únicos que han vivido nuestros clientes</p>
             </div>
 
-            <div class="carousel-container" style="margin-bottom: 40px;">
-                <h3 style="text-align: center; color: var(--primary-color); margin-bottom: 20px;">Galería de Fotos</h3>
-                <div class="carousel" id="photosCarousel">
-                    <?php 
-                    $experiencias_result->data_seek(0);
-                    $photos = [];
-                    while ($experiencia = $experiencias_result->fetch_assoc()): 
-                        if ($experiencia['imagen_url']):
-                            $photos[] = $experiencia;
-                        endif;
-                    endwhile;
-                    ?>
-                    
-                    <?php if (!empty($photos)): ?>
-                        <?php foreach ($photos as $index => $photo): ?>
-                            <div class="carousel-item <?php echo $index === 0 ? 'active' : ''; ?>">
-                                <div class="experiencia-card">
-                                    <div class="experiencia-image" style="background-image: url('<?php echo htmlspecialchars($photo['imagen_url']); ?>')"></div>
-                                    <div class="experiencia-content">
-                                        <div class="experiencia-user">
-                                            <img src="<?php echo htmlspecialchars($photo['avatar_url'] ?: 'imagenes/default-avatar.png'); ?>" 
-                                                 alt="Usuario" class="experiencia-avatar">
-                                            <div>
-                                                <div class="experiencia-name"><?php echo htmlspecialchars($photo['nombre'] ?: 'Usuario Anónimo'); ?></div>
-                                                <div class="experiencia-date"><?php echo date('d/m/Y', strtotime($photo['fecha_publicacion'])); ?></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <div class="carousel-item active">
-                            <div class="experiencia-card">
-                                <div class="experiencia-image" style="background-image: url('https://images.unsplash.com/photo-1587595431973-160d0d94add1?w=600&h=400&fit=crop'); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem;">
-                                    Próximamente más fotos de nuestros viajeros
-                                </div>
+            <h3 style="text-align: center; color: var(--primary-color); margin-bottom: 20px;">Galería de Fotos</h3>
+            <div class="photos-mural">
+                <?php 
+                $experiencias_result->data_seek(0);
+                $photos = [];
+                while ($experiencia = $experiencias_result->fetch_assoc()): 
+                    if ($experiencia['imagen_url']):
+                        $photos[] = $experiencia;
+                    endif;
+                endwhile;
+                ?>
+                
+                <?php if (!empty($photos)): ?>
+                    <?php foreach ($photos as $photo): ?>
+                        <div class="photo-item">
+                            <img src="<?php echo htmlspecialchars($photo['imagen_url']); ?>" alt="Foto de experiencia">
+                            <div class="photo-info">
+                                <img src="<?php echo htmlspecialchars($photo['avatar_url'] ?: 'imagenes/default-avatar.png'); ?>" 
+                                    alt="Usuario" class="small-avatar">
+                                <span><?php echo htmlspecialchars($photo['nombre'] ?: 'Anónimo'); ?></span>
+                                <span><?php echo date('d/m/Y', strtotime($photo['fecha_publicacion'])); ?></span>
                             </div>
                         </div>
-                    <?php endif; ?>
-                </div>
-                
-                <?php if (count($photos) > 1): ?>
-                    <button class="carousel-nav prev" onclick="moveCarousel('photosCarousel', -1)">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <button class="carousel-nav next" onclick="moveCarousel('photosCarousel', 1)">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p style="text-align: center; color: var(--text-light);">Próximamente más fotos de nuestros viajeros</p>
                 <?php endif; ?>
             </div>
 
@@ -1276,6 +1389,22 @@ if (isset($_GET['logout'])) {
                     </button>
                 <?php endif; ?>
             </div>
+
+            <div class="add-experiencia">
+                <button onclick="toggleExperienciaForm()" class="btn btn-primary">Agregar Experiencia</button>
+                <div id="experienciaFormContainer" style="display: none;">
+                    <?php if (!$is_logged_in): ?>
+                        <p>Debes iniciar sesión para agregar una experiencia.</p>
+                        <a href="src/auth/login.php" class="btn btn-secondary">Iniciar Sesión</a>
+                    <?php else: ?>
+                        <form action="src/add_experiencia.php" method="POST" enctype="multipart/form-data">
+                            <textarea name="comentario" placeholder="Escribe tu comentario..." required></textarea>
+                            <input type="file" name="foto" accept="image/*">
+                            <button type="submit" class="btn btn-primary">Publicar</button>
+                        </form>
+                    <?php endif; ?>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -1283,7 +1412,7 @@ if (isset($_GET['logout'])) {
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <h3>Antares Travel</h3>
+                    <h3>Antares Travel Peru</h3>
                     <p>Somos una empresa especializada en turismo receptivo en la ciudad del Cusco, con más de 10 años de experiencia brindando servicios de calidad y experiencias inolvidables a nuestros viajeros.</p>
                     <div class="social-links">
                         <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
@@ -1329,7 +1458,7 @@ if (isset($_GET['logout'])) {
             </div>
             
             <div class="footer-bottom">
-                <p>&copy; 2024 Antares Travel. Todos los derechos reservados.</p>
+                <p>&copy; 2024 Antares Travel Peru. Todos los derechos reservados.</p>
             </div>
         </div>
     </footer>
@@ -1337,7 +1466,6 @@ if (isset($_GET['logout'])) {
     <script>
         // Variables globales
         let currentHeroImage = 0;
-        let currentPhotoIndex = 0;
         let currentCommentIndex = 0;
         const heroImages = document.querySelectorAll('.hero-image');
         const heroIndicators = document.querySelectorAll('.hero-indicator');
@@ -1349,13 +1477,14 @@ if (isset($_GET['logout'])) {
             initializeLanguageSwitch();
             initializeNavbar();
             initializeGoogleSignin();
+            filterGuias(); // Inicializar filtros de guías
         });
 
         // Google Translate Initialization
         function googleTranslateElementInit() {
             new google.translate.TranslateElement({
                 pageLanguage: 'es',
-                includedLanguages: 'es,en',
+                includedLanguages: 'en,fr,es',
                 layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
                 autoDisplay: false
             }, 'google_translate_element');
@@ -1509,7 +1638,39 @@ if (isset($_GET['logout'])) {
             });
         }
 
-        // Carousel
+        // Filter and Sort Guias
+        function filterGuias() {
+            const sortRating = document.getElementById('sortRating').value;
+            const filterStatus = document.getElementById('filterStatus').value;
+            const filterLanguage = document.getElementById('filterLanguage').value;
+            const container = document.getElementById('guiasContainer');
+            let cards = Array.from(document.querySelectorAll('.guia-card'));
+
+            // Filter by status
+            if (filterStatus) {
+                cards = cards.filter(card => card.dataset.estado === filterStatus);
+            }
+
+            // Filter by language
+            if (filterLanguage) {
+                cards = cards.filter(card => card.dataset.idiomas.split(',').includes(filterLanguage));
+            }
+
+            // Sort by rating
+            if (sortRating) {
+                cards.sort((a, b) => {
+                    const ratingA = parseFloat(a.dataset.rating);
+                    const ratingB = parseFloat(b.dataset.rating);
+                    return sortRating === 'asc' ? ratingA - ratingB : ratingB - ratingA;
+                });
+            }
+
+            // Clear and append sorted/filtered cards
+            container.innerHTML = '';
+            cards.forEach(card => container.appendChild(card));
+        }
+
+        // Carousel for comments
         function moveCarousel(carouselId, direction) {
             const carousel = document.getElementById(carouselId);
             const items = carousel.querySelectorAll('.carousel-item');
@@ -1517,37 +1678,29 @@ if (isset($_GET['logout'])) {
             
             if (totalItems === 0) return;
             
-            let currentIndex = carouselId === 'photosCarousel' ? 
-                currentPhotoIndex : currentCommentIndex;
-            
-            currentIndex = (currentIndex + direction + totalItems) % totalItems;
-            
-            if (carouselId === 'photosCarousel') {
-                currentPhotoIndex = currentIndex;
-            } else {
-                currentCommentIndex = currentIndex;
-            }
+            currentCommentIndex = (currentCommentIndex + direction + totalItems) % totalItems;
             
             items.forEach(item => item.classList.remove('active'));
-            items[currentIndex].classList.add('active');
+            items[currentCommentIndex].classList.add('active');
             
-            const translateX = -currentIndex * 100;
+            const translateX = -currentCommentIndex * 100;
             carousel.style.transform = `translateX(${translateX}%)`;
         }
 
-        // Auto-play carousels
+        // Auto-play comments carousel
         setInterval(() => {
-            const photosCarousel = document.getElementById('photosCarousel');
             const commentsCarousel = document.getElementById('commentsCarousel');
-            
-            if (photosCarousel && photosCarousel.querySelectorAll('.carousel-item').length > 1) {
-                moveCarousel('photosCarousel', 1);
-            }
             
             if (commentsCarousel && commentsCarousel.querySelectorAll('.carousel-item').length > 1) {
                 moveCarousel('commentsCarousel', 1);
             }
         }, 8000);
+
+        // Toggle Experiencia Form
+        function toggleExperienciaForm() {
+            const formContainer = document.getElementById('experienciaFormContainer');
+            formContainer.style.display = formContainer.style.display === 'none' ? 'block' : 'none';
+        }
 
         // Scroll animations
         function initializeScrollAnimations() {
