@@ -685,7 +685,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <input type="text" name="nacionalidad[]">
                         </div>
                         <div>
-                            <label for="telefono[]">Teléfono (ingrese sin código de país si es Perú, se agregará +51 automáticamente si nacionalidad es Perú):</label>
+                            <label for="telefono[]">Teléfono :</label>
                             <input type="text" name="telefono[]" placeholder="999999999">
                         </div>
                         <div>
