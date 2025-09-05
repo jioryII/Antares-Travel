@@ -30,42 +30,81 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $id_tour = $_POST['id_tour'] ?? '';
     $fecha_tour = $_POST['fecha_tour'] ?? '';
     $observaciones = $_POST['observaciones'] ?? '';
-    $nombre = $_POST['nombre'] ?? '';
-    $apellido = $_POST['apellido'] ?? '';
-    $dni = $_POST['dni'] ?? '';
-    $nacionalidad = $_POST['nacionalidad'] ?? '';
-    $telefono = $_POST['telefono'] ?? '';
-    $tipo = $_POST['tipo'] ?? 'Adulto';
+
+    // Arrays para múltiples pasajeros
+    $nombres = $_POST['nombre'] ?? [];
+    $apellidos = $_POST['apellido'] ?? [];
+    $dnis = $_POST['dni'] ?? [];
+    $nacionalidades = $_POST['nacionalidad'] ?? [];
+    $telefonos = $_POST['telefono'] ?? [];
+    $tipos = $_POST['tipo'] ?? [];
 
     if (isset($_POST['whatsapp'])) {
         $is_whatsapp = true;
     }
 
-    if ($id_tour && $fecha_tour && $nombre && $apellido && $dni) {
-        // Obtener precio
+    // Validación básica
+    $errors = [];
+    if (empty($id_tour) || empty($fecha_tour)) {
+        $errors[] = 'Tour y fecha son requeridos.';
+    }
+    $num_pasajeros = count($nombres);
+    if ($num_pasajeros < 1) {
+        $errors[] = 'Debe agregar al menos un pasajero.';
+    }
+    for ($i = 0; $i < $num_pasajeros; $i++) {
+        if (empty($nombres[$i]) || empty($apellidos[$i]) || empty($dnis[$i])) {
+            $errors[] = "Pasajero " . ($i + 1) . ": Nombre, apellido y DNI son requeridos.";
+        }
+        // Tipo por defecto
+        $tipos[$i] = $tipos[$i] ?? 'Adulto';
+    }
+    if ($is_whatsapp && empty($telefonos[0])) {
+        $errors[] = 'El teléfono del primer pasajero es requerido para enviar por WhatsApp.';
+    }
+
+    if (empty($errors)) {
+        // Obtener precio del tour
         $tour_query = "SELECT precio, titulo FROM tours WHERE id_tour = ?";
         $stmt = $conn->prepare($tour_query);
         $stmt->bind_param("i", $id_tour);
         $stmt->execute();
         $tour_result = $stmt->get_result();
         $tour = $tour_result->fetch_assoc();
-        $monto_total = $tour['precio'] ?? 0; // Asumiendo un pasajero por ahora
+        $precio_unitario = $tour['precio'] ?? 0;
+        $monto_total = $precio_unitario * $num_pasajeros; // Asumiendo mismo precio por pasajero
         $tour_titulo = $tour['titulo'] ?? '';
 
-        // Insertar reserva
-        $insert_reserva = "INSERT INTO reservas (id_usuario, id_tour, fecha_tour, monto_total, observaciones, estado) VALUES (?, ?, ?, ?, ?, 'Pendiente')";
-        $stmt = $conn->prepare($insert_reserva);
-        $stmt->bind_param("iisds", $id_usuario, $id_tour, $fecha_tour, $monto_total, $observaciones);
-        if ($stmt->execute()) {
+        // Transacción para inserts atómicos
+        $conn->begin_transaction();
+        try {
+            // Insertar reserva
+            $insert_reserva = "INSERT INTO reservas (id_usuario, id_tour, fecha_tour, monto_total, observaciones, estado) VALUES (?, ?, ?, ?, ?, 'Pendiente')";
+            $stmt = $conn->prepare($insert_reserva);
+            $stmt->bind_param("iisds", $id_usuario, $id_tour, $fecha_tour, $monto_total, $observaciones);
+            $stmt->execute();
             $id_reserva = $conn->insert_id;
 
-            // Insertar pasajero
+            // Insertar pasajeros
             $insert_pasajero = "INSERT INTO pasajeros (id_reserva, nombre, apellido, dni_pasaporte, nacionalidad, telefono, tipo_pasajero) VALUES (?, ?, ?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($insert_pasajero);
-            $stmt->bind_param("issssss", $id_reserva, $nombre, $apellido, $dni, $nacionalidad, $telefono, $tipo);
-            $stmt->execute();
+            for ($i = 0; $i < $num_pasajeros; $i++) {
+                $nacionalidad = $nacionalidades[$i] ?? '';
+                $telefono = $telefonos[$i] ?? '';
+                $stmt->bind_param("issssss", $id_reserva, $nombres[$i], $apellidos[$i], $dnis[$i], $nacionalidad, $telefono, $tipos[$i]);
+                $stmt->execute();
+            }
+
+            $conn->commit();
 
             // Generar PDF
+            $pasajeros_html = '<table><tr><th>Nombre Completo</th><th>DNI/Pasaporte</th><th>Nacionalidad</th><th>Teléfono</th><th>Tipo</th></tr>';
+            for ($i = 0; $i < $num_pasajeros; $i++) {
+                $nombre_completo = htmlspecialchars($nombres[$i] . ' ' . $apellidos[$i]);
+                $pasajeros_html .= '<tr><td>' . $nombre_completo . '</td><td>' . htmlspecialchars($dnis[$i]) . '</td><td>' . htmlspecialchars($nacionalidades[$i] ?? '') . '</td><td>' . htmlspecialchars($telefonos[$i] ?? '') . '</td><td>' . htmlspecialchars($tipos[$i]) . '</td></tr>';
+            }
+            $pasajeros_html .= '</table>';
+
             $html = '
             <html>
             <head>
@@ -85,14 +124,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <p>Fecha: ' . $fecha_tour . '</p>
                 <p>Monto Total: S/ ' . $monto_total . '</p>
                 
-                <h2>Pasajero</h2>
-                <table>
-                    <tr><th>Nombre</th><td>' . htmlspecialchars($nombre . ' ' . $apellido) . '</td></tr>
-                    <tr><th>DNI/Pasaporte</th><td>' . htmlspecialchars($dni) . '</td></tr>
-                    <tr><th>Nacionalidad</th><td>' . htmlspecialchars($nacionalidad) . '</td></tr>
-                    <tr><th>Teléfono</th><td>' . htmlspecialchars($telefono) . '</td></tr>
-                    <tr><th>Tipo</th><td>' . htmlspecialchars($tipo) . '</td></tr>
-                </table>
+                <h2>Pasajeros</h2>
+                ' . $pasajeros_html . '
                 
                 <p>Observaciones: ' . htmlspecialchars($observaciones) . '</p>
             </body>
@@ -117,10 +150,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $pdf_url = 'http://' . $_SERVER['HTTP_HOST'] . '/uploads/boletas/' . $pdf_filename; // Ajustar a tu dominio
 
             if ($is_whatsapp) {
-                // Redirigir a WhatsApp
-                $wa_number = '51966217821'; // Número de WA de la empresa, con código país sin +
-                $message = urlencode("Hola, soy $nombre $apellido y esta es mi boleta de reserva: $pdf_url");
-                $wa_url = "https://wa.me/$wa_number?text=$message";
+                // Preparar número de WhatsApp del primer pasajero (asumiendo Perú: +51)
+                $telefono_ws = preg_replace('/[^0-9]/', '', $telefonos[0] ?? ''); // Limpiar
+                if (strlen($telefono_ws) == 9) { // Número peruano típico
+                    $telefono_ws = '51' . $telefono_ws;
+                } elseif (strlen($telefono_ws) == 10 && substr($telefono_ws, 0, 1) == '0') {
+                    $telefono_ws = '51' . substr($telefono_ws, 1);
+                } elseif (!str_starts_with($telefono_ws, '51') && !str_starts_with($telefono_ws, '+51')) {
+                    $telefono_ws = '51' . $telefono_ws;
+                }
+                // Mensaje para "guardar" en su propio WhatsApp
+                $nombre_ws = $nombres[0] ?? '';
+                $apellido_ws = $apellidos[0] ?? '';
+                $message = urlencode("Boleta de reserva para $nombre_ws $apellido_ws: $pdf_url");
+                $wa_url = "https://wa.me/$telefono_ws?text=$message";
                 header("Location: $wa_url");
                 exit;
             } else {
@@ -128,11 +171,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $dompdf->stream($pdf_filename, ["Attachment" => true]);
                 exit;
             }
-        } else {
-            echo "<script>alert('Error al guardar la reserva');</script>";
+        } catch (Exception $e) {
+            $conn->rollback();
+            $errors[] = 'Error al procesar la reserva: ' . $e->getMessage();
         }
-    } else {
-        echo "<script>alert('Por favor completa todos los campos requeridos');</script>";
+    }
+
+    if (!empty($errors)) {
+        echo "<script>alert('" . implode("\\n", $errors) . "');</script>";
     }
 }
 ?>
@@ -479,6 +525,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             margin-right: 10px;
         }
 
+        .pasajero {
+            border: 1px solid var(--primary-light);
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
+        .remove-pasajero {
+            background: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
         /* Footer */
         .footer {
             background: var(--primary-dark);
@@ -652,39 +714,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <input type="date" name="fecha_tour" id="fecha_tour" required min="<?php echo date('Y-m-d'); ?>">
                 </div>
 
-                <div>
-                    <label for="nombre">Nombre:</label>
-                    <input type="text" name="nombre" id="nombre" required>
+                <h3>Pasajeros</h3>
+                <div id="pasajeros">
+                    <div class="pasajero">
+                        <h4>Pasajero 1</h4>
+                        <div>
+                            <label for="nombre[]">Nombre:</label>
+                            <input type="text" name="nombre[]" required>
+                        </div>
+                        <div>
+                            <label for="apellido[]">Apellido:</label>
+                            <input type="text" name="apellido[]" required>
+                        </div>
+                        <div>
+                            <label for="dni[]">DNI/Pasaporte:</label>
+                            <input type="text" name="dni[]" required>
+                        </div>
+                        <div>
+                            <label for="nacionalidad[]">Nacionalidad:</label>
+                            <input type="text" name="nacionalidad[]">
+                        </div>
+                        <div>
+                            <label for="telefono[]">Teléfono (para WhatsApp, ingrese con +51 si es Perú):</label>
+                            <input type="text" name="telefono[]" placeholder="+51 999999999">
+                        </div>
+                        <div>
+                            <label for="tipo[]">Tipo de Pasajero:</label>
+                            <select name="tipo[]">
+                                <option value="Adulto">Adulto</option>
+                                <option value="Niño">Niño</option>
+                                <option value="Infante">Infante</option>
+                            </select>
+                        </div>
+                        <button type="button" class="remove-pasajero" style="display:none;" onclick="removePasajero(this)">Eliminar Pasajero</button>
+                    </div>
                 </div>
-
-                <div>
-                    <label for="apellido">Apellido:</label>
-                    <input type="text" name="apellido" id="apellido" required>
-                </div>
-
-                <div>
-                    <label for="dni">DNI/Pasaporte:</label>
-                    <input type="text" name="dni" id="dni" required>
-                </div>
-
-                <div>
-                    <label for="nacionalidad">Nacionalidad:</label>
-                    <input type="text" name="nacionalidad" id="nacionalidad">
-                </div>
-
-                <div>
-                    <label for="telefono">Teléfono:</label>
-                    <input type="text" name="telefono" id="telefono">
-                </div>
-
-                <div>
-                    <label for="tipo">Tipo de Pasajero:</label>
-                    <select name="tipo" id="tipo">
-                        <option value="Adulto">Adulto</option>
-                        <option value="Niño">Niño</option>
-                        <option value="Infante">Infante</option>
-                    </select>
-                </div>
+                <button type="button" onclick="addPasajero()">Añadir Pasajero</button>
 
                 <div>
                     <label for="observaciones">Observaciones:</label>
@@ -692,7 +757,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
 
                 <button type="submit" class="btn btn-primary">Reservar y Descargar PDF</button>
-                <button type="submit" name="whatsapp" value="1" class="btn btn-secondary">Reservar por WhatsApp</button>
+                <button type="submit" name="whatsapp" value="1" class="btn btn-secondary">Reservar y Guardar en WhatsApp</button>
             </form>
         </div>
     </section>
@@ -783,6 +848,36 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 toggleMobileMenu();
             }
         });
+
+        let pasajeroCount = 1;
+
+        function addPasajero() {
+            pasajeroCount++;
+            const pasajerosDiv = document.getElementById('pasajeros');
+            const newPasajero = pasajerosDiv.firstElementChild.cloneNode(true);
+            newPasajero.querySelector('h4').textContent = `Pasajero ${pasajeroCount}`;
+            newPasajero.querySelector('.remove-pasajero').style.display = 'block';
+            // Limpiar valores
+            const inputs = newPasajero.querySelectorAll('input');
+            inputs.forEach(input => input.value = '');
+            const select = newPasajero.querySelector('select');
+            select.value = 'Adulto';
+            pasajerosDiv.appendChild(newPasajero);
+        }
+
+        function removePasajero(button) {
+            const pasajeroDiv = button.parentElement;
+            pasajeroDiv.remove();
+            // Reenumerar
+            const pasajeros = document.querySelectorAll('.pasajero');
+            pasajeros.forEach((p, index) => {
+                p.querySelector('h4').textContent = `Pasajero ${index + 1}`;
+                if (index === 0) {
+                    p.querySelector('.remove-pasajero').style.display = 'none';
+                }
+            });
+            pasajeroCount--;
+        }
     </script>
 </body>
 </html>
