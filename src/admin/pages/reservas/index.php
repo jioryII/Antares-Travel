@@ -68,7 +68,8 @@ try {
                 u.nombre as usuario_nombre,
                 u.email as usuario_email,
                 u.telefono as usuario_telefono,
-                (SELECT COUNT(*) FROM pasajeros p WHERE p.id_reserva = r.id_reserva) as num_pasajeros
+                (SELECT COUNT(*) FROM pasajeros p WHERE p.id_reserva = r.id_reserva) as num_pasajeros,
+                COALESCE((SELECT SUM(pg.monto) FROM pagos pg WHERE pg.id_reserva = r.id_reserva AND pg.estado_pago = 'Pagado'), 0) as monto_pagado
             FROM reservas r
             INNER JOIN usuarios u ON r.id_usuario = u.id_usuario
             INNER JOIN tours t ON r.id_tour = t.id_tour
@@ -255,7 +256,7 @@ function getEstadoClass($estado) {
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tour</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Tour</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pasajeros</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto Pagado</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                                 </tr>
@@ -308,7 +309,24 @@ function getEstadoClass($estado) {
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                <?php echo formatCurrency($reserva['monto_total']); ?>
+                                                <div class="flex flex-col">
+                                                    <span class="text-green-600 font-semibold">
+                                                        <?php echo formatCurrency($reserva['monto_pagado']); ?>
+                                                    </span>
+                                                    <?php if ($reserva['monto_pagado'] > 0 && $reserva['monto_pagado'] < $reserva['monto_total']): ?>
+                                                        <span class="text-xs text-orange-500">
+                                                            Pendiente: <?php echo formatCurrency($reserva['monto_total'] - $reserva['monto_pagado']); ?>
+                                                        </span>
+                                                    <?php elseif ($reserva['monto_pagado'] >= $reserva['monto_total'] && $reserva['monto_total'] > 0): ?>
+                                                        <span class="text-xs text-green-500">
+                                                            ✓ Completo
+                                                        </span>
+                                                    <?php elseif ($reserva['monto_pagado'] == 0): ?>
+                                                        <span class="text-xs text-red-500">
+                                                            Sin pagos
+                                                        </span>
+                                                    <?php endif; ?>
+                                                </div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?php echo getEstadoClass($reserva['estado']); ?>">

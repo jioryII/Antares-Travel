@@ -74,6 +74,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         
+        // Procesar pagos existentes si se enviaron
+        if (isset($_POST['pagos'])) {
+            foreach ($_POST['pagos'] as $pago_id => $pago_data) {
+                if (!empty($pago_data['monto']) && $pago_data['monto'] > 0) {
+                    $fecha_pago = !empty($pago_data['fecha_pago']) ? $pago_data['fecha_pago'] : date('Y-m-d H:i:s');
+                    
+                    // Actualizar pago existente
+                    $update_pago_sql = "UPDATE pagos SET 
+                                        monto = ?, 
+                                        metodo_pago = ?, 
+                                        estado_pago = ?, 
+                                        fecha_pago = ? 
+                                        WHERE id_pago = ? AND id_reserva = ?";
+                    $update_pago_stmt = $connection->prepare($update_pago_sql);
+                    $update_pago_stmt->execute([
+                        floatval($pago_data['monto']),
+                        $pago_data['metodo_pago'] ?? 'Efectivo',
+                        $pago_data['estado_pago'] ?? 'Pagado',
+                        $fecha_pago,
+                        intval($pago_id),
+                        $id_reserva
+                    ]);
+                }
+            }
+        }
+        
         $connection->commit();
         
         // Redireccionar a la página de la reserva
@@ -113,6 +139,37 @@ try {
     $pasajeros_stmt = $connection->prepare($pasajeros_sql);
     $pasajeros_stmt->execute([$id_reserva]);
     $pasajeros_actuales = $pasajeros_stmt->fetchAll();
+    
+    // Obtener pagos de la reserva
+    $pagos_sql = "SELECT * FROM pagos WHERE id_reserva = ? ORDER BY fecha_pago DESC";
+    $pagos_stmt = $connection->prepare($pagos_sql);
+    $pagos_stmt->execute([$id_reserva]);
+    $pagos_actuales = $pagos_stmt->fetchAll();
+    
+    // Obtener métodos de pago dinámicamente desde la base de datos
+    $metodos_pago = [];
+    $estados_pago = [];
+    try {
+        $metodos_sql = "SHOW COLUMNS FROM pagos LIKE 'metodo_pago'";
+        $metodos_result = $connection->query($metodos_sql)->fetch();
+        if ($metodos_result && isset($metodos_result['Type'])) {
+            preg_match("/^enum\((.+)\)$/", $metodos_result['Type'], $matches);
+            if ($matches) {
+                $metodos_pago = str_getcsv($matches[1], ',', "'");
+            }
+        }
+        
+        $estados_sql = "SHOW COLUMNS FROM pagos LIKE 'estado_pago'";
+        $estados_result = $connection->query($estados_sql)->fetch();
+        if ($estados_result && isset($estados_result['Type'])) {
+            preg_match("/^enum\((.+)\)$/", $estados_result['Type'], $matches);
+            if ($matches) {
+                $estados_pago = str_getcsv($matches[1], ',', "'");
+            }
+        }
+    } catch (Exception $e) {
+        error_log("Error al obtener ENUMs: " . $e->getMessage());
+    }
     
     // Obtener usuarios
     $usuarios_sql = "SELECT id_usuario, nombre, email FROM usuarios ORDER BY nombre ASC";
@@ -295,31 +352,6 @@ if (!$reserva) {
                                 </div>
                             </div>
 
-                            <!-- Información del Tour Seleccionado -->
-                            <div id="tourInfo" class="form-section bg-white rounded-lg shadow-lg overflow-hidden">
-                                <div class="bg-gradient-to-r from-green-600 to-green-700 px-6 py-4">
-                                    <h3 class="text-lg font-semibold text-white flex items-center">
-                                        <i class="fas fa-map-marked-alt mr-3"></i>Información del Tour
-                                    </h3>
-                                </div>
-                                <div class="p-6">
-                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700">Precio por Persona</label>
-                                            <p id="tourPrecio" class="mt-1 text-lg font-semibold text-green-600"><?php echo formatCurrency($reserva['tour_precio']); ?></p>
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700">Duración</label>
-                                            <p id="tourDuracion" class="mt-1 text-gray-900"><?php echo htmlspecialchars($reserva['tour_duracion']); ?></p>
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700">Región</label>
-                                            <p id="tourRegion" class="mt-1 text-gray-900"><?php echo htmlspecialchars($reserva['nombre_region']); ?></p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
                             <!-- Pasajeros -->
                             <div class="form-section bg-white rounded-lg shadow-lg overflow-hidden">
                                 <div class="bg-gradient-to-r from-purple-600 to-purple-700 px-6 py-4">
@@ -346,6 +378,47 @@ if (!$reserva) {
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Gestión de Pagos -->
+                            <div class="form-section bg-white rounded-lg shadow-lg overflow-hidden">
+                                <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-4">
+                                    <h3 class="text-lg font-semibold text-white flex items-center">
+                                        <i class="fas fa-credit-card mr-3"></i>Editar Pagos Existentes
+                                    </h3>
+                                </div>
+                                <div class="p-6">
+                                    <!-- Resumen de pagos actual -->
+                                    <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="text-sm font-medium text-blue-800">Total Pagado Actual:</span>
+                                            <span id="totalPagadoActual" class="text-lg font-bold text-blue-600">
+                                                <?php 
+                                                $total_pagado_actual = array_sum(array_column($pagos_actuales, 'monto'));
+                                                echo formatCurrency($total_pagado_actual); 
+                                                ?>
+                                            </span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm font-medium text-blue-800">Saldo Pendiente:</span>
+                                            <span id="saldoPendienteActual" class="text-lg font-bold <?php echo ($reserva['monto_total'] - $total_pagado_actual) > 0 ? 'text-red-600' : 'text-green-600'; ?>">
+                                                <?php echo formatCurrency($reserva['monto_total'] - $total_pagado_actual); ?>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div id="pagosContainer">
+                                        <!-- Los pagos existentes se cargarán aquí -->
+                                    </div>
+                                    
+                                    <?php if (empty($pagos_actuales)): ?>
+                                    <div class="text-center py-8 text-gray-500">
+                                        <i class="fas fa-receipt text-4xl mb-3"></i>
+                                        <p>No hay pagos registrados para esta reserva</p>
+                                        <p class="text-sm mt-1">Los pagos se pueden agregar desde el formulario de creación de reservas</p>
+                                    </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Columna Lateral - Resumen -->
@@ -354,7 +427,7 @@ if (!$reserva) {
                             <div class="form-section bg-white rounded-lg shadow-lg overflow-hidden">
                                 <div class="bg-gradient-to-r from-orange-600 to-orange-700 px-6 py-4">
                                     <h3 class="text-lg font-semibold text-white flex items-center">
-                                        <i class="fas fa-calculator mr-3"></i>Resumen
+                                        <i class="fas fa-calculator mr-3"></i>Resumen de Reserva
                                     </h3>
                                 </div>
                                 <div class="p-6">
@@ -374,27 +447,56 @@ if (!$reserva) {
                                             </div>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+
+                            <!-- Resumen de Pagos -->
+                            <div class="form-section bg-white rounded-lg shadow-lg overflow-hidden">
+                                <div class="bg-gradient-to-r from-green-600 to-green-700 px-6 py-4">
+                                    <h3 class="text-lg font-semibold text-white flex items-center">
+                                        <i class="fas fa-money-bill-wave mr-3"></i>Estado de Pagos
+                                    </h3>
+                                </div>
+                                <div class="p-6">
+                                    <div class="space-y-3">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-600">Total a Pagar:</span>
+                                            <span class="font-medium"><?php echo formatCurrency($reserva['monto_total']); ?></span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-600">Total Pagado:</span>
+                                            <span id="totalPagadoResumen" class="font-medium text-green-600">
+                                                <?php echo formatCurrency($total_pagado_actual); ?>
+                                            </span>
+                                        </div>
+                                        <div class="flex justify-between items-center border-t pt-3">
+                                            <span class="font-semibold text-gray-900">Saldo:</span>
+                                            <span id="saldoResumen" class="font-bold text-lg <?php echo ($reserva['monto_total'] - $total_pagado_actual) > 0 ? 'text-red-600' : 'text-green-600'; ?>">
+                                                <?php echo formatCurrency($reserva['monto_total'] - $total_pagado_actual); ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Barra de progreso de pagos -->
+                                    <div class="mt-4">
+                                        <?php 
+                                        $porcentaje_pagado = $reserva['monto_total'] > 0 ? ($total_pagado_actual / $reserva['monto_total']) * 100 : 0;
+                                        ?>
+                                        <div class="flex justify-between text-xs text-gray-600 mb-1">
+                                            <span>Progreso de Pago</span>
+                                            <span id="porcentajePago"><?php echo number_format($porcentaje_pagado, 1); ?>%</span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-2">
+                                            <div id="barraProgresoPago" class="bg-green-600 h-2 rounded-full transition-all duration-300" 
+                                                 style="width: <?php echo $porcentaje_pagado; ?>%"></div>
+                                        </div>
+                                    </div>
 
                                     <div class="mt-6 pt-6 border-t">
                                         <button type="submit" 
                                                 class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium">
                                             <i class="fas fa-save mr-2"></i>Guardar Cambios
                                         </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Información Original -->
-                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                                <div class="flex">
-                                    <i class="fas fa-clock text-gray-400 mr-3 mt-1"></i>
-                                    <div>
-                                        <h4 class="text-sm font-medium text-gray-800">Información Original</h4>
-                                        <ul class="text-sm text-gray-600 mt-2 space-y-1">
-                                            <li>• Creada: <?php echo date('d/m/Y H:i', strtotime($reserva['fecha_creacion'])); ?></li>
-                                            <li>• Monto Original: <?php echo formatCurrency($reserva['monto_total']); ?></li>
-                                            <li>• Estado: <?php echo htmlspecialchars($reserva['estado']); ?></li>
-                                        </ul>
                                     </div>
                                 </div>
                             </div>
@@ -409,8 +511,12 @@ if (!$reserva) {
         let pasajeroCount = 0;
         let precioPorPersona = <?php echo $reserva['tour_precio']; ?>;
         
-        // Pasajeros existentes
+        // Datos desde PHP
         const pasajerosExistentes = <?php echo json_encode($pasajeros_actuales); ?>;
+        const pagosExistentes = <?php echo json_encode($pagos_actuales); ?>;
+        const metodosPago = <?php echo json_encode($metodos_pago); ?>;
+        const estadosPago = <?php echo json_encode($estados_pago); ?>;
+        const montoTotalReserva = <?php echo $reserva['monto_total']; ?>;
 
         // Inicializar
         document.addEventListener('DOMContentLoaded', function() {
@@ -418,6 +524,13 @@ if (!$reserva) {
             pasajerosExistentes.forEach(pasajero => {
                 cargarPasajeroExistente(pasajero);
             });
+            
+            // Cargar pagos existentes
+            pagosExistentes.forEach(pago => {
+                cargarPagoExistente(pago);
+            });
+            
+            actualizarResumenPagos();
         });
 
         // Manejar selección de tour
@@ -436,6 +549,132 @@ if (!$reserva) {
             
             actualizarResumen();
         });
+
+        // Funciones de Pagos
+        function cargarPagoExistente(pago) {
+            const container = document.getElementById('pagosContainer');
+            
+            const pagoDiv = document.createElement('div');
+            pagoDiv.className = 'border border-blue-200 rounded-lg p-4 mb-4 bg-blue-50';
+            pagoDiv.id = `pago-${pago.id_pago}`;
+            
+            const fechaPago = pago.fecha_pago ? new Date(pago.fecha_pago).toISOString().slice(0, 16) : '';
+            
+            pagoDiv.innerHTML = `
+                <div class="flex items-center justify-between mb-3">
+                    <h4 class="font-medium text-gray-900">
+                        <i class="fas fa-edit text-blue-600 mr-2"></i>
+                        Pago #${pago.id_pago} - ${formatCurrency(pago.monto)}
+                    </h4>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                        ${pago.estado_pago === 'Pagado' ? 'bg-green-100 text-green-800' :
+                          pago.estado_pago === 'Pendiente' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}">
+                        ${pago.estado_pago}
+                    </span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Monto *</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-2 text-gray-500">S/</span>
+                            <input type="number" name="pagos[${pago.id_pago}][monto]" required 
+                                   value="${pago.monto || ''}" step="0.01" min="0"
+                                   class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   onchange="actualizarResumenPagos()">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Método de Pago *</label>
+                        <select name="pagos[${pago.id_pago}][metodo_pago]" required 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            ${metodosPago.map(metodo => 
+                                `<option value="${metodo}" ${pago.metodo_pago === metodo ? 'selected' : ''}>${metodo}</option>`
+                            ).join('')}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Estado *</label>
+                        <select name="pagos[${pago.id_pago}][estado_pago]" required 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                onchange="actualizarEstadoPago(${pago.id_pago})">
+                            ${estadosPago.map(estado => 
+                                `<option value="${estado}" ${pago.estado_pago === estado ? 'selected' : ''}>${estado}</option>`
+                            ).join('')}
+                        </select>
+                    </div>
+                    <div class="lg:col-span-3">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha y Hora</label>
+                        <input type="datetime-local" name="pagos[${pago.id_pago}][fecha_pago]" 
+                               value="${fechaPago}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                </div>
+                <div class="mt-3 p-2 bg-gray-100 rounded text-xs text-gray-600">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Pago registrado el: ${pago.fecha_pago ? new Date(pago.fecha_pago).toLocaleDateString('es-PE') : 'No especificado'}
+                </div>
+            `;
+            
+            container.appendChild(pagoDiv);
+        }
+
+        function actualizarEstadoPago(pagoId) {
+            const pagoDiv = document.getElementById(`pago-${pagoId}`);
+            const estadoSelect = pagoDiv.querySelector('select[name*="[estado_pago]"]');
+            const badge = pagoDiv.querySelector('.inline-flex');
+            
+            // Actualizar el badge visual
+            const estado = estadoSelect.value;
+            badge.textContent = estado;
+            badge.className = `inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                estado === 'Pagado' ? 'bg-green-100 text-green-800' :
+                estado === 'Pendiente' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
+            }`;
+        }
+
+        function actualizarResumenPagos() {
+            const pagoInputs = document.querySelectorAll('input[name*="[monto]"]');
+            let totalPagos = 0;
+            
+            pagoInputs.forEach(input => {
+                const monto = parseFloat(input.value) || 0;
+                totalPagos += monto;
+            });
+            
+            const saldoPendiente = montoTotalReserva - totalPagos;
+            const porcentaje = montoTotalReserva > 0 ? (totalPagos / montoTotalReserva) * 100 : 0;
+            
+            // Actualizar resumen principal de pagos
+            document.getElementById('totalPagadoActual').textContent = formatCurrency(totalPagos);
+            const saldoElement = document.getElementById('saldoPendienteActual');
+            saldoElement.textContent = formatCurrency(saldoPendiente);
+            
+            // Actualizar resumen lateral
+            document.getElementById('totalPagadoResumen').textContent = formatCurrency(totalPagos);
+            const saldoResumenElement = document.getElementById('saldoResumen');
+            saldoResumenElement.textContent = formatCurrency(saldoPendiente);
+            
+            // Actualizar porcentaje y barra de progreso
+            document.getElementById('porcentajePago').textContent = porcentaje.toFixed(1) + '%';
+            document.getElementById('barraProgresoPago').style.width = porcentaje + '%';
+            
+            // Cambiar colores según el saldo
+            const colorClass = saldoPendiente > 0 ? 'text-red-600' : 
+                              saldoPendiente === 0 ? 'text-green-600' : 'text-blue-600';
+            
+            saldoElement.className = 'text-lg font-bold ' + colorClass;
+            saldoResumenElement.className = 'font-bold text-lg ' + colorClass;
+            
+            // Cambiar color de la barra de progreso
+            const barraElement = document.getElementById('barraProgresoPago');
+            if (porcentaje >= 100) {
+                barraElement.className = 'bg-green-600 h-2 rounded-full transition-all duration-300';
+            } else if (porcentaje >= 50) {
+                barraElement.className = 'bg-yellow-500 h-2 rounded-full transition-all duration-300';
+            } else {
+                barraElement.className = 'bg-red-500 h-2 rounded-full transition-all duration-300';
+            }
+        }
 
         function cargarPasajeroExistente(pasajero) {
             pasajeroCount++;
@@ -637,6 +876,31 @@ if (!$reserva) {
             if (!valid) {
                 e.preventDefault();
                 alert('Por favor complete todos los campos obligatorios de los pasajeros');
+                return false;
+            }
+
+            // Validar pagos existentes si hay cambios
+            const pagos = document.querySelectorAll('#pagosContainer div[id^="pago-"]');
+            pagos.forEach(pago => {
+                const montoInput = pago.querySelector('input[name*="[monto]"]');
+                const metodoSelect = pago.querySelector('select[name*="[metodo_pago]"]');
+                const estadoSelect = pago.querySelector('select[name*="[estado_pago]"]');
+                
+                if (montoInput && montoInput.value) {
+                    if (!metodoSelect.value || !estadoSelect.value) {
+                        valid = false;
+                        if (!metodoSelect.value) metodoSelect.classList.add('border-red-500');
+                        if (!estadoSelect.value) estadoSelect.classList.add('border-red-500');
+                    } else {
+                        metodoSelect.classList.remove('border-red-500');
+                        estadoSelect.classList.remove('border-red-500');
+                    }
+                }
+            });
+
+            if (!valid) {
+                e.preventDefault();
+                alert('Por favor complete todos los campos obligatorios de los pagos');
                 return false;
             }
         });
