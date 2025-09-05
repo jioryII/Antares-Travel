@@ -2,9 +2,6 @@
 // reserva.php
 session_start();
 require_once 'config/conexion.php';
-require '../vendor/autoload.php'; // Para Dompdf
-
-use Dompdf\Dompdf;
 
 if (!isset($_SESSION['user_email'])) {
     header("Location: ../auth/login.php");
@@ -91,66 +88,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             for ($i = 0; $i < $num_pasajeros; $i++) {
                 $nacionalidad = $nacionalidades[$i] ?? '';
                 $telefono = $telefonos[$i] ?? '';
+                // Agregar código de país automáticamente si es Perú y no tiene prefijo
+                if (strtolower($nacionalidad) === 'peru' || strtolower($nacionalidad) === 'perú') {
+                    $telefono = preg_replace('/[^0-9]/', '', $telefono);
+                    if (strlen($telefono) === 9 && !str_starts_with($telefono, '51')) {
+                        $telefono = '+51' . $telefono;
+                    } elseif (!str_starts_with($telefono, '+')) {
+                        $telefono = '+' . $telefono;
+                    }
+                }
                 $stmt->bind_param("issssss", $id_reserva, $nombres[$i], $apellidos[$i], $dnis[$i], $nacionalidad, $telefono, $tipos[$i]);
                 $stmt->execute();
             }
 
             $conn->commit();
 
-            // Generar PDF
-            $pasajeros_html = '<table><tr><th>Nombre Completo</th><th>DNI/Pasaporte</th><th>Nacionalidad</th><th>Teléfono</th><th>Tipo</th></tr>';
-            for ($i = 0; $i < $num_pasajeros; $i++) {
-                $nombre_completo = htmlspecialchars($nombres[$i] . ' ' . $apellidos[$i]);
-                $pasajeros_html .= '<tr><td>' . $nombre_completo . '</td><td>' . htmlspecialchars($dnis[$i]) . '</td><td>' . htmlspecialchars($nacionalidades[$i] ?? '') . '</td><td>' . htmlspecialchars($telefonos[$i] ?? '') . '</td><td>' . htmlspecialchars($tipos[$i]) . '</td></tr>';
-            }
-            $pasajeros_html .= '</table>';
-
-            $html = '
-            <html>
-            <head>
-                <style>
-                    body { font-family: Arial, sans-serif; }
-                    h1 { color: #A27741; }
-                    table { width: 100%; border-collapse: collapse; }
-                    th, td { border: 1px solid #ddd; padding: 8px; }
-                    th { background-color: #f2f2f2; }
-                </style>
-            </head>
-            <body>
-                <h1>Boleta de Reserva - Antares Travel Peru</h1>
-                <p>ID Reserva: ' . $id_reserva . '</p>
-                <p>Usuario: ' . htmlspecialchars($user_name) . '</p>
-                <p>Tour: ' . htmlspecialchars($tour_titulo) . '</p>
-                <p>Fecha: ' . $fecha_tour . '</p>
-                <p>Monto Total: S/ ' . $monto_total . '</p>
-                
-                <h2>Pasajeros</h2>
-                ' . $pasajeros_html . '
-                
-                <p>Observaciones: ' . htmlspecialchars($observaciones) . '</p>
-            </body>
-            </html>';
-
-            $dompdf = new Dompdf();
-            $dompdf->loadHtml($html);
-            $dompdf->setPaper('A4', 'portrait');
-            $dompdf->render();
-
-            $pdf_output = $dompdf->output();
-            $pdf_filename = 'reserva_' . $id_reserva . '.pdf';
-            $pdf_path = '../uploads/boletas/' . $pdf_filename;
-
-            // Crear directorio si no existe
-            if (!file_exists('../uploads/boletas/')) {
-                mkdir('../uploads/boletas/', 0777, true);
-            }
-
-            file_put_contents($pdf_path, $pdf_output);
-
-            $pdf_url = 'http://' . $_SERVER['HTTP_HOST'] . '/uploads/boletas/' . $pdf_filename; // Ajustar a tu dominio
+            $boleta_url = 'http://' . $_SERVER['HTTP_HOST'] . '/boleta.php?id_reserva=' . $id_reserva;
 
             if ($is_whatsapp) {
-                // Preparar número de WhatsApp del primer pasajero (asumiendo Perú: +51)
+                // Preparar número de WhatsApp del primer pasajero
                 $telefono_ws = preg_replace('/[^0-9]/', '', $telefonos[0] ?? ''); // Limpiar
                 if (strlen($telefono_ws) == 9) { // Número peruano típico
                     $telefono_ws = '51' . $telefono_ws;
@@ -162,13 +118,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 // Mensaje para "guardar" en su propio WhatsApp
                 $nombre_ws = $nombres[0] ?? '';
                 $apellido_ws = $apellidos[0] ?? '';
-                $message = urlencode("Boleta de reserva para $nombre_ws $apellido_ws: $pdf_url");
+                $message = urlencode("Boleta de reserva para $nombre_ws $apellido_ws: $boleta_url");
                 $wa_url = "https://wa.me/$telefono_ws?text=$message";
                 header("Location: $wa_url");
                 exit;
             } else {
-                // Descargar PDF
-                $dompdf->stream($pdf_filename, ["Attachment" => true]);
+                // Redirigir a la página de boleta
+                header("Location: boleta.php?id_reserva=" . $id_reserva);
                 exit;
             }
         } catch (Exception $e) {
@@ -220,7 +176,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             overflow-x: hidden;
         }
 
-        /* Navigation */
         .navbar {
             position: fixed;
             top: 0;
@@ -379,7 +334,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             cursor: pointer;
         }
 
-        /* Google Sign-in Popover */
         .google-signin-container {
             position: fixed;
             top: 80px;
@@ -408,7 +362,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             color: var(--text-light);
         }
 
-        /* Mobile Menu */
         .mobile-menu {
             display: none;
             flex-direction: column;
@@ -460,7 +413,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             margin-top: 1rem;
         }
 
-        /* Sections */
         .section {
             padding: 80px 0;
         }
@@ -541,7 +493,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             border-radius: 5px;
         }
 
-        /* Footer */
         .footer {
             background: var(--primary-dark);
             color: var(--white);
@@ -612,7 +563,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             color: rgba(255, 255, 255, 0.6);
         }
 
-        /* Responsive Design */
         @media (max-width: 768px) {
             .nav-links {
                 display: none;
@@ -735,8 +685,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <input type="text" name="nacionalidad[]">
                         </div>
                         <div>
-                            <label for="telefono[]">Teléfono (para WhatsApp, ingrese con +51 si es Perú):</label>
-                            <input type="text" name="telefono[]" placeholder="+51 999999999">
+                            <label for="telefono[]">Teléfono (ingrese sin código de país si es Perú, se agregará +51 automáticamente si nacionalidad es Perú):</label>
+                            <input type="text" name="telefono[]" placeholder="999999999">
                         </div>
                         <div>
                             <label for="tipo[]">Tipo de Pasajero:</label>
@@ -756,8 +706,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <textarea name="observaciones" id="observaciones"></textarea>
                 </div>
 
-                <button type="submit" class="btn btn-primary">Reservar y Descargar PDF</button>
-                <button type="submit" name="whatsapp" value="1" class="btn btn-secondary">Reservar y Guardar en WhatsApp</button>
+                <button type="submit" class="btn btn-primary">Reservar y Ver Boleta</button>
+                <button type="submit" name="whatsapp" value="1" class="btn btn-secondary">Reservar y Enviar por WhatsApp</button>
             </form>
         </div>
     </section>
@@ -837,7 +787,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         }
 
-        // Close mobile menu when clicking outside
         document.addEventListener('click', function(event) {
             const mobileNav = document.getElementById('mobileNav');
             const mobileMenu = document.querySelector('.mobile-menu');
@@ -857,7 +806,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             const newPasajero = pasajerosDiv.firstElementChild.cloneNode(true);
             newPasajero.querySelector('h4').textContent = `Pasajero ${pasajeroCount}`;
             newPasajero.querySelector('.remove-pasajero').style.display = 'block';
-            // Limpiar valores
             const inputs = newPasajero.querySelectorAll('input');
             inputs.forEach(input => input.value = '');
             const select = newPasajero.querySelector('select');
@@ -868,7 +816,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         function removePasajero(button) {
             const pasajeroDiv = button.parentElement;
             pasajeroDiv.remove();
-            // Reenumerar
             const pasajeros = document.querySelectorAll('.pasajero');
             pasajeros.forEach((p, index) => {
                 p.querySelector('h4').textContent = `Pasajero ${index + 1}`;
