@@ -33,7 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['email'])) {
         }
 
         $nombre = $usuario['nombre'];
-        $link = "https://jiory.opalstacked.com/Antares-Travel/src/auth/verificar_email.php?token=" . $token;
+        $link = "https://antarestravelperu.com/src/auth/verificar_email.php?token=" . $token;
         $resultado = enviarCorreoVerificacion($email, $nombre, $link);
 
         if ($resultado === true) {

@@ -36,8 +36,8 @@ if (!empty($token)) {
             $_SESSION['user_email']   = $row['email'];
             $_SESSION['user_name']    = $row['nombre'];
             $_SESSION['user_picture'] = isset($row['avatar_url']) && $row['avatar_url'] 
-                ? "https://jiory.opalstacked.com/Antares-Travel/" . $row['avatar_url'] 
-                : "https://jiory.opalstacked.com/Antares-Travel/uploads/avatars/default.png";
+                ? "https://antarestravelperu.com/" . $row['avatar_url'] 
+                : "https://antarestravelperu.com/uploads/avatars/default.png";
 
             header("Location: ./../../index.php");
             exit;
