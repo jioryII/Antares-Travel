@@ -132,7 +132,7 @@ function getEstadoIcon($estado) {
     <div class="flex">
         <?php include '../../components/sidebar.php'; ?>
         
-        <!-- Contenido principal -->
+        <!-- Contenido principal none -->
         <div class="flex-1 lg:ml-64 pt-16 lg:pt-0 min-h-screen">
             <div class="p-4 lg:p-8">
                 <!-- Encabezado -->
