@@ -13,20 +13,31 @@ function isActiveRoute($route) {
     return $current_page === $route;
 }
 
-// Función para generar URL relativa desde la ubicación actual
-function getRelativeUrl($target) {
-    $current_path = $_SERVER['REQUEST_URI'];
+// Función simplificada para generar URLs relativas independientes del proyecto
+function getAdminUrl($path) {
+    // Determinar el nivel de profundidad desde components/
+    $currentPath = $_SERVER['REQUEST_URI'];
     
-    // Si estamos en la raíz del admin
-    if (strpos($current_path, '/pages/') === false) {
-        return $target;
+    // Si estamos en components/ (este archivo), necesitamos subir un nivel
+    if (strpos($currentPath, '/components/') !== false) {
+        $baseLevel = '../';
+    }
+    // Si estamos en pages/ o subcarpetas, necesitamos subir al nivel admin
+    else if (strpos($currentPath, '/pages/') !== false) {
+        // Contar niveles de subcarpetas en pages
+        $pathAfterPages = substr($currentPath, strpos($currentPath, '/pages/') + 7);
+        $depth = substr_count($pathAfterPages, '/');
+        $baseLevel = str_repeat('../', $depth + 1);
+    }
+    // Si estamos en admin/ directamente
+    else {
+        $baseLevel = './';
     }
     
-    // Si estamos en una subcarpeta de pages
-    $depth = substr_count(str_replace('/src/admin/', '', $current_path), '/');
-    $prefix = str_repeat('../', $depth - 1);
+    // Limpiar path inicial
+    $cleanPath = ltrim($path, './');
     
-    return $prefix . $target;
+    return $baseLevel . $cleanPath;
 }
 ?>
 
@@ -42,9 +53,11 @@ function getRelativeUrl($target) {
         <div class="relative flex items-center group cursor-pointer hover:scale-105 transition-transform duration-300">
             <!-- Logo con animación -->
             <div class="w-12 h-12 lg:w-12 lg:h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mr-3 lg:mr-3 shadow-lg group-hover:shadow-blue-500/25 transition-all duration-300 overflow-hidden">
-                <img src="/Antares-Travel/imagenes/antares_logo.png" 
+                <img src="<?php echo getAdminUrl('../../imagenes/antares_logo.png'); ?>" 
                      alt="Antares Travel Logo" 
-                     class="w-10 h-10 lg:w-10 lg:h-10 object-contain group-hover:scale-110 transition-transform duration-300 filter brightness-0 invert">
+                     class="w-10 h-10 lg:w-10 lg:h-10 object-contain group-hover:scale-110 transition-transform duration-300 filter brightness-0 invert"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <i class="fas fa-map-marked-alt text-white text-lg" style="display: none;"></i>
             </div>
             
             <!-- Texto del logo -->
@@ -67,7 +80,7 @@ function getRelativeUrl($target) {
     <!-- Navegación -->
     <nav class="flex-1 px-3 lg:px-4 py-3 lg:py-4 space-y-2 lg:space-y-1 overflow-y-auto custom-scrollbar min-h-0">
         <!-- Dashboard -->
-        <a href="<?php echo getRelativeUrl('../pages/dashboard/'); ?>" 
+        <a href="<?php echo getAdminUrl('pages/dashboard/'); ?>" 
            class="<?php echo isActiveRoute('dashboard') ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg scale-105' : 'text-gray-300 hover:bg-gray-800/70 hover:text-white'; ?> group flex items-center px-4 lg:px-4 py-3 lg:py-2.5 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-md">
             <div class="<?php echo isActiveRoute('dashboard') ? 'bg-white/20' : 'bg-gray-700/50 group-hover:bg-blue-600/50'; ?> p-2 lg:p-2 rounded-lg mr-4 lg:mr-3 transition-all duration-300 flex-shrink-0">
                 <i class="fas fa-tachometer-alt w-4 h-4 lg:w-4 lg:h-4 text-center"></i>
@@ -91,7 +104,7 @@ function getRelativeUrl($target) {
                 <i class="fas fa-map-marked-alt text-blue-400/60 text-sm lg:text-xs"></i>
             </div>
             
-            <a href="<?php echo getRelativeUrl('../pages/tours/'); ?>" 
+            <a href="<?php echo getAdminUrl('pages/tours/'); ?>" 
                class="<?php echo isActiveRoute('tours') && !isActiveRoute('tours_diarios') ? 'bg-gradient-to-r from-blue-600/80 to-blue-700/80 text-white shadow-md' : 'text-gray-300 hover:bg-gray-800/50 hover:text-blue-200'; ?> group flex items-center px-4 lg:px-4 py-3 lg:py-2 rounded-lg transition-all duration-300 hover:translate-x-1">
                 <div class="<?php echo isActiveRoute('tours') && !isActiveRoute('tours_diarios') ? 'bg-white/20' : 'bg-gray-700/50 group-hover:bg-blue-600/50'; ?> p-2 lg:p-1.5 rounded-lg mr-4 lg:mr-3 transition-all duration-300 flex-shrink-0">
                     <i class="fas fa-map-marked-alt text-sm lg:text-sm"></i>
@@ -99,7 +112,7 @@ function getRelativeUrl($target) {
                 <span class="text-base lg:text-sm font-medium">Gestión de Tours</span>
             </a>
             
-            <a href="<?php echo getRelativeUrl('../pages/tours/tours_diarios.php'); ?>" 
+            <a href="<?php echo getAdminUrl('pages/tours/tours_diarios.php'); ?>" 
                class="<?php echo isActiveRoute('tours_diarios') ? 'bg-gradient-to-r from-green-600/80 to-green-700/80 text-white shadow-md' : 'text-gray-300 hover:bg-gray-800/50 hover:text-green-200'; ?> group flex items-center px-4 lg:px-4 py-3 lg:py-2 rounded-lg transition-all duration-300 hover:translate-x-1">
                 <div class="<?php echo isActiveRoute('tours_diarios') ? 'bg-white/20' : 'bg-gray-700/50 group-hover:bg-green-600/50'; ?> p-2 lg:p-1.5 rounded-lg mr-4 lg:mr-3 transition-all duration-300 flex-shrink-0">
                     <i class="fas fa-calendar-day text-sm lg:text-sm"></i>
@@ -112,7 +125,7 @@ function getRelativeUrl($target) {
         <div class="h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent my-3 lg:my-3"></div>
 
         <!-- Reservas -->
-        <a href="<?php echo getRelativeUrl('../pages/reservas/'); ?>" 
+        <a href="<?php echo getAdminUrl('pages/reservas/'); ?>" 
            class="<?php echo isActiveRoute('reservas') ? 'bg-gradient-to-r from-purple-600/80 to-purple-700/80 text-white shadow-md' : 'text-gray-300 hover:bg-gray-800/50 hover:text-purple-200'; ?> group flex items-center px-4 lg:px-4 py-3 lg:py-2 rounded-lg transition-all duration-300 hover:translate-x-1">
             <div class="<?php echo isActiveRoute('reservas') ? 'bg-white/20' : 'bg-gray-700/50 group-hover:bg-purple-600/50'; ?> p-2 lg:p-1.5 rounded-lg mr-4 lg:mr-3 transition-all duration-300 flex-shrink-0">
                 <i class="fas fa-calendar-check text-sm lg:text-sm"></i>
@@ -121,7 +134,7 @@ function getRelativeUrl($target) {
         </a>
 
         <!-- Usuarios -->
-        <a href="<?php echo getRelativeUrl('../pages/usuarios/'); ?>" 
+        <a href="<?php echo getAdminUrl('pages/usuarios/'); ?>" 
            class="<?php echo isActiveRoute('usuarios') ? 'bg-gradient-to-r from-indigo-600/80 to-indigo-700/80 text-white shadow-md' : 'text-gray-300 hover:bg-gray-800/50 hover:text-indigo-200'; ?> group flex items-center px-4 lg:px-4 py-3 lg:py-2 rounded-lg transition-all duration-300 hover:translate-x-1">
             <div class="<?php echo isActiveRoute('usuarios') ? 'bg-white/20' : 'bg-gray-700/50 group-hover:bg-indigo-600/50'; ?> p-2 lg:p-1.5 rounded-lg mr-4 lg:mr-3 transition-all duration-300 flex-shrink-0">
                 <i class="fas fa-users text-sm lg:text-sm"></i>
@@ -140,7 +153,7 @@ function getRelativeUrl($target) {
                 <i class="fas fa-user-tie text-orange-400/60 text-sm lg:text-xs"></i>
             </div>
             
-            <a href="<?php echo getRelativeUrl('../pages/guias/'); ?>" 
+            <a href="<?php echo getAdminUrl('pages/guias/'); ?>" 
                class="<?php echo isActiveRoute('guias') ? 'bg-gradient-to-r from-orange-600/80 to-orange-700/80 text-white shadow-md' : 'text-gray-300 hover:bg-gray-800/50 hover:text-orange-200'; ?> group flex items-center px-4 lg:px-4 py-3 lg:py-2 rounded-lg transition-all duration-300 hover:translate-x-1">
                 <div class="<?php echo isActiveRoute('guias') ? 'bg-white/20' : 'bg-gray-700/50 group-hover:bg-orange-600/50'; ?> p-2 lg:p-1.5 rounded-lg mr-4 lg:mr-3 transition-all duration-300 flex-shrink-0">
                     <i class="fas fa-user-tie text-sm lg:text-sm"></i>
@@ -148,7 +161,7 @@ function getRelativeUrl($target) {
                 <span class="text-base lg:text-sm font-medium">Guías</span>
             </a>
             
-            <a href="<?php echo getRelativeUrl('../pages/choferes/'); ?>" 
+            <a href="<?php echo getAdminUrl('pages/choferes/'); ?>" 
                class="<?php echo isActiveRoute('choferes') ? 'bg-gradient-to-r from-amber-600/80 to-amber-700/80 text-white shadow-md' : 'text-gray-300 hover:bg-gray-800/50 hover:text-amber-200'; ?> group flex items-center px-4 lg:px-4 py-3 lg:py-2 rounded-lg transition-all duration-300 hover:translate-x-1">
                 <div class="<?php echo isActiveRoute('choferes') ? 'bg-white/20' : 'bg-gray-700/50 group-hover:bg-amber-600/50'; ?> p-2 lg:p-1.5 rounded-lg mr-4 lg:mr-3 transition-all duration-300 flex-shrink-0">
                     <i class="fas fa-user-cog text-sm lg:text-sm"></i>
@@ -156,7 +169,7 @@ function getRelativeUrl($target) {
                 <span class="text-base lg:text-sm font-medium">Choferes</span>
             </a>
             
-            <a href="<?php echo getRelativeUrl('../pages/vehiculos/'); ?>" 
+            <a href="<?php echo getAdminUrl('pages/vehiculos/'); ?>" 
                class="<?php echo isActiveRoute('vehiculos') ? 'bg-gradient-to-r from-teal-600/80 to-teal-700/80 text-white shadow-md' : 'text-gray-300 hover:bg-gray-800/50 hover:text-teal-200'; ?> group flex items-center px-4 lg:px-4 py-3 lg:py-2 rounded-lg transition-all duration-300 hover:translate-x-1">
                 <div class="<?php echo isActiveRoute('vehiculos') ? 'bg-white/20' : 'bg-gray-700/50 group-hover:bg-teal-600/50'; ?> p-2 lg:p-1.5 rounded-lg mr-4 lg:mr-3 transition-all duration-300 flex-shrink-0">
                     <i class="fas fa-bus text-sm lg:text-sm"></i>

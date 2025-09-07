@@ -15,34 +15,28 @@ $admin = obtenerAdminActual();
 
         <!-- Logo y título corporativo -->
         <div class="flex items-center">
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center shadow-sm">
                     <i class="fas fa-map-marked-alt text-white text-lg"></i>
                 </div>
-                <div class="hidden sm:block">
+                <!-- Título completo para desktop -->
+                <div class="hidden lg:block">
                     <h1 class="text-xl font-light text-gray-900 tracking-tight">
                         Antares Travel
                     </h1>
                     <p class="text-sm text-gray-600 font-medium">Sistema de Administración</p>
                 </div>
-                <div class="sm:hidden">
-                    <h1 class="text-lg font-semibold text-gray-900">AT</h1>
+                <!-- Título simplificado para móvil y tablet -->
+                <div class="lg:hidden">
+                    <h1 class="text-lg font-semibold text-gray-900">Antares Travel</h1>
                 </div>
             </div>
         </div>
 
         <!-- Panel de usuario profesional -->
         <div class="flex items-center space-x-3 lg:space-x-4">
-            <!-- Indicador de notificaciones -->
-            <div class="relative">
-                <button class="p-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all duration-200 relative">
-                    <i class="fas fa-bell text-lg"></i>
-                    <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium shadow-sm">3</span>
-                </button>
-            </div>
-
-            <!-- Información del administrador -->
-            <div class="flex items-center space-x-3 bg-gray-50 rounded-lg px-4 py-2.5 border border-gray-200 hover:border-gray-300 transition-all duration-200">
+            <!-- Información del administrador - Completa para desktop -->
+            <div class="hidden lg:flex items-center space-x-3 bg-gray-50 rounded-lg px-4 py-2.5 border border-gray-200 hover:border-gray-300 transition-all duration-200">
                 <div class="flex items-center space-x-3">
                     <div class="relative">
                         <div class="w-9 h-9 bg-slate-900 rounded-lg flex items-center justify-center shadow-sm">
@@ -50,7 +44,7 @@ $admin = obtenerAdminActual();
                         </div>
                         <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
                     </div>
-                    <div class="hidden lg:block">
+                    <div>
                         <p class="text-sm font-semibold text-gray-900"><?php echo htmlspecialchars($admin['nombre']); ?></p>
                         <div class="flex items-center space-x-1">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
@@ -61,13 +55,13 @@ $admin = obtenerAdminActual();
                     </div>
                 </div>
 
-                <!-- Menú desplegable corporativo -->
-                <div class="relative" id="userDropdown">
-                    <button onclick="toggleDropdown()" class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all duration-200">
+                <!-- Menú desplegable para desktop -->
+                <div class="relative" id="userDropdownDesktop">
+                    <button onclick="toggleDropdown('Desktop')" class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all duration-200">
                         <i class="fas fa-chevron-down text-sm"></i>
                     </button>
                     
-                    <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg ring-1 ring-gray-200 z-50 border border-gray-100 overflow-hidden">
+                    <div id="dropdownMenuDesktop" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg ring-1 ring-gray-200 z-50 border border-gray-100 overflow-hidden">
                         <div class="bg-gray-50 px-4 py-4 border-b border-gray-200">
                             <div class="flex items-center space-x-3">
                                 <div class="w-12 h-12 bg-slate-900 rounded-lg flex items-center justify-center shadow-sm">
@@ -121,15 +115,89 @@ $admin = obtenerAdminActual();
                     </div>
                 </div>
             </div>
+
+            <!-- Avatar simple para móvil -->
+            <div class="lg:hidden relative" id="userDropdownMobile">
+                <button onclick="toggleDropdown('Mobile')" class="relative p-1 focus:outline-none">
+                    <div class="w-9 h-9 bg-slate-900 rounded-lg flex items-center justify-center shadow-sm hover:shadow-md transition-all duration-200">
+                        <i class="fas fa-user text-white text-sm"></i>
+                    </div>
+                    <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                </button>
+                
+                <div id="dropdownMenuMobile" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg ring-1 ring-gray-200 z-50 border border-gray-100 overflow-hidden">
+                    <div class="bg-gray-50 px-4 py-4 border-b border-gray-200">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 bg-slate-900 rounded-lg flex items-center justify-center shadow-sm">
+                                <i class="fas fa-user text-white"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-900 text-sm"><?php echo htmlspecialchars($admin['nombre']); ?></p>
+                                <p class="text-xs text-gray-600"><?php echo htmlspecialchars($admin['email'] ?? 'admin@antares.com'); ?></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="py-1">
+                        <a href="../mi_perfil/index.php" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors group">
+                            <div class="w-8 h-8 bg-gray-100 group-hover:bg-gray-200 rounded-lg flex items-center justify-center mr-3 transition-colors">
+                                <i class="fas fa-user-circle text-gray-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium">Mi Perfil</p>
+                                <p class="text-xs text-gray-500">Configuración personal</p>
+                            </div>
+                        </a>
+                        <a href="../soporte/settings.php" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors group">
+                            <div class="w-8 h-8 bg-gray-100 group-hover:bg-gray-200 rounded-lg flex items-center justify-center mr-3 transition-colors">
+                                <i class="fas fa-cog text-gray-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium">Configuración</p>
+                                <p class="text-xs text-gray-500">Ajustes del sistema</p>
+                            </div>
+                        </a>
+                        <a href="../soporte/manual_usuario.php" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors group">
+                            <div class="w-8 h-8 bg-gray-100 group-hover:bg-gray-200 rounded-lg flex items-center justify-center mr-3 transition-colors">
+                                <i class="fas fa-book text-gray-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium">Manual de Usuario</p>
+                                <p class="text-xs text-gray-500">Documentación</p>
+                            </div>
+                        </a>
+                        <div class="border-t border-gray-200 my-1"></div>
+                        <a href="../../auth/logout.php" class="flex items-center px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors group">
+                            <div class="w-8 h-8 bg-red-50 group-hover:bg-red-100 rounded-lg flex items-center justify-center mr-3 transition-colors">
+                                <i class="fas fa-sign-out-alt text-red-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium">Cerrar Sesión</p>
+                                <p class="text-xs text-red-500">Salir del sistema</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </header>
 
 <script>
 // Función para alternar el dropdown del usuario
-function toggleDropdown() {
-    const dropdown = document.getElementById('dropdownMenu');
+function toggleDropdown(device = '') {
+    const dropdown = document.getElementById(`dropdownMenu${device}`);
     const isHidden = dropdown.classList.contains('hidden');
+    
+    // Cerrar el otro dropdown si está abierto
+    const otherDevice = device === 'Mobile' ? 'Desktop' : 'Mobile';
+    const otherDropdown = document.getElementById(`dropdownMenu${otherDevice}`);
+    if (otherDropdown && !otherDropdown.classList.contains('hidden')) {
+        otherDropdown.style.transform = 'translateY(-8px)';
+        otherDropdown.style.opacity = '0';
+        setTimeout(() => {
+            otherDropdown.classList.add('hidden');
+        }, 150);
+    }
     
     if (isHidden) {
         dropdown.classList.remove('hidden');
@@ -148,17 +216,29 @@ function toggleDropdown() {
 
 // Cerrar dropdown al hacer clic fuera
 document.addEventListener('click', function(event) {
-    const dropdown = document.getElementById('userDropdown');
-    const menu = document.getElementById('dropdownMenu');
+    const dropdownDesktop = document.getElementById('userDropdownDesktop');
+    const dropdownMobile = document.getElementById('userDropdownMobile');
+    const menuDesktop = document.getElementById('dropdownMenuDesktop');
+    const menuMobile = document.getElementById('dropdownMenuMobile');
     
-    if (!dropdown.contains(event.target)) {
-        if (!menu.classList.contains('hidden')) {
-            menu.style.transform = 'translateY(-8px)';
-            menu.style.opacity = '0';
-            setTimeout(() => {
-                menu.classList.add('hidden');
-            }, 150);
-        }
+    // Verificar si el clic fue fuera de ambos dropdowns
+    const isOutsideDesktop = dropdownDesktop && !dropdownDesktop.contains(event.target);
+    const isOutsideMobile = dropdownMobile && !dropdownMobile.contains(event.target);
+    
+    if (isOutsideDesktop && menuDesktop && !menuDesktop.classList.contains('hidden')) {
+        menuDesktop.style.transform = 'translateY(-8px)';
+        menuDesktop.style.opacity = '0';
+        setTimeout(() => {
+            menuDesktop.classList.add('hidden');
+        }, 150);
+    }
+    
+    if (isOutsideMobile && menuMobile && !menuMobile.classList.contains('hidden')) {
+        menuMobile.style.transform = 'translateY(-8px)';
+        menuMobile.style.opacity = '0';
+        setTimeout(() => {
+            menuMobile.classList.add('hidden');
+        }, 150);
     }
 });
 
@@ -168,13 +248,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebarOverlay');
     
-    // Configurar estilos iniciales del dropdown
-    const dropdownMenu = document.getElementById('dropdownMenu');
-    if (dropdownMenu) {
-        dropdownMenu.style.transform = 'translateY(-8px)';
-        dropdownMenu.style.opacity = '0';
-        dropdownMenu.style.transition = 'all 0.15s ease-in-out';
-    }
+    // Configurar estilos iniciales de los dropdowns
+    const dropdownMenuDesktop = document.getElementById('dropdownMenuDesktop');
+    const dropdownMenuMobile = document.getElementById('dropdownMenuMobile');
+    
+    [dropdownMenuDesktop, dropdownMenuMobile].forEach(dropdown => {
+        if (dropdown) {
+            dropdown.style.transform = 'translateY(-8px)';
+            dropdown.style.opacity = '0';
+            dropdown.style.transition = 'all 0.15s ease-in-out';
+        }
+    });
     
     // Agregar estilos elegantes al header
     const header = document.querySelector('header');
