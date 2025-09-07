@@ -1,9 +1,16 @@
 <?php
 session_start();
 
+// Función para generar URLs absolutas desde la raíz del dominio
+function getAdminUrl($path) {
+    // Generar URL absoluta desde la raíz del dominio
+    $cleanPath = ltrim($path, './');
+    return '/src/admin/' . $cleanPath;
+}
+
 // Si ya está logueado, redirigir al dashboard
 if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
-    header('Location: ../pages/dashboard');
+    header('Location: ' . getAdminUrl('pages/dashboard/'));
     exit();
 }
 
@@ -22,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     } else {
         $resultado = autenticarAdmin($email, $password);
         if ($resultado['success']) {
-            header('Location: ../pages/dashboard');
+            header('Location: ' . getAdminUrl('pages/dashboard/'));
             exit();
         } else {
             $error = $resultado['message'];
