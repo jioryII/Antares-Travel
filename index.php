@@ -1392,7 +1392,7 @@ if (isset($_GET['logout'])) {
     <footer class="footer" id="contacto">
         <div class="container">
             <div class="footer-content">
-                <div class="footer-section">
+                <div class="footer-section"> 
                     <h3><?php echo $lang['footer_about_title']; ?></h3>
                     <p><?php echo $lang['footer_about_text']; ?></p>
                     <div class="social-links">
@@ -1429,7 +1429,7 @@ if (isset($_GET['logout'])) {
                 <div class="footer-section">
                     <h3><?php echo $lang['footer_legal_title']; ?></h3>
                     <ul>
-                        <li>RUC: 20XXXXXXXXX</li>
+                        <li>RUC: 20XXXXXXXX</li>
                         <li><?php echo $lang['footer_legal_license']; ?>: XXXX-XXXX</li>
                         <li><a href="#"><?php echo $lang['footer_legal_terms']; ?></a></li>
                         <li><a href="#"><?php echo $lang['footer_legal_privacy']; ?></a></li>
