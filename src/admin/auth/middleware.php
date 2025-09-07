@@ -10,14 +10,14 @@ function verificarSesionAdmin() {
     // Verificar si existe sesión de admin
     if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
         // Redirigir a login
-        header('Location: ' . '/Antares-Travel/src/admin/auth/login.php');
+        header('Location: /src/admin/auth/login.php');
         exit();
     }
     
     // Verificar rol de admin
     if (!isset($_SESSION['admin_rol']) || $_SESSION['admin_rol'] !== 'admin') {
         // Sin permisos suficientes
-        header('Location: ' . '/Antares-Travel/src/admin/auth/login.php?error=insufficient_permissions');
+        header('Location: /src/admin/auth/login.php?error=insufficient_permissions');
         exit();
     }
     
