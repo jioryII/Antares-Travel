@@ -4,7 +4,7 @@ session_start();
 require_once 'config/conexion.php';
 
 if (!isset($_SESSION['user_email'])) {
-    header("Location: ../auth/login.php");
+    header("Location: auth/login.php");
     exit;
 }
 
