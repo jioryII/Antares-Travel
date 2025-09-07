@@ -1,5 +1,13 @@
 <?php
 session_start();
+
+if (isset($_GET['lang']) && ($_GET['lang'] == 'es' || $_GET['lang'] == 'en')) {
+    $_SESSION['lang'] = $_GET['lang'];
+}
+
+$current_lang = isset($_SESSION['lang']) ? $_SESSION['lang'] : 'es';
+require_once __DIR__ . '/src/languages/' . $current_lang . '.php';
+
 require_once __DIR__ . '/src/funtions/google_auth.php';
 
 $client = getGoogleClient();
@@ -23,16 +31,15 @@ if (isset($_GET['logout'])) {
 ?>
 
 <!DOCTYPE html>
-<html lang="es">
+<html lang="<?php echo $current_lang; ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Antares Travel Peru - Descubre el Mundo</title>
+    <title><?php echo $lang['page_title']; ?></title>
     <link rel="icon" type="image/png" href="imagenes/antares_logozz3.png">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
     <style>
         :root {
             --primary-bg: #FFFAF0;
@@ -61,7 +68,6 @@ if (isset($_GET['logout'])) {
             overflow-x: hidden;
         }
 
-        /* Navigation */
         .navbar {
             position: fixed;
             top: 0;
@@ -142,7 +148,7 @@ if (isset($_GET['logout'])) {
 
         .lang-btn {
             padding: 0.5rem 1rem;
-            border: none;
+            text-decoration: none;
             background: transparent;
             color: var(--primary-color);
             cursor: pointer;
@@ -220,7 +226,6 @@ if (isset($_GET['logout'])) {
             cursor: pointer;
         }
 
-        /* Google Sign-in Popover */
         .google-signin-container {
             position: fixed;
             top: 80px;
@@ -249,7 +254,6 @@ if (isset($_GET['logout'])) {
             color: var(--text-light);
         }
 
-        /* Mobile Menu */
         .mobile-menu {
             display: none;
             flex-direction: column;
@@ -301,7 +305,6 @@ if (isset($_GET['logout'])) {
             margin-top: 1rem;
         }
 
-        /* Hero Section */
         .hero {
             position: relative;
             height: 100vh;
@@ -396,7 +399,6 @@ if (isset($_GET['logout'])) {
             background: var(--white);
         }
 
-        /* Sections */
         .section {
             padding: 80px 0;
         }
@@ -431,7 +433,6 @@ if (isset($_GET['logout'])) {
             margin: 0 auto;
         }
 
-        /* Tours Section */
         .tours-section {
             background: var(--primary-bg);
         }
@@ -536,7 +537,6 @@ if (isset($_GET['logout'])) {
             text-align: center;
         }
 
-        /* Guías Section */
         .guias-section {
             background: var(--white);
         }
@@ -603,7 +603,6 @@ if (isset($_GET['logout'])) {
             color: #ffd700;
         }
 
-        /* Experiencias Section */
         .experiencias-section {
             background: var(--primary-bg);
         }
@@ -740,7 +739,6 @@ if (isset($_GET['logout'])) {
             right: 10px;
         }
 
-        /* Add Experiencia Form */
         .add-experiencia {
             max-width: 600px;
             margin: 40px auto 0;
@@ -773,7 +771,6 @@ if (isset($_GET['logout'])) {
             margin-bottom: 10px;
         }
 
-        /* Footer */
         .footer {
             background: var(--primary-dark);
             color: var(--white);
@@ -844,7 +841,6 @@ if (isset($_GET['logout'])) {
             color: rgba(255, 255, 255, 0.6);
         }
 
-        /* Animations */
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -865,7 +861,6 @@ if (isset($_GET['logout'])) {
             animation: fadeIn 0.8s ease-out;
         }
 
-        /* Responsive Design */
         @media (max-width: 768px) {
             .nav-links {
                 display: none;
@@ -949,7 +944,6 @@ if (isset($_GET['logout'])) {
             }
         }
 
-        /* Loading Animation */
         .loading {
             display: inline-block;
             width: 20px;
@@ -963,15 +957,6 @@ if (isset($_GET['logout'])) {
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-
-        /* Google Translate Styling */
-        .goog-te-gadget {
-            font-size: 0;
-        }
-
-        .goog-te-combo {
-            display: none !important;
-        }
     </style>
 </head>
 <body>
@@ -980,7 +965,6 @@ if (isset($_GET['logout'])) {
     
     $is_logged_in = isset($_SESSION['user_email']);
     
-    // Obtener tours desde la base de datos
     $tours_query = "SELECT t.*, r.nombre_region, g.nombre as guia_nombre 
                     FROM tours t 
                     LEFT JOIN regiones r ON t.id_region = r.id_region 
@@ -991,7 +975,6 @@ if (isset($_GET['logout'])) {
         die("Error executing query: " . $conn->error);
     }
     
-    // Obtener guías desde la base de datos
     $guias_query = "SELECT g.*, 
                     (SELECT AVG(c.calificacion) FROM calificaciones_guias c WHERE c.id_guia = g.id_guia) as rating_promedio,
                     (SELECT COUNT(*) FROM calificaciones_guias c WHERE c.id_guia = g.id_guia) as total_calificaciones,
@@ -1005,11 +988,9 @@ if (isset($_GET['logout'])) {
         die("Error executing guides query: " . mysqli_error($conn));
     }
     
-    // Obtener idiomas
     $idiomas_query = "SELECT * FROM idiomas ORDER BY nombre_idioma";
     $idiomas_result = $conn->query($idiomas_query);
     
-    // Obtener experiencias (fotos y comentarios)
     $experiencias_query = "SELECT e.*, u.nombre, u.avatar_url 
                           FROM experiencias e 
                           LEFT JOIN usuarios u ON e.id_usuario = u.id_usuario 
@@ -1028,30 +1009,27 @@ if (isset($_GET['logout'])) {
                 ANTARES TRAVEL PERU
             </a>
             <ul class="nav-links">
-                <li><a href="#inicio">Inicio</a></li>
-                <li><a href="#tours">Tours</a></li>
-                <li><a href="#guias">Guías</a></li>
-                <li><a href="#experiencias">Experiencias</a></li>
-                <li><a href="#reservas">Reservas</a></li>
+                <li><a href="#inicio"><?php echo $lang['nav_home']; ?></a></li>
+                <li><a href="#tours"><?php echo $lang['nav_tours']; ?></a></li>
+                <li><a href="#guias"><?php echo $lang['nav_guides']; ?></a></li>
+                <li><a href="#experiencias"><?php echo $lang['nav_experiences']; ?></a></li>
+                <li><a href="#reservas"><?php echo $lang['nav_reservations']; ?></a></li>
             </ul>
             <div class="auth-buttons">
                 <div class="lang-switch">
-                    <button class="lang-btn active" data-lang="es">ES</button>
-                    <button class="lang-btn" data-lang="en">EN</button>
-                    <button class="lang-btn" data-lang="fr">FR</button>
+                    <a href="?lang=es" class="lang-btn <?php if ($current_lang == 'es') echo 'active'; ?>"><?php echo $lang['lang_es']; ?></a>
+                    <a href="?lang=en" class="lang-btn <?php if ($current_lang == 'en') echo 'active'; ?>"><?php echo $lang['lang_en']; ?></a>
                 </div>
                 <?php if (!$is_logged_in): ?>
                     <a href="src/auth/login.php" class="btn btn-secondary">
-                        <i class="fas fa-user"></i> Iniciar Sesión
+                        <i class="fas fa-user"></i> <?php echo $lang['login_button']; ?>
                     </a>
-                    <a href="src/auth/register.php" class="btn btn-primary">
-                        <i class="fas fa-user-plus"></i> Registrarse
-                    </a>
+
                 <?php else: ?>
                     <div class="user-profile">
                         <img src="<?php echo htmlspecialchars($_SESSION['user_picture'] ?? 'imagenes/default-avatar.png'); ?>" alt="Avatar">
                         <span><?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
-                        <a href="index.php?logout=1" class="logout-btn">
+                        <a href="index.php?logout=1" class="logout-btn" title="<?php echo $lang['logout_button']; ?>">
                             <i class="fas fa-sign-out-alt"></i>
                         </a>
                     </div>
@@ -1066,30 +1044,29 @@ if (isset($_GET['logout'])) {
     </nav>
 
     <div class="mobile-nav" id="mobileNav">
-        <a href="#inicio">Inicio</a>
-        <a href="#tours">Tours</a>
-        <a href="#guias">Guías</a>
-        <a href="#experiencias">Experiencias</a>
-        <a href="#reservas">Reservas</a>
+        <a href="#inicio"><?php echo $lang['nav_home']; ?></a>
+        <a href="#tours"><?php echo $lang['nav_tours']; ?></a>
+        <a href="#guias"><?php echo $lang['nav_guides']; ?></a>
+        <a href="#experiencias"><?php echo $lang['nav_experiences']; ?></a>
+        <a href="#reservas"><?php echo $lang['nav_reservations']; ?></a>
         <div class="mobile-auth-buttons">
             <div class="lang-switch">
-                <button class="lang-btn active" data-lang="es">ES</button>
-                <button class="lang-btn" data-lang="en">EN</button>
-                <button class="lang-btn" data-lang="fr">FR</button>
+                <a href="?lang=es" class="lang-btn <?php if ($current_lang == 'es') echo 'active'; ?>"><?php echo $lang['lang_es']; ?></a>
+                <a href="?lang=en" class="lang-btn <?php if ($current_lang == 'en') echo 'active'; ?>"><?php echo $lang['lang_en']; ?></a>
             </div>
             <?php if (!$is_logged_in): ?>
-                <button class="btn btn-primary" onclick="toggleGoogleSignin()">Iniciar con Google</button>
+                <button class="btn btn-primary" onclick="toggleGoogleSignin()"><?php echo $lang['login_with_google']; ?></button>
                 <a href="src/auth/login.php" class="btn btn-secondary">
-                    <i class="fas fa-user"></i> Iniciar Sesión
+                    <i class="fas fa-user"></i> <?php echo $lang['login_button']; ?>
                 </a>
                 <a href="src/auth/register.php" class="btn btn-primary">
-                    <i class="fas fa-user-plus"></i> Registrarse
+                    <i class="fas fa-user-plus"></i> <?php echo $lang['register_button']; ?>
                 </a>
             <?php else: ?>
                 <div class="user-profile">
                     <img src="<?php echo htmlspecialchars($_SESSION['user_picture'] ?? 'imagenes/default-avatar.png'); ?>" alt="Avatar">
                     <span><?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
-                    <a href="index.php?logout=1" class="logout-btn">
+                    <a href="index.php?logout=1" class="logout-btn" title="<?php echo $lang['logout_button']; ?>">
                         <i class="fas fa-sign-out-alt"></i>
                     </a>
                 </div>
@@ -1118,14 +1095,14 @@ if (isset($_GET['logout'])) {
         <div class="hero-bg"></div>
         <div class="container">
             <div class="hero-content">
-                <h1>Descubre el Mundo con Antares Travel Peru</h1>
-                <p>Experiencias únicas que transforman tu forma de viajar. Desde aventuras épicas hasta escapadas relajantes, creamos momentos inolvidables en los destinos más extraordinarios del mundo.</p>
+                <h1><?php echo $lang['hero_title']; ?></h1>
+                <p><?php echo $lang['hero_subtitle']; ?></p>
                 <div class="hero-buttons">
                     <a href="#tours" class="btn btn-primary">
-                        <i class="fas fa-compass"></i><span>Explorar Tours</span>
+                        <i class="fas fa-compass"></i><span><?php echo $lang['hero_button_explore']; ?></span>
                     </a>
-                    <a href="src/reserva.php" class="btn btn-secondary">
-                        <i class="fas fa-calendar-alt"></i><span>Reservar Ahora</span>
+                    <a href="src/reserva.php" class="btn btn-primary" style="background: #F8F3E9; color: var(--primary-color);">
+                        <i class="fas fa-calendar-alt"></i><span><?php echo $lang['hero_button_book']; ?></span>
                     </a>
                 </div>
             </div>
@@ -1142,15 +1119,15 @@ if (isset($_GET['logout'])) {
     <section id="tours" class="section tours-section">
         <div class="container">
             <div class="section-header fade-in">
-                <h2 class="section-title">Nuestros Tours</h2>
-                <p class="section-subtitle">Descubre nuestras experiencias únicas en Cusco y sus alrededores</p>
+                <h2 class="section-title"><?php echo $lang['tours_section_title']; ?></h2>
+                <p class="section-subtitle"><?php echo $lang['tours_section_subtitle']; ?></p>
             </div>
 
             <div class="tour-categories">
-                <button class="category-btn active" onclick="filterTours('all')">Todos los Tours</button>
-                <button class="category-btn" onclick="filterTours('cusco')">Cusco y Valle Sagrado</button>
-                <button class="category-btn" onclick="filterTours('aventura')">Aventura</button>
-                <button class="category-btn" onclick="filterTours('multi-day')">Tours Multi-día</button>
+                <button class="category-btn active" onclick="filterTours('all')"><?php echo $lang['tours_cat_all']; ?></button>
+                <button class="category-btn" onclick="filterTours('cusco')"><?php echo $lang['tours_cat_cusco']; ?></button>
+                <button class="category-btn" onclick="filterTours('aventura')"><?php echo $lang['tours_cat_adventure']; ?></button>
+                <button class="category-btn" onclick="filterTours('multi-day')"><?php echo $lang['tours_cat_multiday']; ?></button>
             </div>
 
             <div class="tours-container" id="toursContainer">
@@ -1183,9 +1160,9 @@ if (isset($_GET['logout'])) {
                             <div class="tour-image" style="background-image: url('<?php echo $tour['imagen_principal'] ?: $imagen_url; ?>')"></div>
                             <div class="tour-header">
                                 <h3 class="tour-title"><?php echo htmlspecialchars($tour['titulo']); ?></h3>
-                                <div class="tour-schedule"><?php echo htmlspecialchars($tour['duracion'] ?: 'Consultar horarios'); ?></div>
+                                <div class="tour-schedule"><?php echo htmlspecialchars($tour['duracion'] ?: $lang['tour_card_duration']); ?></div>
                                 <?php if ($tour['guia_nombre']): ?>
-                                    <div class="tour-guide">Guía: <?php echo htmlspecialchars($tour['guia_nombre']); ?></div>
+                                    <div class="tour-guide"><?php echo $lang['tour_card_guide']; ?>: <?php echo htmlspecialchars($tour['guia_nombre']); ?></div>
                                 <?php endif; ?>
                             </div>
                             <div class="tour-content">
@@ -1197,17 +1174,17 @@ if (isset($_GET['logout'])) {
                                 
                                 <div class="tour-details">
                                     <?php if ($tour['lugar_salida']): ?>
-                                        <div><i class="fas fa-map-marker-alt"></i> Salida: <?php echo htmlspecialchars($tour['lugar_salida']); ?></div>
+                                        <div><i class="fas fa-map-marker-alt"></i> <?php echo $lang['tour_card_departure']; ?>: <?php echo htmlspecialchars($tour['lugar_salida']); ?></div>
                                     <?php endif; ?>
                                     <?php if ($tour['hora_salida']): ?>
-                                        <div><i class="fas fa-clock"></i> Hora: <?php echo date('H:i', strtotime($tour['hora_salida'])); ?></div>
+                                        <div><i class="fas fa-clock"></i> <?php echo $lang['tour_card_time']; ?>: <?php echo date('H:i', strtotime($tour['hora_salida'])); ?></div>
                                     <?php endif; ?>
                                 </div>
 
                                 
                                 <div class="tour-actions">
                                     <a href="src/reserva.php" class="btn btn-primary">
-                                        <i class="fas fa-calendar-plus"></i> Reservar
+                                        <i class="fas fa-calendar-plus"></i> <?php echo $lang['tour_card_book']; ?>
                                     </a>
                                 </div>
                             </div>
@@ -1215,7 +1192,7 @@ if (isset($_GET['logout'])) {
                     <?php endwhile; ?>
                 <?php else: ?>
                     <div class="no-tours">
-                        <p>No hay tours disponibles en este momento.</p>
+                        <p><?php echo $lang['no_tours_available']; ?></p>
                     </div>
                 <?php endif; ?>
             </div>
@@ -1225,23 +1202,23 @@ if (isset($_GET['logout'])) {
     <section id="guias" class="section guias-section">
         <div class="container">
             <div class="section-header fade-in">
-                <h2 class="section-title">Nuestros Guías Expertos</h2>
-                <p class="section-subtitle">Conoce a nuestro equipo de guías profesionales, expertos locales que harán de tu experiencia algo memorable</p>
+                <h2 class="section-title"><?php echo $lang['guides_section_title']; ?></h2>
+                <p class="section-subtitle"><?php echo $lang['guides_section_subtitle']; ?></p>
             </div>
 
             <div class="guias-filters">
                 <select id="sortRating" onchange="filterGuias()">
-                    <option value="">Ordenar por recomendación</option>
-                    <option value="asc">Menos recomendado a más</option>
-                    <option value="desc">Más recomendado a menos</option>
+                    <option value=""><?php echo $lang['guides_filter_sort']; ?></option>
+                    <option value="asc"><?php echo $lang['guides_filter_sort_asc']; ?></option>
+                    <option value="desc"><?php echo $lang['guides_filter_sort_desc']; ?></option>
                 </select>
                 <select id="filterStatus" onchange="filterGuias()">
-                    <option value="">Todos los estados</option>
-                    <option value="libre">Libre</option>
-                    <option value="ocupado">Ocupado</option>
+                    <option value=""><?php echo $lang['guides_filter_status']; ?></option>
+                    <option value="libre"><?php echo $lang['guides_filter_status_free']; ?></option>
+                    <option value="ocupado"><?php echo $lang['guides_filter_status_busy']; ?></option>
                 </select>
                 <select id="filterLanguage" onchange="filterGuias()">
-                    <option value="">Todos los idiomas</option>
+                    <option value=""><?php echo $lang['guides_filter_language']; ?></option>
                     <?php if ($idiomas_result): ?>
                         <?php while($idioma = $idiomas_result->fetch_assoc()): ?>
                             <option value="<?php echo $idioma['id_idioma']; ?>"><?php echo htmlspecialchars($idioma['nombre_idioma']); ?></option>
@@ -1269,7 +1246,7 @@ if (isset($_GET['logout'])) {
                                 ?>
                                     <i class="fas fa-star <?php echo $i <= $rating ? 'star' : ''; ?>"></i>
                                 <?php endfor; ?>
-                                <span>(<?php echo $total_reviews; ?> reseñas)</span>
+                                <span>(<?php echo $total_reviews; ?> <?php echo $lang['guide_card_reviews']; ?>)</span>
                             </div>
                             
                             <?php if ($guia['experiencia']): ?>
@@ -1291,7 +1268,7 @@ if (isset($_GET['logout'])) {
                     <?php endwhile; ?>
                 <?php else: ?>
                     <div class="no-guides">
-                        <p>No hay guías disponibles en este momento.</p>
+                        <p><?php echo $lang['no_guides_available']; ?></p>
                     </div>
                 <?php endif; ?>
             </div>
@@ -1301,20 +1278,22 @@ if (isset($_GET['logout'])) {
     <section id="experiencias" class="section experiencias-section">
         <div class="container">
             <div class="section-header fade-in">
-                <h2 class="section-title">Experiencias de Nuestros Viajeros</h2>
-                <p class="section-subtitle">Descubre las increíbles experiencias y momentos únicos que han vivido nuestros clientes</p>
+                <h2 class="section-title"><?php echo $lang['experiences_section_title']; ?></h2>
+                <p class="section-subtitle"><?php echo $lang['experiences_section_subtitle']; ?></p>
             </div>
 
-            <h3 style="text-align: center; color: var(--primary-color); margin-bottom: 20px;">Galería de Fotos</h3>
+            <h3 style="text-align: center; color: var(--primary-color); margin-bottom: 20px;"><?php echo $lang['experiences_gallery_title']; ?></h3>
             <div class="photos-mural">
                 <?php 
-                $experiencias_result->data_seek(0);
+                if ($experiencias_result) $experiencias_result->data_seek(0);
                 $photos = [];
-                while ($experiencia = $experiencias_result->fetch_assoc()): 
-                    if ($experiencia['imagen_url']):
-                        $photos[] = $experiencia;
-                    endif;
-                endwhile;
+                if($experiencias_result) {
+                    while ($experiencia = $experiencias_result->fetch_assoc()): 
+                        if ($experiencia['imagen_url']):
+                            $photos[] = $experiencia;
+                        endif;
+                    endwhile;
+                }
                 ?>
                 
                 <?php if (!empty($photos)): ?>
@@ -1324,27 +1303,29 @@ if (isset($_GET['logout'])) {
                             <div class="photo-info">
                                 <img src="<?php echo htmlspecialchars($photo['avatar_url'] ?: 'imagenes/default-avatar.png'); ?>" 
                                     alt="Usuario" class="small-avatar">
-                                <span><?php echo htmlspecialchars($photo['nombre'] ?: 'Anónimo'); ?></span>
+                                <span><?php echo htmlspecialchars($photo['nombre'] ?: $lang['experiences_anonymous']); ?></span>
                                 <span><?php echo date('d/m/Y', strtotime($photo['fecha_publicacion'])); ?></span>
                             </div>
                         </div>
                     <?php endforeach; ?>
                 <?php else: ?>
-                    <p style="text-align: center; color: var(--text-light);">Próximamente más fotos de nuestros viajeros</p>
+                    <p style="text-align: center; color: var(--text-light);"><?php echo $lang['experiences_photos_soon']; ?></p>
                 <?php endif; ?>
             </div>
 
             <div class="carousel-container">
-                <h3 style="text-align: center; color: var(--primary-color); margin-bottom: 20px;">Comentarios y Testimonios</h3>
+                <h3 style="text-align: center; color: var(--primary-color); margin-bottom: 20px;"><?php echo $lang['experiences_comments_title']; ?></h3>
                 <div class="carousel" id="commentsCarousel">
                     <?php 
-                    $experiencias_result->data_seek(0);
+                    if ($experiencias_result) $experiencias_result->data_seek(0);
                     $comments = [];
-                    while ($experiencia = $experiencias_result->fetch_assoc()): 
-                        if ($experiencia['comentario']):
-                            $comments[] = $experiencia;
-                        endif;
-                    endwhile;
+                    if($experiencias_result) {
+                        while ($experiencia = $experiencias_result->fetch_assoc()): 
+                            if ($experiencia['comentario']):
+                                $comments[] = $experiencia;
+                            endif;
+                        endwhile;
+                    }
                     ?>
                     
                     <?php if (!empty($comments)): ?>
@@ -1356,7 +1337,7 @@ if (isset($_GET['logout'])) {
                                             <img src="<?php echo htmlspecialchars($comment['avatar_url'] ?: 'imagenes/default-avatar.png'); ?>" 
                                                  alt="Usuario" class="experiencia-avatar">
                                             <div>
-                                                <div class="experiencia-name"><?php echo htmlspecialchars($comment['nombre'] ?: 'Usuario Anónimo'); ?></div>
+                                                <div class="experiencia-name"><?php echo htmlspecialchars($comment['nombre'] ?: $lang['experiences_anonymous_user']); ?></div>
                                                 <div class="experiencia-date"><?php echo date('d/m/Y', strtotime($comment['fecha_publicacion'])); ?></div>
                                             </div>
                                         </div>
@@ -1372,7 +1353,7 @@ if (isset($_GET['logout'])) {
                             <div class="experiencia-card">
                                 <div class="experiencia-content" style="padding: 30px; text-align: center;">
                                     <p style="color: var(--text-light); font-size: 1rem;">
-                                        Próximamente testimonios de nuestros viajeros. ¡Sé el primero en compartir tu experiencia!
+                                        <?php echo $lang['experiences_comments_soon']; ?>
                                     </p>
                                 </div>
                             </div>
@@ -1391,16 +1372,16 @@ if (isset($_GET['logout'])) {
             </div>
 
             <div class="add-experiencia">
-                <button onclick="toggleExperienciaForm()" class="btn btn-primary">Agregar Experiencia</button>
+                <button onclick="toggleExperienciaForm()" class="btn btn-primary"><?php echo $lang['add_experience_button']; ?></button>
                 <div id="experienciaFormContainer" style="display: none;">
                     <?php if (!$is_logged_in): ?>
-                        <p>Debes iniciar sesión para agregar una experiencia.</p>
-                        <a href="src/auth/login.php" class="btn btn-secondary">Iniciar Sesión</a>
+                        <p><?php echo $lang['add_experience_login_prompt']; ?></p>
+                        <a href="src/auth/login.php" class="btn btn-secondary"><?php echo $lang['login_button']; ?></a>
                     <?php else: ?>
                         <form action="src/add_experiencia.php" method="POST" enctype="multipart/form-data">
-                            <textarea name="comentario" placeholder="Escribe tu comentario..." required></textarea>
+                            <textarea name="comentario" placeholder="<?php echo $lang['add_experience_placeholder']; ?>" required></textarea>
                             <input type="file" name="foto" accept="image/*">
-                            <button type="submit" class="btn btn-primary">Publicar</button>
+                            <button type="submit" class="btn btn-primary"><?php echo $lang['add_experience_publish']; ?></button>
                         </form>
                     <?php endif; ?>
                 </div>
@@ -1412,8 +1393,8 @@ if (isset($_GET['logout'])) {
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <h3>Antares Travel Peru</h3>
-                    <p>Somos una empresa especializada en turismo receptivo en la ciudad del Cusco, con más de 10 años de experiencia brindando servicios de calidad y experiencias inolvidables a nuestros viajeros.</p>
+                    <h3><?php echo $lang['footer_about_title']; ?></h3>
+                    <p><?php echo $lang['footer_about_text']; ?></p>
                     <div class="social-links">
                         <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
                         <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
@@ -1423,9 +1404,9 @@ if (isset($_GET['logout'])) {
                 </div>
                 
                 <div class="footer-section">
-                    <h3>Contacto</h3>
+                    <h3><?php echo $lang['footer_contact_title']; ?></h3>
                     <ul>
-                        <li><i class="fas fa-map-marker-alt"></i> Calle Triunfo 392, Cusco - Perú</li>
+                        <li><i class="fas fa-map-marker-alt"></i> <?php echo $lang['footer_contact_address']; ?></li>
                         <li><i class="fas fa-phone"></i> +51 966 217 821</li>
                         <li><i class="fas fa-phone"></i> +51 958 940 100</li>
                         <li><i class="fas fa-envelope"></i> antares.travel.cusco@gmail.com</li>
@@ -1434,66 +1415,49 @@ if (isset($_GET['logout'])) {
                 </div>
                 
                 <div class="footer-section">
-                    <h3>Servicios</h3>
+                    <h3><?php echo $lang['footer_services_title']; ?></h3>
                     <ul>
-                        <li><a href="#tours">Tours en Cusco</a></li>
-                        <li><a href="#tours">Valle Sagrado</a></li>
-                        <li><a href="#tours">Machu Picchu</a></li>
-                        <li><a href="#tours">Tours de Aventura</a></li>
-                        <li><a href="#guias">Guías Profesionales</a></li>
-                        <li><a href="#tours">Transporte Turístico</a></li>
+                        <li><a href="#tours"><?php echo $lang['footer_service_cusco']; ?></a></li>
+                        <li><a href="#tours"><?php echo $lang['footer_service_sacred_valley']; ?></a></li>
+                        <li><a href="#tours"><?php echo $lang['footer_service_machu_picchu']; ?></a></li>
+                        <li><a href="#tours"><?php echo $lang['footer_service_adventure']; ?></a></li>
+                        <li><a href="#guias"><?php echo $lang['footer_service_guides']; ?></a></li>
+                        <li><a href="#tours"><?php echo $lang['footer_service_transport']; ?></a></li>
                     </ul>
                 </div>
                 
                 <div class="footer-section">
-                    <h3>Información Legal</h3>
+                    <h3><?php echo $lang['footer_legal_title']; ?></h3>
                     <ul>
                         <li>RUC: 20XXXXXXXXX</li>
-                        <li>Licencia de Turismo: XXXX-XXXX</li>
-                        <li><a href="#">Términos y Condiciones</a></li>
-                        <li><a href="#">Política de Privacidad</a></li>
-                        <li><a href="#">Política de Cancelación</a></li>
+                        <li><?php echo $lang['footer_legal_license']; ?>: XXXX-XXXX</li>
+                        <li><a href="#"><?php echo $lang['footer_legal_terms']; ?></a></li>
+                        <li><a href="#"><?php echo $lang['footer_legal_privacy']; ?></a></li>
+                        <li><a href="#"><?php echo $lang['footer_legal_cancellation']; ?></a></li>
                     </ul>
                 </div>
             </div>
             
             <div class="footer-bottom">
-                <p>&copy; 2024 Antares Travel Peru. Todos los derechos reservados.</p>
+                <p><?php echo $lang['footer_copyright']; ?></p>
             </div>
         </div>
     </footer>
 
     <script>
-        // Variables globales
         let currentHeroImage = 0;
         let currentCommentIndex = 0;
         const heroImages = document.querySelectorAll('.hero-image');
         const heroIndicators = document.querySelectorAll('.hero-indicator');
 
-        // Inicialización
         document.addEventListener('DOMContentLoaded', function() {
             initializeHeroCarousel();
             initializeScrollAnimations();
-            initializeLanguageSwitch();
             initializeNavbar();
             initializeGoogleSignin();
-            filterGuias(); // Inicializar filtros de guías
+            filterGuias();
         });
 
-        // Google Translate Initialization
-        function googleTranslateElementInit() {
-            new google.translate.TranslateElement({
-                pageLanguage: 'es',
-                includedLanguages: 'en,fr,es',
-                layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
-                autoDisplay: false
-            }, 'google_translate_element');
-            
-            // Hide default Google Translate widget
-            document.querySelector('.goog-te-combo').style.display = 'none';
-        }
-
-        // Hero Carousel
         function initializeHeroCarousel() {
             setInterval(() => {
                 currentHeroImage = (currentHeroImage + 1) % heroImages.length;
@@ -1510,7 +1474,6 @@ if (isset($_GET['logout'])) {
             currentHeroImage = index;
         }
 
-        // Mobile Menu
         function toggleMobileMenu() {
             const mobileNav = document.getElementById('mobileNav');
             const mobileMenu = document.querySelector('.mobile-menu');
@@ -1532,7 +1495,6 @@ if (isset($_GET['logout'])) {
             }
         }
 
-        // Google Sign-in
         function toggleGoogleSignin() {
             const googleSignin = document.getElementById('googleSignin');
             const mobileNav = document.getElementById('mobileNav');
@@ -1546,7 +1508,6 @@ if (isset($_GET['logout'])) {
                 spans[1].style.opacity = '1';
                 spans[2].style.transform = 'none';
                 
-                // Re-renderizar el botón cuando se abre el popup
                 if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
                     setTimeout(() => {
                         try {
@@ -1562,7 +1523,7 @@ if (isset($_GET['logout'])) {
                                 }
                             );
                         } catch (error) {
-                            console.log('🔄 Re-renderizando botón Google...');
+                            console.log('🔄 Re-rendering Google button...');
                         }
                     }, 100);
                 }
@@ -1570,7 +1531,6 @@ if (isset($_GET['logout'])) {
         }
 
         function initializeGoogleSignin() {
-            // Verificar que la librería de Google esté cargada
             if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
                 try {
                     google.accounts.id.initialize({
@@ -1580,7 +1540,6 @@ if (isset($_GET['logout'])) {
                         cancel_on_tap_outside: false
                     });
 
-                    // Renderizar el botón en el contenedor
                     google.accounts.id.renderButton(
                         document.getElementById("g_id_signin"),
                         {
@@ -1593,19 +1552,19 @@ if (isset($_GET['logout'])) {
                         }
                     );
 
-                    console.log('✅ Google One Tap inicializado correctamente');
+                    console.log('✅ Google One Tap initialized successfully');
                 } catch (error) {
-                    console.error('❌ Error inicializando Google One Tap:', error);
+                    console.error('❌ Error initializing Google One Tap:', error);
                 }
             } else {
-                console.log('⏳ Esperando carga de Google Identity Services...');
+                console.log('⏳ Waiting for Google Identity Services to load...');
                 setTimeout(initializeGoogleSignin, 100);
             }
         }
 
         function handleCredentialResponse(response) {
             try {
-                console.log('📨 Credential recibido:', response);
+                console.log('📨 Credential received:', response);
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = '<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>';
@@ -1617,11 +1576,10 @@ if (isset($_GET['logout'])) {
                 document.body.appendChild(form);
                 form.submit();
             } catch (error) {
-                console.error('❌ Error procesando credential:', error);
+                console.error('❌ Error processing credential:', error);
             }
         }
 
-        // Filter Tours
         function filterTours(category) {
             const tourCards = document.querySelectorAll('.tour-card');
             const categoryButtons = document.querySelectorAll('.category-btn');
@@ -1638,7 +1596,6 @@ if (isset($_GET['logout'])) {
             });
         }
 
-        // Filter and Sort Guias
         function filterGuias() {
             const sortRating = document.getElementById('sortRating').value;
             const filterStatus = document.getElementById('filterStatus').value;
@@ -1646,17 +1603,14 @@ if (isset($_GET['logout'])) {
             const container = document.getElementById('guiasContainer');
             let cards = Array.from(document.querySelectorAll('.guia-card'));
 
-            // Filter by status
             if (filterStatus) {
                 cards = cards.filter(card => card.dataset.estado === filterStatus);
             }
 
-            // Filter by language
             if (filterLanguage) {
                 cards = cards.filter(card => card.dataset.idiomas.split(',').includes(filterLanguage));
             }
 
-            // Sort by rating
             if (sortRating) {
                 cards.sort((a, b) => {
                     const ratingA = parseFloat(a.dataset.rating);
@@ -1665,12 +1619,10 @@ if (isset($_GET['logout'])) {
                 });
             }
 
-            // Clear and append sorted/filtered cards
             container.innerHTML = '';
             cards.forEach(card => container.appendChild(card));
         }
 
-        // Carousel for comments
         function moveCarousel(carouselId, direction) {
             const carousel = document.getElementById(carouselId);
             const items = carousel.querySelectorAll('.carousel-item');
@@ -1687,7 +1639,6 @@ if (isset($_GET['logout'])) {
             carousel.style.transform = `translateX(${translateX}%)`;
         }
 
-        // Auto-play comments carousel
         setInterval(() => {
             const commentsCarousel = document.getElementById('commentsCarousel');
             
@@ -1696,13 +1647,11 @@ if (isset($_GET['logout'])) {
             }
         }, 8000);
 
-        // Toggle Experiencia Form
         function toggleExperienciaForm() {
             const formContainer = document.getElementById('experienciaFormContainer');
             formContainer.style.display = formContainer.style.display === 'none' ? 'block' : 'none';
         }
 
-        // Scroll animations
         function initializeScrollAnimations() {
             const observerOptions = {
                 threshold: 0.1,
@@ -1723,29 +1672,6 @@ if (isset($_GET['logout'])) {
             });
         }
 
-        // Language switch
-        function initializeLanguageSwitch() {
-            const langButtons = document.querySelectorAll('.lang-btn');
-            
-            langButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const lang = button.dataset.lang;
-                    switchLanguage(lang);
-                    langButtons.forEach(btn => btn.classList.remove('active'));
-                    button.classList.add('active');
-                });
-            });
-        }
-
-        function switchLanguage(lang) {
-            const translateSelect = document.querySelector('.goog-te-combo');
-            if (translateSelect) {
-                translateSelect.value = lang;
-                translateSelect.dispatchEvent(new Event('change'));
-            }
-        }
-
-        // Navbar scroll effect
         function initializeNavbar() {
             window.addEventListener('scroll', () => {
                 const navbar = document.querySelector('.navbar');
@@ -1759,7 +1685,6 @@ if (isset($_GET['logout'])) {
             });
         }
 
-        // Smooth scrolling
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -1782,7 +1707,6 @@ if (isset($_GET['logout'])) {
             });
         });
 
-        // Close mobile menu and sign-in when clicking outside
         document.addEventListener('click', function(event) {
             const mobileNav = document.getElementById('mobileNav');
             const mobileMenu = document.querySelector('.mobile-menu');
@@ -1801,7 +1725,5 @@ if (isset($_GET['logout'])) {
             }
         });
     </script>
-
-    <div id="google_translate_element" style="display: none;"></div>
 </body>
 </html>
