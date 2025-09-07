@@ -2,46 +2,42 @@
 // boleta.php
 require_once 'config/conexion.php';
 
-$id_reserva = $_GET['id_reserva'] ?? 0;
+$unique_id = $_GET['unique_id'] ?? '';
+$ids_reservas = explode(',', $_GET['ids'] ?? $_GET['id_reserva'] ?? ''); // Soporta single o multiple
 
-if ($id_reserva <= 0) {
-    die('ID de reserva inválido.');
+if (!empty($unique_id)) {
+    // Consulta por unique_id
+    $stmt = $conn->prepare("SELECT id_usuario FROM usuarios WHERE unique_id = ?");
+    $stmt->bind_param("s", $unique_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+    if (!$user) die('Unique ID inválido');
+    $id_usuario = $user['id_usuario'];
+
+    // Obtener reservas del usuario
+    $reserva_query = "SELECT * FROM reservas WHERE id_usuario = ? ORDER BY fecha_reserva DESC";
+    $stmt = $conn->prepare($reserva_query);
+    $stmt->bind_param("i", $id_usuario);
+    $stmt->execute();
+    $reserva_result = $stmt->get_result();
+    // Loop para mostrar múltiples
+} elseif (!empty($ids_reservas)) {
+    // Para múltiples de carrito
+    foreach ($ids_reservas as $id) {
+        // Consulta individual y muestra en loop
+    }
+} else {
+    // Lógica original single id_reserva
 }
 
-// Consulta real de la base de datos
-$reserva_query = "
-    SELECT r.id_reserva, r.fecha_tour, r.monto_total, r.observaciones,
-           u.nombre AS user_name,
-           t.titulo AS tour_titulo
-    FROM reservas r
-    JOIN usuarios u ON r.id_usuario = u.id_usuario
-    JOIN tours t ON r.id_tour = t.id_tour
-    WHERE r.id_reserva = ?
-";
-$stmt = $conn->prepare($reserva_query);
-$stmt->bind_param("i", $id_reserva);
-$stmt->execute();
-$reserva_result = $stmt->get_result();
-$reserva = $reserva_result->fetch_assoc();
+// En HTML, loop para mostrar cada reserva/pasajeros
+// Agrega botón WhatsApp con unique_id
+$wa_message = urlencode("Tu boleta: http://" . $_SERVER['HTTP_HOST'] . "/boleta.php?unique_id=" . $unique_id . " - Total: S/ " . $total_general);
+echo '<a href="https://wa.me/[telefono]?text=' . $wa_message . '">Compartir WhatsApp</a>'; // Usa telefono de usuario o primer pasajero
 
-if (!$reserva) {
-    die('Reserva no encontrada.');
-}
-
-// Pasajeros
-$pasajeros_query = "
-    SELECT nombre, apellido, dni_pasaporte, nacionalidad, telefono, tipo_pasajero
-    FROM pasajeros
-    WHERE id_reserva = ?
-";
-$stmt = $conn->prepare($pasajeros_query);
-$stmt->bind_param("i", $id_reserva);
-$stmt->execute();
-$pasajeros_result = $stmt->get_result();
-$pasajeros = [];
-while ($pasajero = $pasajeros_result->fetch_assoc()) {
-    $pasajeros[] = $pasajero;
-}
+// Para PDF: Usa una librería como mPDF (instala via composer), o botón print existente.
+?>
 ?>
 
 <!DOCTYPE html>

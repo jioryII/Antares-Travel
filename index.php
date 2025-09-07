@@ -1034,6 +1034,16 @@ if (isset($_GET['logout'])) {
                         </a>
                     </div>
                 <?php endif; ?>
+
+                <?php if (isset($_SESSION['user_email'])): ?>
+                    <?php 
+                    $cart_count = isset($_SESSION['cart']['total_paquetes']) ? $_SESSION['cart']['total_paquetes'] : 0;
+                    ?>
+                    <a href="carrito.php" id="cart-icon" class="btn btn-secondary" style="position: relative;">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span id="cart-count" style="position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 12px;"><?php echo $cart_count; ?></span>
+                    </a>
+                <?php endif; ?>
             </div>
             <div class="mobile-menu" onclick="toggleMobileMenu()">
                 <span></span>
@@ -1097,14 +1107,17 @@ if (isset($_GET['logout'])) {
             <div class="hero-content">
                 <h1><?php echo $lang['hero_title']; ?></h1>
                 <p><?php echo $lang['hero_subtitle']; ?></p>
-                <div class="hero-buttons">
-                    <a href="#tours" class="btn btn-primary">
-                        <i class="fas fa-compass"></i><span><?php echo $lang['hero_button_explore']; ?></span>
-                    </a>
-                    <a href="src/reserva.php" class="btn btn-primary" style="background: #F8F3E9; color: var(--primary-color);">
-                        <i class="fas fa-calendar-alt"></i><span><?php echo $lang['hero_button_book']; ?></span>
-                    </a>
-                </div>
+                <div class="tour-actions">
+                        <?php if (isset($_SESSION['user_email'])): ?>
+                            <button class="btn btn-primary add-to-cart" data-id="<?php echo $tour['id_tour']; ?>" data-titulo="<?php echo htmlspecialchars($tour['titulo']); ?>" data-precio="<?php echo $tour['precio']; ?>">
+                                <i class="fas fa-shopping-cart"></i> Agregar al Carrito
+                            </button>
+                        <?php else: ?>
+                            <a href="src/auth/login.php" class="btn btn-primary">
+                                <i class="fas fa-calendar-plus"></i> Inicia Sesión para Reservar
+                            </a>
+                        <?php endif; ?>
+                    </div>
             </div>
         </div>
         <div class="hero-indicators">
@@ -1724,6 +1737,49 @@ if (isset($_GET['logout'])) {
                 googleSignin.classList.remove('active');
             }
         });
+
+        // Manejo del carrito con AJAX
+document.addEventListener('DOMContentLoaded', function() {
+    const addButtons = document.querySelectorAll('.add-to-cart');
+    addButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            if (!<?php echo isset($_SESSION['user_email']) ? 'true' : 'false'; ?>) {
+                alert('Debes iniciar sesión para agregar al carrito.');
+                window.location.href = 'src/auth/login.php';
+                return;
+            }
+
+            const idTour = this.dataset.id;
+            const titulo = this.dataset.titulo;
+            const precio = parseFloat(this.dataset.precio);
+
+            // AJAX para agregar
+            fetch('agregar_carrito.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `id_tour=${idTour}&titulo=${encodeURIComponent(titulo)}&precio=${precio}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Actualizar contador
+                    document.getElementById('cart-count').textContent = data.total_paquetes;
+                    // Notificación
+                    alert('Tour agregado al carrito!');
+                    // Opcional: Animación en botón
+                    this.style.background = 'green';
+                    setTimeout(() => { this.style.background = ''; }, 1000);
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al agregar al carrito.');
+            });
+        });
+    });
+});
     </script>
 </body>
 </html>
