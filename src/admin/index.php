@@ -9,12 +9,12 @@ function redirectToDashboard() {
     // Verificar si ya estamos en el dashboard para evitar bucles infinitos
     $currentPath = $_SERVER['REQUEST_URI'];
     
-    if (strpos($currentPath, 'dashboard.php') === false) {
-        // URL del dashboard
-        $dashboardUrl = 'pages/dashboard';
+    if (strpos($currentPath, 'dashboard') === false) {
+        // URL absoluta del dashboard desde la raíz del dominio
+        $dashboardUrl = '/src/admin/pages/dashboard/';
         
-        // Verificar que el archivo del dashboard existe
-        if (file_exists($dashboardUrl)) {
+        // Verificar que el directorio del dashboard existe
+        if (is_dir(__DIR__ . '/pages/dashboard')) {
             // Redirección con código 302 (redirección temporal)
             header("Location: $dashboardUrl", true, 302);
             exit();
