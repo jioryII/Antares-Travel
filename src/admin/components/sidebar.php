@@ -23,7 +23,7 @@ function getRelativeUrl($target) {
     }
     
     // Si estamos en una subcarpeta de pages
-    $depth = substr_count(str_replace('/Antares-Travel/src/admin/', '', $current_path), '/');
+    $depth = substr_count(str_replace('/src/admin/', '', $current_path), '/');
     $prefix = str_repeat('../', $depth - 1);
     
     return $prefix . $target;
