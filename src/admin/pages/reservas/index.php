@@ -129,6 +129,72 @@ function getEstadoClass($estado) {
         .reservation-card:hover {
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
+        
+        /* Estilos para móviles */
+        @media (max-width: 768px) {
+            .desktop-table {
+                display: none;
+            }
+            .mobile-cards {
+                display: block;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .filter-form {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            .filter-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+            .filter-actions button,
+            .filter-actions a {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .desktop-table {
+                display: block;
+            }
+            .mobile-cards {
+                display: none;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            .filter-form {
+                flex-direction: row;
+                gap: 1rem;
+            }
+            .filter-actions {
+                flex-direction: row;
+                gap: 0.5rem;
+            }
+        }
+        
+        .mobile-card {
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .mobile-card:hover {
+            box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.15);
+            transform: translateY(-1px);
+        }
+        
+        .status-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -154,15 +220,12 @@ function getEstadoClass($estado) {
                             <a href="crear.php" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                                 <i class="fas fa-plus mr-2"></i>Nueva Reserva
                             </a>
-                            <button onclick="exportarReservas()" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                                <i class="fas fa-download mr-2"></i>Exportar
-                            </button>
                         </div>
                     </div>
                 </div>
 
                 <!-- Estadísticas Rápidas -->
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6">
+                <div class="stats-grid grid gap-3 lg:gap-6 mb-6">
                     <?php 
                     $total_todas = array_sum(array_column($estadisticas, 'cantidad'));
                     $stats_display = [
@@ -188,14 +251,14 @@ function getEstadoClass($estado) {
                         $is_active = ($filtro_estado === $estado) || ($estado === 'Todas' && empty($filtro_estado));
                     ?>
                         <a href="?estado=<?php echo $estado === 'Todas' ? '' : $estado; ?><?php echo $busqueda ? "&buscar=$busqueda" : ''; ?><?php echo $filtro_fecha ? "&fecha=$filtro_fecha" : ''; ?>" 
-                           class="status-filter block bg-white rounded-lg shadow p-4 transition-all duration-200 <?php echo $is_active ? "ring-2 ring-$color-500" : 'hover:shadow-md'; ?>">
+                           class="status-filter block bg-white rounded-lg shadow p-3 lg:p-4 transition-all duration-200 <?php echo $is_active ? "ring-2 ring-$color-500" : 'hover:shadow-md'; ?>">
                             <div class="flex items-center">
                                 <div class="p-2 bg-<?php echo $color; ?>-100 rounded-lg">
-                                    <i class="fas fa-calendar-check text-<?php echo $color; ?>-600 text-lg"></i>
+                                    <i class="fas fa-calendar-check text-<?php echo $color; ?>-600 text-sm lg:text-lg"></i>
                                 </div>
-                                <div class="ml-3">
+                                <div class="ml-2 lg:ml-3">
                                     <p class="text-xs text-gray-600"><?php echo $estado; ?></p>
-                                    <p class="text-lg font-bold text-gray-900"><?php echo number_format($cantidad); ?></p>
+                                    <p class="text-base lg:text-lg font-bold text-gray-900"><?php echo number_format($cantidad); ?></p>
                                 </div>
                             </div>
                         </a>
@@ -204,23 +267,23 @@ function getEstadoClass($estado) {
 
                 <!-- Filtros y Búsqueda -->
                 <div class="bg-white rounded-lg shadow mb-6 p-4">
-                    <form method="GET" class="flex flex-col lg:flex-row gap-4">
+                    <form method="GET" class="filter-form flex gap-4">
                         <div class="flex-1">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
                             <div class="relative">
                                 <input type="text" name="buscar" value="<?php echo htmlspecialchars($busqueda); ?>" 
-                                       placeholder="Buscar por cliente, email o tour..." 
-                                       class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                       placeholder="Cliente, email o tour..." 
+                                       class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center">
                                     <i class="fas fa-search text-gray-400"></i>
                                 </div>
                             </div>
                         </div>
                         
-                        <div>
+                        <div class="lg:min-w-0 lg:w-auto w-full">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-                            <select name="estado" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <option value="">Todos los estados</option>
+                            <select name="estado" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                                <option value="">Todos</option>
                                 <option value="Pendiente" <?php echo $filtro_estado === 'Pendiente' ? 'selected' : ''; ?>>Pendiente</option>
                                 <option value="Confirmada" <?php echo $filtro_estado === 'Confirmada' ? 'selected' : ''; ?>>Confirmada</option>
                                 <option value="Cancelada" <?php echo $filtro_estado === 'Cancelada' ? 'selected' : ''; ?>>Cancelada</option>
@@ -228,25 +291,25 @@ function getEstadoClass($estado) {
                             </select>
                         </div>
                         
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha del Tour</label>
+                        <div class="lg:min-w-0 lg:w-auto w-full">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
                             <input type="date" name="fecha" value="<?php echo htmlspecialchars($filtro_fecha); ?>"
-                                   class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
                         </div>
                         
-                        <div class="flex items-end gap-2">
-                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        <div class="filter-actions flex items-end gap-2">
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
                                 <i class="fas fa-filter mr-1"></i>Filtrar
                             </button>
-                            <a href="index.php" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors">
+                            <a href="index.php" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors text-sm">
                                 <i class="fas fa-times mr-1"></i>Limpiar
                             </a>
                         </div>
                     </form>
                 </div>
 
-                <!-- Tabla de Reservas -->
-                <div class="bg-white rounded-lg shadow overflow-hidden">
+                <!-- Tabla de Reservas - Vista Desktop -->
+                <div class="desktop-table bg-white rounded-lg shadow overflow-hidden">
                     <div class="table-container">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
@@ -355,25 +418,140 @@ function getEstadoClass($estado) {
                             </tbody>
                         </table>
                     </div>
+                </div>
+
+                <!-- Vista Mobile - Tarjetas -->
+                <div class="mobile-cards space-y-4">
+                    <?php if (empty($reservas)): ?>
+                        <div class="bg-white rounded-lg shadow p-6 text-center">
+                            <i class="fas fa-calendar-times text-4xl text-gray-300 mb-4"></i>
+                            <p class="text-lg font-medium text-gray-900 mb-2">No se encontraron reservas</p>
+                            <p class="text-sm text-gray-500">Intenta ajustar los filtros de búsqueda</p>
+                        </div>
+                    <?php else: ?>
+                        <?php foreach ($reservas as $reserva): ?>
+                            <div class="mobile-card bg-white p-4 border border-gray-200">
+                                <!-- Header de la tarjeta -->
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center mr-3">
+                                            <i class="fas fa-user text-white text-sm"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-semibold text-gray-900 text-sm">
+                                                <?php echo htmlspecialchars($reserva['usuario_nombre']); ?>
+                                            </h3>
+                                            <p class="text-xs text-gray-500">#<?php echo $reserva['id_reserva']; ?></p>
+                                        </div>
+                                    </div>
+                                    <span class="status-badge <?php echo getEstadoClass($reserva['estado']); ?>">
+                                        <?php echo $reserva['estado']; ?>
+                                    </span>
+                                </div>
+
+                                <!-- Información del tour -->
+                                <div class="mb-3">
+                                    <p class="font-medium text-gray-900 text-sm mb-1">
+                                        <?php echo htmlspecialchars($reserva['tour_titulo']); ?>
+                                    </p>
+                                    <p class="text-xs text-gray-500">
+                                        Fecha: <?php echo formatDate($reserva['fecha_tour']); ?>
+                                    </p>
+                                </div>
+
+                                <!-- Grid de información -->
+                                <div class="grid grid-cols-2 gap-3 mb-4 text-xs">
+                                    <div>
+                                        <span class="text-gray-500">Pasajeros:</span>
+                                        <div class="font-medium text-gray-900 mt-1">
+                                            <i class="fas fa-users text-gray-400 mr-1"></i>
+                                            <?php echo $reserva['num_pasajeros']; ?>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-500">Monto Pagado:</span>
+                                        <div class="font-medium text-green-600 mt-1">
+                                            <?php echo formatCurrency($reserva['monto_pagado']); ?>
+                                        </div>
+                                        <?php if ($reserva['monto_pagado'] > 0 && $reserva['monto_pagado'] < $reserva['monto_total']): ?>
+                                            <div class="text-orange-500 text-xs">
+                                                Pendiente: <?php echo formatCurrency($reserva['monto_total'] - $reserva['monto_pagado']); ?>
+                                            </div>
+                                        <?php elseif ($reserva['monto_pagado'] >= $reserva['monto_total'] && $reserva['monto_total'] > 0): ?>
+                                            <div class="text-green-500 text-xs">✓ Completo</div>
+                                        <?php elseif ($reserva['monto_pagado'] == 0): ?>
+                                            <div class="text-red-500 text-xs">Sin pagos</div>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+
+                                <!-- Contacto -->
+                                <div class="mb-4 p-2 bg-gray-50 rounded-lg">
+                                    <p class="text-xs text-gray-500 mb-1">Contacto:</p>
+                                    <p class="text-xs text-gray-700"><?php echo htmlspecialchars($reserva['usuario_email']); ?></p>
+                                    <?php if (!empty($reserva['usuario_telefono'])): ?>
+                                        <p class="text-xs text-gray-700"><?php echo htmlspecialchars($reserva['usuario_telefono']); ?></p>
+                                    <?php endif; ?>
+                                </div>
+
+                                <!-- Acciones -->
+                                <div class="flex justify-between items-center pt-3 border-t border-gray-100">
+                                    <div class="flex space-x-4">
+                                        <a href="ver.php?id=<?php echo $reserva['id_reserva']; ?>" 
+                                           class="text-blue-600 hover:text-blue-800 transition-colors">
+                                            <i class="fas fa-eye text-sm"></i>
+                                            <span class="ml-1 text-xs">Ver</span>
+                                        </a>
+                                        <a href="editar.php?id=<?php echo $reserva['id_reserva']; ?>" 
+                                           class="text-green-600 hover:text-green-800 transition-colors">
+                                            <i class="fas fa-edit text-sm"></i>
+                                            <span class="ml-1 text-xs">Editar</span>
+                                        </a>
+                                        <button onclick="eliminarReserva(<?php echo $reserva['id_reserva']; ?>)" 
+                                                class="text-red-600 hover:text-red-800 transition-colors">
+                                            <i class="fas fa-trash text-sm"></i>
+                                            <span class="ml-1 text-xs">Eliminar</span>
+                                        </button>
+                                    </div>
+                                    <div class="text-xs text-gray-500">
+                                        <?php echo date('d/m/Y', strtotime($reserva['fecha_reserva'])); ?>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
 
                     <!-- Paginación -->
                     <?php if ($total_paginas > 1): ?>
-                        <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+                        <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6 rounded-b-lg">
                             <div class="flex items-center justify-between">
+                                <!-- Paginación móvil -->
                                 <div class="flex-1 flex justify-between sm:hidden">
                                     <?php if ($pagina > 1): ?>
                                         <a href="?pagina=<?php echo $pagina - 1; ?><?php echo $filtro_estado ? "&estado=$filtro_estado" : ''; ?><?php echo $busqueda ? "&buscar=$busqueda" : ''; ?><?php echo $filtro_fecha ? "&fecha=$filtro_fecha" : ''; ?>" 
                                            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                                            Anterior
+                                            <i class="fas fa-chevron-left mr-2"></i>Anterior
                                         </a>
+                                    <?php else: ?>
+                                        <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-400 bg-gray-100 cursor-not-allowed">
+                                            <i class="fas fa-chevron-left mr-2"></i>Anterior
+                                        </span>
                                     <?php endif; ?>
+                                    
                                     <?php if ($pagina < $total_paginas): ?>
                                         <a href="?pagina=<?php echo $pagina + 1; ?><?php echo $filtro_estado ? "&estado=$filtro_estado" : ''; ?><?php echo $busqueda ? "&buscar=$busqueda" : ''; ?><?php echo $filtro_fecha ? "&fecha=$filtro_fecha" : ''; ?>" 
                                            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                                            Siguiente
+                                            Siguiente<i class="fas fa-chevron-right ml-2"></i>
                                         </a>
+                                    <?php else: ?>
+                                        <span class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-400 bg-gray-100 cursor-not-allowed">
+                                            Siguiente<i class="fas fa-chevron-right ml-2"></i>
+                                        </span>
                                     <?php endif; ?>
                                 </div>
+                                
+                                <!-- Paginación desktop -->
                                 <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                                     <div>
                                         <p class="text-sm text-gray-700">
@@ -384,12 +562,40 @@ function getEstadoClass($estado) {
                                     </div>
                                     <div>
                                         <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                                            <?php for ($i = 1; $i <= $total_paginas; $i++): ?>
+                                            <?php
+                                            // Calcular rango de páginas a mostrar
+                                            $rango_inicio = max(1, $pagina - 2);
+                                            $rango_fin = min($total_paginas, $pagina + 2);
+                                            
+                                            // Botón primera página
+                                            if ($rango_inicio > 1): ?>
+                                                <a href="?pagina=1<?php echo $filtro_estado ? "&estado=$filtro_estado" : ''; ?><?php echo $busqueda ? "&buscar=$busqueda" : ''; ?><?php echo $filtro_fecha ? "&fecha=$filtro_fecha" : ''; ?>" 
+                                                   class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                                    <i class="fas fa-angle-double-left"></i>
+                                                </a>
+                                                <?php if ($rango_inicio > 2): ?>
+                                                    <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">...</span>
+                                                <?php endif;
+                                            endif;
+                                            
+                                            // Páginas en el rango
+                                            for ($i = $rango_inicio; $i <= $rango_fin; $i++): ?>
                                                 <a href="?pagina=<?php echo $i; ?><?php echo $filtro_estado ? "&estado=$filtro_estado" : ''; ?><?php echo $busqueda ? "&buscar=$busqueda" : ''; ?><?php echo $filtro_fecha ? "&fecha=$filtro_fecha" : ''; ?>" 
                                                    class="relative inline-flex items-center px-4 py-2 border text-sm font-medium <?php echo $i === $pagina ? 'z-10 bg-blue-50 border-blue-500 text-blue-600' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'; ?>">
                                                     <?php echo $i; ?>
                                                 </a>
-                                            <?php endfor; ?>
+                                            <?php endfor;
+                                            
+                                            // Botón última página
+                                            if ($rango_fin < $total_paginas): 
+                                                if ($rango_fin < $total_paginas - 1): ?>
+                                                    <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">...</span>
+                                                <?php endif; ?>
+                                                <a href="?pagina=<?php echo $total_paginas; ?><?php echo $filtro_estado ? "&estado=$filtro_estado" : ''; ?><?php echo $busqueda ? "&buscar=$busqueda" : ''; ?><?php echo $filtro_fecha ? "&fecha=$filtro_fecha" : ''; ?>" 
+                                                   class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                                    <i class="fas fa-angle-double-right"></i>
+                                                </a>
+                                            <?php endif; ?>
                                         </nav>
                                     </div>
                                 </div>
@@ -471,12 +677,6 @@ function getEstadoClass($estado) {
             }
             cerrarModalEliminar();
         });
-
-        function exportarReservas() {
-            const params = new URLSearchParams(window.location.search);
-            params.set('exportar', '1');
-            window.location.href = 'exportar.php?' + params.toString();
-        }
 
         // Auto-submit del formulario de filtros cuando cambian los selects
         document.querySelectorAll('select[name="estado"]').forEach(select => {

@@ -50,8 +50,7 @@ $total_tours = $resultado['success'] ? $resultado['total'] : 0;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Tours - Antares Travel Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="../../assets/css/responsive.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         .line-clamp-3 {
             display: -webkit-box;
@@ -59,6 +58,25 @@ $total_tours = $resultado['success'] ? $resultado['total'] : 0;
             -webkit-box-orient: vertical;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+        
+        /* Estilos para móviles */
+        @media (max-width: 768px) {
+            .desktop-table {
+                display: none;
+            }
+            .mobile-cards {
+                display: block;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .desktop-table {
+                display: block;
+            }
+            .mobile-cards {
+                display: none;
+            }
         }
     </style>
 </head>
@@ -70,32 +88,22 @@ $total_tours = $resultado['success'] ? $resultado['total'] : 0;
         
         <!-- Contenido principal -->
         <div class="flex-1 lg:ml-64 pt-16 lg:pt-0 min-h-screen">
-            <br><br><br>
             <div class="p-4 lg:p-8">
-                <!-- Título y acciones mejorados -->
-                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
-                    <div>
-                        <h1 class="text-2xl lg:text-3xl font-bold text-gray-900">Gestión de Tours</h1>
-                        <p class="text-gray-600 text-sm lg:text-base">Administra todos los tours disponibles</p>
-                    </div>
-                    <div class="flex flex-col sm:flex-row gap-2">
-                        <!-- Botón de exportar -->
-                        <button onclick="exportarTours()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg flex items-center justify-center cursor-not-allowed opacity-75" disabled>
-                            <i class="fas fa-download mr-2"></i>
-                            <span class="hidden sm:inline">Exportar</span>
-                        </button>
-                        
-                        <!-- Botón de estadísticas -->
-                        <button onclick="verEstadisticasDetalladas()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg flex items-center justify-center cursor-not-allowed opacity-75" disabled>
-                            <i class="fas fa-chart-line mr-2"></i>
-                            <span class="hidden sm:inline">Estadísticas</span>
-                        </button>
-                        
-                        <!-- Botón principal -->
-                        <button onclick="abrirModalCrear()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-plus mr-2"></i>
-                            Nuevo Tour
-                        </button>
+                <!-- Encabezado -->
+                <div class="mb-6 lg:mb-8">
+                    <br><br><br>
+                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <div>
+                            <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
+                                <i class="fas fa-map-marked-alt text-blue-600 mr-3"></i>Gestión de Tours
+                            </h1>
+                            <p class="text-sm lg:text-base text-gray-600">Administra todos los tours disponibles</p>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <button onclick="abrirModalCrear()" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-plus mr-2"></i>Nuevo Tour
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -722,8 +730,6 @@ $total_tours = $resultado['success'] ? $resultado['total'] : 0;
                     elemento.innerHTML = resaltarTerminos(elemento.textContent, busqueda);
                 });
             }
-            
-            initializeResponsive();
         });
         
         // Funciones de UI
@@ -887,23 +893,6 @@ $total_tours = $resultado['success'] ? $resultado['total'] : 0;
                 });
         }
         
-        // Función para cargar datos en el formulario
-        function cargarDatosFormulario(tour) {
-            document.getElementById('tour_id').value = tour.id_tour;
-            document.getElementById('titulo').value = tour.titulo;
-            document.getElementById('descripcion').value = tour.descripcion;
-            document.getElementById('precio').value = tour.precio;
-            document.getElementById('duracion').value = tour.duracion;
-            document.getElementById('hora_salida').value = tour.hora_salida || '';
-            document.getElementById('hora_llegada').value = tour.hora_llegada || '';
-            
-            // Mostrar imagen actual si existe
-            if (tour.imagen_principal) {
-                document.getElementById('imagenPreviewImg').src = '/Antares-Travel/' + tour.imagen_principal;
-                document.getElementById('imagenPreview').classList.remove('hidden');
-            }
-        }
-        
         // Función para eliminar tour
         function eliminarTour(idTour) {
             if (confirm('¿Estás seguro de que deseas eliminar este tour? Esta acción no se puede deshacer.')) {
@@ -1037,7 +1026,7 @@ $total_tours = $resultado['success'] ? $resultado['total'] : 0;
             }
             
             // Funcionalidad responsiva básica
-            initializeResponsive();
+            // La responsividad del sidebar se maneja automáticamente por las clases de Tailwind
         });
         
         // Función de filtro en tiempo real (lado cliente)
@@ -1144,36 +1133,26 @@ $total_tours = $resultado['success'] ? $resultado['total'] : 0;
             }
         }
         
-        // Funciones de responsive básico
-        function initializeResponsive() {
-            const sidebarToggle = document.getElementById('sidebarToggle');
+        // Inicialización cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar que el sidebar funcione correctamente
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
             
-            if (sidebarToggle && sidebar) {
-                sidebarToggle.addEventListener('click', function() {
-                    sidebar.classList.toggle('-translate-x-full');
-                    if (overlay) {
-                        overlay.classList.toggle('hidden');
-                    }
-                });
-            }
-            
-            if (overlay) {
-                overlay.addEventListener('click', function() {
-                    sidebar.classList.add('-translate-x-full');
-                    overlay.classList.add('hidden');
-                });
-            }
-            
-            // Cerrar sidebar en cambio de tamaño
-            window.addEventListener('resize', function() {
-                if (window.innerWidth >= 1024) {
-                    if (sidebar) sidebar.classList.add('-translate-x-full');
-                    if (overlay) overlay.classList.add('hidden');
+            if (sidebar && overlay) {
+                console.log('Tours module: Sidebar y overlay encontrados correctamente');
+                console.log('Tours module: Ancho de ventana:', window.innerWidth);
+                
+                // Asegurar estado inicial correcto
+                if (window.innerWidth < 1024) {
+                    sidebar.classList.remove('show');
+                    overlay.classList.remove('show');
+                    document.body.style.overflow = 'auto';
                 }
-            });
-        }
+            } else {
+                console.error('Tours module: No se encontraron elementos del sidebar');
+            }
+        });
     </script>
 </body>
 </html>

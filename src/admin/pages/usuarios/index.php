@@ -128,6 +128,72 @@ function getProveedorIcon($proveedor) {
             transform: translateY(-2px);
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
+        
+        /* Estilos responsivos */
+        @media (max-width: 768px) {
+            .desktop-table {
+                display: none;
+            }
+            .mobile-cards {
+                display: block;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .filter-form {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+            .filter-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+            .filter-actions button,
+            .filter-actions a {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .desktop-table {
+                display: block;
+            }
+            .mobile-cards {
+                display: none;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(5, 1fr);
+            }
+            .filter-form {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 1rem;
+            }
+            .filter-actions {
+                flex-direction: row;
+                gap: 0.5rem;
+            }
+        }
+        
+        .user-card {
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .user-card:hover {
+            box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.15);
+            transform: translateY(-1px);
+        }
+        
+        .status-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -153,9 +219,6 @@ function getProveedorIcon($proveedor) {
                             <a href="crear.php" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                                 <i class="fas fa-plus mr-2"></i>Nuevo Usuario
                             </a>
-                            <button onclick="exportarUsuarios()" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                                <i class="fas fa-download mr-2"></i>Exportar
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -174,88 +237,88 @@ function getProveedorIcon($proveedor) {
                 <?php endif; ?>
 
                 <!-- Estadísticas Rápidas -->
-                <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6 mb-6">
-                    <div class="stats-card bg-white rounded-lg shadow-lg p-6">
+                <div class="stats-grid grid gap-3 lg:gap-6 mb-6">
+                    <div class="stats-card bg-white rounded-lg shadow-lg p-4 lg:p-6">
                         <div class="flex items-center">
-                            <div class="p-3 rounded-full bg-blue-100 bg-opacity-75">
-                                <i class="fas fa-users text-blue-600 text-xl"></i>
+                            <div class="p-2 lg:p-3 rounded-full bg-blue-100 bg-opacity-75">
+                                <i class="fas fa-users text-blue-600 text-lg lg:text-xl"></i>
                             </div>
-                            <div class="ml-4">
-                                <p class="text-sm font-medium text-gray-500">Total Usuarios</p>
-                                <p class="text-2xl font-bold text-gray-900"><?php echo number_format($stats['total_usuarios'] ?? 0); ?></p>
+                            <div class="ml-3 lg:ml-4">
+                                <p class="text-xs lg:text-sm font-medium text-gray-500">Total Usuarios</p>
+                                <p class="text-lg lg:text-2xl font-bold text-gray-900"><?php echo number_format($stats['total_usuarios'] ?? 0); ?></p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="stats-card bg-white rounded-lg shadow-lg p-6">
+                    <div class="stats-card bg-white rounded-lg shadow-lg p-4 lg:p-6">
                         <div class="flex items-center">
-                            <div class="p-3 rounded-full bg-green-100 bg-opacity-75">
-                                <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                            <div class="p-2 lg:p-3 rounded-full bg-green-100 bg-opacity-75">
+                                <i class="fas fa-check-circle text-green-600 text-lg lg:text-xl"></i>
                             </div>
-                            <div class="ml-4">
-                                <p class="text-sm font-medium text-gray-500">Verificados</p>
-                                <p class="text-2xl font-bold text-gray-900"><?php echo number_format($stats['verificados'] ?? 0); ?></p>
+                            <div class="ml-3 lg:ml-4">
+                                <p class="text-xs lg:text-sm font-medium text-gray-500">Verificados</p>
+                                <p class="text-lg lg:text-2xl font-bold text-gray-900"><?php echo number_format($stats['verificados'] ?? 0); ?></p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="stats-card bg-white rounded-lg shadow-lg p-6">
+                    <div class="stats-card bg-white rounded-lg shadow-lg p-4 lg:p-6">
                         <div class="flex items-center">
-                            <div class="p-3 rounded-full bg-purple-100 bg-opacity-75">
-                                <i class="fas fa-user-plus text-purple-600 text-xl"></i>
+                            <div class="p-2 lg:p-3 rounded-full bg-purple-100 bg-opacity-75">
+                                <i class="fas fa-user-plus text-purple-600 text-lg lg:text-xl"></i>
                             </div>
-                            <div class="ml-4">
-                                <p class="text-sm font-medium text-gray-500">Registro Manual</p>
-                                <p class="text-2xl font-bold text-gray-900"><?php echo number_format($stats['registro_manual'] ?? 0); ?></p>
+                            <div class="ml-3 lg:ml-4">
+                                <p class="text-xs lg:text-sm font-medium text-gray-500">Registro Manual</p>
+                                <p class="text-lg lg:text-2xl font-bold text-gray-900"><?php echo number_format($stats['registro_manual'] ?? 0); ?></p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="stats-card bg-white rounded-lg shadow-lg p-6">
+                    <div class="stats-card bg-white rounded-lg shadow-lg p-4 lg:p-6">
                         <div class="flex items-center">
-                            <div class="p-3 rounded-full bg-orange-100 bg-opacity-75">
-                                <i class="fab fa-google text-orange-600 text-xl"></i>
+                            <div class="p-2 lg:p-3 rounded-full bg-orange-100 bg-opacity-75">
+                                <i class="fab fa-google text-orange-600 text-lg lg:text-xl"></i>
                             </div>
-                            <div class="ml-4">
-                                <p class="text-sm font-medium text-gray-500">Social Login</p>
-                                <p class="text-2xl font-bold text-gray-900"><?php echo number_format($stats['registro_social'] ?? 0); ?></p>
+                            <div class="ml-3 lg:ml-4">
+                                <p class="text-xs lg:text-sm font-medium text-gray-500">Social Login</p>
+                                <p class="text-lg lg:text-2xl font-bold text-gray-900"><?php echo number_format($stats['registro_social'] ?? 0); ?></p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="stats-card bg-white rounded-lg shadow-lg p-6">
+                    <div class="stats-card bg-white rounded-lg shadow-lg p-4 lg:p-6">
                         <div class="flex items-center">
-                            <div class="p-3 rounded-full bg-indigo-100 bg-opacity-75">
-                                <i class="fas fa-calendar text-indigo-600 text-xl"></i>
+                            <div class="p-2 lg:p-3 rounded-full bg-indigo-100 bg-opacity-75">
+                                <i class="fas fa-calendar text-indigo-600 text-lg lg:text-xl"></i>
                             </div>
-                            <div class="ml-4">
-                                <p class="text-sm font-medium text-gray-500">Nuevos (30d)</p>
-                                <p class="text-2xl font-bold text-gray-900"><?php echo number_format($stats['nuevos_mes'] ?? 0); ?></p>
+                            <div class="ml-3 lg:ml-4">
+                                <p class="text-xs lg:text-sm font-medium text-gray-500">Nuevos (30d)</p>
+                                <p class="text-lg lg:text-2xl font-bold text-gray-900"><?php echo number_format($stats['nuevos_mes'] ?? 0); ?></p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Filtros -->
-                <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-                    <form method="GET" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div class="bg-white rounded-lg shadow-lg p-4 lg:p-6 mb-6">
+                    <form method="GET" class="filter-form grid gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Buscar por nombre</label>
                             <input type="text" name="nombre" value="<?php echo htmlspecialchars($filtro_nombre); ?>"
-                                   class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
+                                   class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full text-sm"
                                    placeholder="Nombre del usuario">
                         </div>
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Buscar por email</label>
                             <input type="email" name="email" value="<?php echo htmlspecialchars($filtro_email); ?>"
-                                   class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
+                                   class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full text-sm"
                                    placeholder="Email del usuario">
                         </div>
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Estado de verificación</label>
-                            <select name="verificado" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full">
+                            <select name="verificado" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full text-sm">
                                 <option value="">Todos</option>
                                 <option value="1" <?php echo $filtro_verificado === '1' ? 'selected' : ''; ?>>Verificados</option>
                                 <option value="0" <?php echo $filtro_verificado === '0' ? 'selected' : ''; ?>>No verificados</option>
@@ -264,7 +327,7 @@ function getProveedorIcon($proveedor) {
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de registro</label>
-                            <select name="proveedor" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full">
+                            <select name="proveedor" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full text-sm">
                                 <option value="">Todos</option>
                                 <option value="manual" <?php echo $filtro_proveedor === 'manual' ? 'selected' : ''; ?>>Manual</option>
                                 <option value="google" <?php echo $filtro_proveedor === 'google' ? 'selected' : ''; ?>>Google</option>
@@ -273,19 +336,19 @@ function getProveedorIcon($proveedor) {
                             </select>
                         </div>
                         
-                        <div class="flex items-end gap-2">
-                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        <div class="filter-actions flex items-end gap-2">
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
                                 <i class="fas fa-filter mr-1"></i>Filtrar
                             </button>
-                            <a href="index.php" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors">
+                            <a href="index.php" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors text-sm">
                                 <i class="fas fa-times mr-1"></i>Limpiar
                             </a>
                         </div>
                     </form>
                 </div>
 
-                <!-- Tabla de usuarios -->
-                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                <!-- Tabla de usuarios - Vista Desktop -->
+                <div class="desktop-table bg-white rounded-lg shadow-lg overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
@@ -399,6 +462,111 @@ function getProveedorIcon($proveedor) {
                             </tbody>
                         </table>
                     </div>
+                </div>
+
+                <!-- Vista Mobile - Tarjetas -->
+                <div class="mobile-cards space-y-4">
+                    <?php if (empty($usuarios)): ?>
+                        <div class="bg-white rounded-lg shadow p-6 text-center">
+                            <i class="fas fa-users text-4xl text-gray-300 mb-4"></i>
+                            <p class="text-lg font-medium text-gray-900 mb-2">No se encontraron usuarios</p>
+                            <p class="text-sm text-gray-500">Intenta ajustar los filtros de búsqueda</p>
+                        </div>
+                    <?php else: ?>
+                        <?php foreach ($usuarios as $usuario): ?>
+                            <div class="user-card bg-white p-4 border border-gray-200">
+                                <!-- Header de la tarjeta -->
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0">
+                                            <?php if ($usuario['avatar_url']): ?>
+                                                <img class="h-12 w-12 rounded-full" src="<?php echo htmlspecialchars($usuario['avatar_url']); ?>" alt="">
+                                            <?php else: ?>
+                                                <div class="h-12 w-12 rounded-full bg-blue-600 flex items-center justify-center">
+                                                    <span class="text-white font-medium text-sm">
+                                                        <?php echo strtoupper(substr($usuario['nombre'] ?? $usuario['email'], 0, 1)); ?>
+                                                    </span>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="ml-3">
+                                            <h3 class="font-semibold text-gray-900 text-sm">
+                                                <?php echo htmlspecialchars($usuario['nombre'] ?? 'Sin nombre'); ?>
+                                            </h3>
+                                            <p class="text-xs text-gray-500"><?php echo htmlspecialchars($usuario['email']); ?></p>
+                                            <?php if ($usuario['telefono']): ?>
+                                                <p class="text-xs text-gray-400">
+                                                    <i class="fas fa-phone mr-1"></i>
+                                                    <?php echo htmlspecialchars($usuario['telefono']); ?>
+                                                </p>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                    <?php if ($usuario['email_verificado']): ?>
+                                        <span class="status-badge bg-green-100 text-green-800">
+                                            <i class="fas fa-check-circle mr-1"></i>Verificado
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="status-badge bg-yellow-100 text-yellow-800">
+                                            <i class="fas fa-clock mr-1"></i>Pendiente
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
+
+                                <!-- Tipo de registro -->
+                                <div class="mb-3">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?php echo getProveedorClass($usuario['proveedor_oauth']); ?>">
+                                        <i class="<?php echo getProveedorIcon($usuario['proveedor_oauth']); ?> mr-1"></i>
+                                        Registro <?php echo ucfirst($usuario['proveedor_oauth']); ?>
+                                    </span>
+                                </div>
+
+                                <!-- Estadísticas -->
+                                <div class="grid grid-cols-2 gap-3 mb-4 p-3 bg-gray-50 rounded-lg">
+                                    <div class="text-center">
+                                        <div class="text-lg font-bold text-blue-600"><?php echo number_format($usuario['total_reservas']); ?></div>
+                                        <div class="text-xs text-gray-500">Reservas</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-lg font-bold text-green-600"><?php echo formatCurrency($usuario['total_gastado']); ?></div>
+                                        <div class="text-xs text-gray-500">Total gastado</div>
+                                    </div>
+                                </div>
+
+                                <!-- Footer con fecha de registro y acciones -->
+                                <div class="flex justify-between items-center pt-3 border-t border-gray-100">
+                                    <div class="flex space-x-4">
+                                        <a href="ver.php?id=<?php echo $usuario['id_usuario']; ?>" 
+                                           class="text-blue-600 hover:text-blue-800 transition-colors">
+                                            <i class="fas fa-eye text-sm"></i>
+                                            <span class="ml-1 text-xs">Ver</span>
+                                        </a>
+                                        <a href="editar.php?id=<?php echo $usuario['id_usuario']; ?>" 
+                                           class="text-green-600 hover:text-green-800 transition-colors">
+                                            <i class="fas fa-edit text-sm"></i>
+                                            <span class="ml-1 text-xs">Editar</span>
+                                        </a>
+                                        <?php if (!$usuario['email_verificado']): ?>
+                                            <button onclick="verificarEmail(<?php echo $usuario['id_usuario']; ?>)" 
+                                                    class="text-purple-600 hover:text-purple-800 transition-colors">
+                                                <i class="fas fa-check text-sm"></i>
+                                                <span class="ml-1 text-xs">Verificar</span>
+                                            </button>
+                                        <?php endif; ?>
+                                        <button onclick="eliminarUsuario(<?php echo $usuario['id_usuario']; ?>)" 
+                                                class="text-red-600 hover:text-red-800 transition-colors">
+                                            <i class="fas fa-trash text-sm"></i>
+                                            <span class="ml-1 text-xs">Eliminar</span>
+                                        </button>
+                                    </div>
+                                    <div class="text-xs text-gray-500">
+                                        <?php echo formatDate($usuario['creado_en'], 'd/m/Y'); ?>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
 
                     <!-- Paginación -->
                     <?php if ($total_paginas > 1): ?>
@@ -542,12 +710,6 @@ function getProveedorIcon($proveedor) {
                 form.submit();
             }
         });
-
-        function exportarUsuarios() {
-            const params = new URLSearchParams(window.location.search);
-            params.set('exportar', '1');
-            window.location.href = 'exportar.php?' + params.toString();
-        }
     </script>
 </body>
 </html>
