@@ -676,53 +676,52 @@ function getImagePath($imagePath) {
     </section>
 
     <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3><?php echo $lang['footer_about_title'] ?? 'About Antares Travel'; ?></h3>
-                <p><?php echo $lang['footer_about_text'] ?? 'Your expert travel agency in Peru.'; ?></p>
-                <div class="social-links">
-                    <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
-                    <a href="#" class="social-link"><i class="fab fa-whatsapp"></i></a>
-                    <a href="#" class="social-link"><i class="fab fa-tripadvisor"></i></a>
-                </div>
-            </div>
-            <div class="footer-section">
-                <h3><?php echo $lang['footer_contact_title'] ?? 'Contact'; ?></h3>
-                <ul>
-                    <li><i class="fas fa-map-marker-alt"></i> <?php echo $lang['footer_contact_address'] ?? 'Cusco, Peru'; ?></li>
-                    <li><i class="fas fa-phone"></i> +51 966 217 821</li>
-                    <li><i class="fas fa-phone"></i> +51 958 940 100</li>
-                    <li><i class="fas fa-envelope"></i> antares.travel.cusco@gmail.com</li>
-                    <li><i class="fas fa-globe"></i> www.antarestravelcusco.com</li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3><?php echo $lang['footer_services_title'] ?? 'Services'; ?></h3>
-                <ul>
-                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_cusco'] ?? 'Cusco Tours'; ?></a></li>
-                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_sacred_valley'] ?? 'Sacred Valley'; ?></a></li>
-                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_machu_picchu'] ?? 'Machu Picchu'; ?></a></li>
-                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_adventure'] ?? 'Adventures'; ?></a></li>
-                    <li><a href="../index.php#guias"><?php echo $lang['footer_service_guides'] ?? 'Expert Guides'; ?></a></li>
-                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_transport'] ?? 'Transport'; ?></a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3><?php echo $lang['footer_legal_title'] ?? 'Legal'; ?></h3>
-                <ul>
-                    <li>RUC: 20XXXXXXXX</li>
-                    <li><?php echo $lang['footer_legal_license'] ?? 'License'; ?>: XXXX-XXXX</li>
-                    <li><a href="#"><?php echo $lang['footer_legal_terms'] ?? 'Terms and Conditions'; ?></a></li>
-                    <li><a href="#"><?php echo $lang['footer_legal_privacy'] ?? 'Privacy Policy'; ?></a></li>
-                    <li><a href="#"><?php echo $lang['footer_legal_cancellation'] ?? 'Cancellation Policy'; ?></a></li>
-                </ul>
+    <div class="footer-content">
+        <div class="footer-section"> 
+            <h3><?php echo $lang['footer_about_title']; ?></h3>
+            <p><?php echo $lang['footer_about_text']; ?></p>
+            <div class="social-links">
+                <a href="https://wa.me/51958940100" class="social-link" target="_blank"><i class="fab fa-whatsapp"></i></a>
             </div>
         </div>
-        <div class="footer-bottom">
-            <p><?php echo $lang['footer_copyright'] ?? '© 2025 Antares Travel Peru.'; ?></p>
+        <div class="footer-section">
+            <h3><?php echo $lang['footer_contact_title']; ?></h3>
+            <ul>
+                <li><i class="fas fa-map-marker-alt"></i> <?php echo $lang['footer_contact_address']; ?></li>
+                <li><i class="fas fa-phone"></i> +51 958 940 100</li>
+                <li><i class="fas fa-envelope"></i> antarestravelperu@gmail.com </li>
+                <li><i class="fas fa-globe"></i> www.antarestravelperu.com</li>
+            </ul>
         </div>
-    </footer>
+        <div class="footer-section">
+            <h3><?php echo $lang['footer_services_title']; ?></h3>
+            <ul>
+                <li><a href="../index.php#tours"><?php echo $lang['footer_service_cusco']; ?></a></li>
+                <li><a href="../index.php#tours"><?php echo $lang['footer_service_sacred_valley']; ?></a></li>
+                <li><a href="../index.php#tours"><?php echo $lang['footer_service_machu_picchu']; ?></a></li>
+                <li><a href="../index.php#tours"><?php echo $lang['footer_service_adventure']; ?></a></li>
+                <li><a href="../index.php#guias"><?php echo $lang['footer_service_guides']; ?></a></li>
+                <li><a href="../index.php#tours"><?php echo $lang['footer_service_transport']; ?></a></li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h3><?php echo $lang['footer_legal_title']; ?></h3>
+            <ul>
+                <li>RUC: 20XXXXXXXX</li>
+                <li><?php echo $lang['footer_legal_license']; ?>: XXXX-XXXX</li>
+                <li><a href="#"><?php echo $lang['footer_legal_terms']; ?></a></li>
+                <li><a href="#"><?php echo $lang['footer_legal_privacy']; ?></a></li>
+                <li><a href="#"><?php echo $lang['footer_legal_cancellation']; ?></a></li>
+            </ul>
+            <div class="admin-btn-wrapper" style="margin-top:20px; text-align:center;">
+                <a href="src/admin" class="custom-admin-btn2">Panel Admin</a>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p><?php echo $lang['footer_copyright']; ?></p>
+    </div>
+</footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

@@ -1161,56 +1161,52 @@ if (!isset($_SESSION['cart'])) {
     </section>
 
     <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-section"> 
-                <h3><?php echo $lang['footer_about_title'] ?? 'Sobre Nosotros'; ?></h3>
-                <p><?php echo $lang['footer_about_text'] ?? 'Antares Travel Peru ofrece experiencias únicas en Cusco y sus alrededores.'; ?></p>
-                <div class="social-links">
-                    <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
-                    <a href="#" class="social-link"><i class="fab fa-whatsapp"></i></a>
-                    <a href="#" class="social-link"><i class="fab fa-tripadvisor"></i></a>
-                </div>
-            </div>
-            <div class="footer-section">
-                <h3><?php echo $lang['footer_contact_title'] ?? 'Contacto'; ?></h3>
-                <ul>
-                    <li><i class="fas fa-map-marker-alt"></i> <?php echo $lang['footer_contact_address'] ?? 'Cusco, Perú'; ?></li>
-                    <li><i class="fas fa-phone"></i> +51 966 217 821</li>
-                    <li><i class="fas fa-phone"></i> +51 958 940 100</li>
-                    <li><i class="fas fa-envelope"></i> antares.travel.cusco@gmail.com</li>
-                    <li><i class="fas fa-globe"></i> www.antarestravelcusco.com</li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3><?php echo $lang['footer_services_title'] ?? 'Servicios'; ?></h3>
-                <ul>
-                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_cusco'] ?? 'Tours en Cusco'; ?></a></li>
-                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_sacred_valley'] ?? 'Valle Sagrado'; ?></a></li>
-                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_machu_picchu'] ?? 'Machu Picchu'; ?></a></li>
-                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_adventure'] ?? 'Aventuras'; ?></a></li>
-                    <li><a href="../index.php#guias"><?php echo $lang['footer_service_guides'] ?? 'Guías'; ?></a></li>
-                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_transport'] ?? 'Transporte'; ?></a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3><?php echo $lang['footer_legal_title'] ?? 'Legal'; ?></h3>
-                <ul>
-                    <li>RUC: 20XXXXXXXX</li>
-                    <li><?php echo $lang['footer_legal_license'] ?? 'Licencia'; ?>: XXXX-XXXX</li>
-                    <li><a href="#"><?php echo $lang['footer_legal_terms'] ?? 'Términos y Condiciones'; ?></a></li>
-                    <li><a href="#"><?php echo $lang['footer_legal_privacy'] ?? 'Política de Privacidad'; ?></a></li>
-                    <li><a href="#"><?php echo $lang['footer_legal_cancellation'] ?? 'Política de Cancelación'; ?></a></li>
-                </ul>
-                <div class="admin-btn-wrapper" style="margin-top:20px; text-align:center;">
-                    <a href="admin" class="custom-admin-btn2"><?php echo $lang['admin_panel'] ?? 'Panel Admin'; ?></a>
-                </div>
+    <div class="footer-content">
+        <div class="footer-section"> 
+            <h3><?php echo $lang['footer_about_title']; ?></h3>
+            <p><?php echo $lang['footer_about_text']; ?></p>
+            <div class="social-links">
+                <a href="https://wa.me/51958940100" class="social-link" target="_blank"><i class="fab fa-whatsapp"></i></a>
             </div>
         </div>
-        <div class="footer-bottom">
-            <p><?php echo $lang['footer_copyright'] ?? '© 2025 Antares Travel Peru. Todos los derechos reservados.'; ?></p>
+        <div class="footer-section">
+            <h3><?php echo $lang['footer_contact_title']; ?></h3>
+            <ul>
+                <li><i class="fas fa-map-marker-alt"></i> <?php echo $lang['footer_contact_address']; ?></li>
+                <li><i class="fas fa-phone"></i> +51 958 940 100</li>
+                <li><i class="fas fa-envelope"></i> antarestravelperu@gmail.com </li>
+                <li><i class="fas fa-globe"></i> www.antarestravelperu.com</li>
+            </ul>
         </div>
-    </footer>
+        <div class="footer-section">
+            <h3><?php echo $lang['footer_services_title']; ?></h3>
+            <ul>
+                <li><a href="../index.php#tours"><?php echo $lang['footer_service_cusco']; ?></a></li>
+                <li><a href="../index.php#tours"><?php echo $lang['footer_service_sacred_valley']; ?></a></li>
+                <li><a href="../index.php#tours"><?php echo $lang['footer_service_machu_picchu']; ?></a></li>
+                <li><a href="../index.php#tours"><?php echo $lang['footer_service_adventure']; ?></a></li>
+                <li><a href="../index.php#guias"><?php echo $lang['footer_service_guides']; ?></a></li>
+                <li><a href="../index.php#tours"><?php echo $lang['footer_service_transport']; ?></a></li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h3><?php echo $lang['footer_legal_title']; ?></h3>
+            <ul>
+                <li>RUC: 20XXXXXXXX</li>
+                <li><?php echo $lang['footer_legal_license']; ?>: XXXX-XXXX</li>
+                <li><a href="#"><?php echo $lang['footer_legal_terms']; ?></a></li>
+                <li><a href="#"><?php echo $lang['footer_legal_privacy']; ?></a></li>
+                <li><a href="#"><?php echo $lang['footer_legal_cancellation']; ?></a></li>
+            </ul>
+            <div class="admin-btn-wrapper" style="margin-top:20px; text-align:center;">
+                <a href="src/admin" class="custom-admin-btn2">Panel Admin</a>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p><?php echo $lang['footer_copyright']; ?></p>
+    </div>
+</footer>
 
     <script>
         const tourPrice = <?php echo $tour['precio'] ? $tour['precio'] : 0; ?>;
