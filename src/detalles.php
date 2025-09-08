@@ -954,6 +954,14 @@ if (!isset($_SESSION['cart'])) {
             color: var(--primary-color);
             margin-top: 1rem;
         }
+
+        .custom-admin-btn2 {
+        padding: 12px 24px;
+        color: #A27741; 
+        border: 1px solid #ffffff; 
+        border-radius: 50px;
+        text-decoration: none;
+    }
     </style>
 </head>
 <body>

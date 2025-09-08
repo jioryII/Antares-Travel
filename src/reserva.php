@@ -443,6 +443,14 @@ function getImagePath($imagePath) {
         }
 
         .price-info { font-weight: 600; color: var(--primary-color); margin-top: 0.5rem; }
+
+        .custom-admin-btn2 {
+        padding: 12px 24px;
+        color: #A27741; 
+        border: 1px solid #ffffff; 
+        border-radius: 50px;
+        text-decoration: none;
+    }
     </style>
 </head>
 <body>

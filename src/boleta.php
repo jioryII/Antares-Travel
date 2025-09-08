@@ -211,7 +211,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mail->Port = 587;
             $mail->CharSet = 'UTF-8';
 
-            $mail->setFrom('antares.travel.cusco@gmail.com', 'Antares Travel Peru');
+            $mail->setFrom('antarestravelperu@gmail.com', 'Antares Travel Peru');
             $mail->addAddress($contacto['email'], $contacto['nombre']);
             $mail->isHTML(true);
             $mail->Subject = 'Confirmación de Reserva - Antares Travel Peru';
@@ -321,8 +321,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <h3 style='color: #A27741; margin: 0 0 15px 0;'>🙏 ¡Gracias por elegir Antares Travel Peru!</h3>
                     <p style='margin: 10px 0; color: #666; line-height: 1.6;'>Estamos emocionados de ser parte de su aventura. Para cualquier consulta o cambio, no dude en contactarnos:</p>
                     <div style='margin: 20px 0;'>
-                        <p style='margin: 8px 0; color: #A27741; font-weight: 600;'>📧 antares.travel.cusco@gmail.com</p>
-                        <p style='margin: 8px 0; color: #A27741; font-weight: 600;'>📱 +51 966 217 821</p>
+                        <p style='margin: 8px 0; color: #A27741; font-weight: 600;'>📧 antarestravelperu@gmail.com</p>
+                        <p style='margin: 8px 0; color: #A27741; font-weight: 600;'>📱 +51 958 940 1001</p>
                         <p style='margin: 8px 0; color: #A27741; font-weight: 600;'>🌐 www.antarestravelperu.com</p>
                     </div>
                 </div>
@@ -866,8 +866,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 <p style="margin-top: 2rem; color: var(--text-light);">
                     <strong>Contacto:</strong> 
-                    <i class="fas fa-envelope"></i> antares.travel.cusco@gmail.com | 
-                    <i class="fas fa-phone"></i> +51 966 217 821
+                    <i class="fas fa-envelope"></i> antarestravelperu@gmail.com | 
+                    <i class="fas fa-phone"></i> +51 958 940 100
                 </p>
             </div>
         </div>
