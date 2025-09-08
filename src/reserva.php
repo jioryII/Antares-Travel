@@ -43,16 +43,40 @@ if (empty($cart['paquetes'])) {
 }
 
 // Handle remove item
-if (isset($_POST['remove_item']) && isset($_POST['index'])) {
-    $index = filter_input(INPUT_POST, 'index', FILTER_VALIDATE_INT);
-    if ($index !== false && isset($cart['paquetes'][$index])) {
-        unset($cart['paquetes'][$index]);
-        $cart['paquetes'] = array_values($cart['paquetes']);
-        $cart['total_paquetes'] = count($cart['paquetes']);
-        $_SESSION['cart'] = $cart;
-        header('Location: reserva.php');
-        exit;
+if (isset($_POST['remove_item'])) {
+    // Verificar si se ha enviado el índice y el ID del tour
+    if (isset($_POST['index']) && isset($_POST['tour_id'])) {
+        $index_to_remove = filter_input(INPUT_POST, 'index', FILTER_VALIDATE_INT);
+        $id_to_remove = filter_input(INPUT_POST, 'tour_id', FILTER_VALIDATE_INT);
+
+        if ($index_to_remove !== false && isset($cart['paquetes'][$index_to_remove])) {
+            $item_to_remove = $cart['paquetes'][$index_to_remove];
+
+            // Confirmar que el tour en el índice coincide con el ID enviado
+            if ($item_to_remove['id_tour'] == $id_to_remove) {
+                // Eliminar el elemento del carrito
+                unset($cart['paquetes'][$index_to_remove]);
+                
+                // Reindexar el array para evitar problemas con los índices
+                $cart['paquetes'] = array_values($cart['paquetes']);
+                $cart['total_paquetes'] = count($cart['paquetes']);
+                $_SESSION['cart'] = $cart;
+            } else {
+                // Si hay una discrepancia, buscar y eliminar por ID
+                foreach ($cart['paquetes'] as $key => $item) {
+                    if ($item['id_tour'] == $id_to_remove) {
+                        unset($cart['paquetes'][$key]);
+                        $cart['paquetes'] = array_values($cart['paquetes']);
+                        $cart['total_paquetes'] = count($cart['paquetes']);
+                        $_SESSION['cart'] = $cart;
+                        break;
+                    }
+                }
+            }
+        }
     }
+    header('Location: reserva.php');
+    exit;
 }
 
 // Get tour details
@@ -552,10 +576,13 @@ function getImagePath($imagePath) {
                             Total for this tour: $<?php echo number_format($detail['total_price'] ?? 0, 2); ?>
                         </div>
                     </div>
-                    <input type="hidden" name="index" value="<?php echo $index; ?>">
-                    <button type="submit" name="remove_item" class="remove-btn" onclick="return confirm('<?php echo $lang['remove_confirm'] ?? 'Remove this tour from cart?'; ?>');">
-                        <i class="fas fa-trash"></i> Remove
-                    </button>
+                    <form method="POST" action="reserva.php">
+                        <input type="hidden" name="index" value="<?php echo $index; ?>">
+                        <input type="hidden" name="tour_id" value="<?php echo $item['id_tour']; ?>">
+                        <button type="submit" name="remove_item" class="remove-btn" onclick="return confirm('<?php echo $lang['remove_confirm'] ?? 'Remove this tour from cart?'; ?>');">
+                            <i class="fas fa-trash"></i> Remove
+                        </button>
+                    </form>
                 </div>
             <?php endforeach; ?>
             <div class="price-info" style="text-align: right; font-size: 1.2rem;">
