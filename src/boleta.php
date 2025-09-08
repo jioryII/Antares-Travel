@@ -322,7 +322,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <p style='margin: 10px 0; color: #666; line-height: 1.6;'>Estamos emocionados de ser parte de su aventura. Para cualquier consulta o cambio, no dude en contactarnos:</p>
                     <div style='margin: 20px 0;'>
                         <p style='margin: 8px 0; color: #A27741; font-weight: 600;'>📧 antarestravelperu@gmail.com</p>
-                        <p style='margin: 8px 0; color: #A27741; font-weight: 600;'>📱 +51 958 940 1001</p>
+                        <p style='margin: 8px 0; color: #A27741; font-weight: 600;'>📱 +51 958 940 006</p>
                         <p style='margin: 8px 0; color: #A27741; font-weight: 600;'>🌐 www.antarestravelperu.com</p>
                     </div>
                 </div>
@@ -867,7 +867,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <p style="margin-top: 2rem; color: var(--text-light);">
                     <strong>Contacto:</strong> 
                     <i class="fas fa-envelope"></i> antarestravelperu@gmail.com | 
-                    <i class="fas fa-phone"></i> +51 958 940 100
+                    <i class="fas fa-phone"></i> +51 958 940 006
                 </p>
             </div>
         </div>

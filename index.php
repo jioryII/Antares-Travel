@@ -1424,14 +1424,14 @@ if (isset($_GET['logout'])) {
             <h3><?php echo $lang['footer_about_title']; ?></h3>
             <p><?php echo $lang['footer_about_text']; ?></p>
             <div class="social-links">
-                <a href="https://wa.me/51958940100" class="social-link" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                <a href="https://wa.me/51958940006" class="social-link" target="_blank"><i class="fab fa-whatsapp"></i></a>
             </div>
         </div>
         <div class="footer-section">
             <h3><?php echo $lang['footer_contact_title']; ?></h3>
             <ul>
                 <li><i class="fas fa-map-marker-alt"></i> <?php echo $lang['footer_contact_address']; ?></li>
-                <li><i class="fas fa-phone"></i> +51 958 940 100</li>
+                <li><i class="fas fa-phone"></i> +51 958 940 006</li>
                 <li><i class="fas fa-envelope"></i> antarestravelperu@gmail.com </li>
                 <li><i class="fas fa-globe"></i> www.antarestravelperu.com</li>
             </ul>
