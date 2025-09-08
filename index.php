@@ -39,9 +39,8 @@ if (isset($_GET['logout'])) {
     <link rel="icon" type="image/png" href="imagenes/antares_logozz3.png">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
-        :root {
+                :root {
             --primary-bg: #FFFAF0;
             --primary-color: #A27741;
             --primary-dark: #8B6332;
@@ -81,12 +80,12 @@ if (isset($_GET['logout'])) {
         }
 
         .nav-container {
-            max-width: 1200px;
+            max-width: 1440px;
             margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 2rem;
+            padding: 0 2.5rem;
         }
 
         .logo {
@@ -142,7 +141,7 @@ if (isset($_GET['logout'])) {
         .lang-switch {
             display: flex;
             border: 2px solid var(--primary-color);
-            border-radius: 25px;
+            border-radius: 2px;
             overflow: hidden;
         }
 
@@ -232,7 +231,7 @@ if (isset($_GET['logout'])) {
             right: 20px;
             background: var(--white);
             padding: 1rem;
-            border-radius: 10px;
+            border-radius: 2px;
             box-shadow: var(--shadow);
             z-index: 1001;
             display: none;
@@ -469,7 +468,7 @@ if (isset($_GET['logout'])) {
 
         .tour-card {
             background: var(--white);
-            border-radius: 10px;
+            border-radius: 2px;
             overflow: hidden;
             box-shadow: var(--shadow);
             transition: var(--transition);
@@ -566,7 +565,7 @@ if (isset($_GET['logout'])) {
 
         .guia-card {
             background: var(--white);
-            border-radius: 10px;
+            border-radius: 2px;
             padding: 20px;
             text-align: center;
             box-shadow: var(--shadow);
@@ -616,7 +615,7 @@ if (isset($_GET['logout'])) {
 
         .photo-item {
             position: relative;
-            border-radius: 10px;
+            border-radius: 2px;
             overflow: hidden;
             box-shadow: var(--shadow);
         }
@@ -659,7 +658,7 @@ if (isset($_GET['logout'])) {
         .carousel-container {
             position: relative;
             overflow: hidden;
-            border-radius: 10px;
+            border-radius: 2px;
         }
 
         .carousel {
@@ -674,7 +673,7 @@ if (isset($_GET['logout'])) {
 
         .experiencia-card {
             background: var(--white);
-            border-radius: 10px;
+            border-radius: 2px;
             overflow: hidden;
             box-shadow: var(--shadow);
             margin: 0 10px;
@@ -748,7 +747,7 @@ if (isset($_GET['logout'])) {
         .add-experiencia form {
             background: var(--white);
             padding: 20px;
-            border-radius: 10px;
+            border-radius: 2px;
             box-shadow: var(--shadow);
             margin-top: 20px;
         }
@@ -758,7 +757,7 @@ if (isset($_GET['logout'])) {
             min-height: 100px;
             padding: 10px;
             border: 1px solid var(--primary-light);
-            border-radius: 5px;
+            border-radius: 2px;
             margin-bottom: 10px;
         }
 
@@ -778,10 +777,12 @@ if (isset($_GET['logout'])) {
         }
 
         .footer-content {
+            max-width: 1280px;
+            margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 30px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 2.5rem;
+            padding: 0 2.5rem;
         }
 
         .footer-section h3 {
@@ -957,6 +958,14 @@ if (isset($_GET['logout'])) {
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+        .custom-admin-btn2 {
+        padding: 12px 24px;
+        color: #A27741; 
+        border: 1px solid #ffffff; 
+        border-radius: 50px;
+        text-decoration: none;
+    }
     </style>
 </head>
 <body>
@@ -1000,6 +1009,10 @@ if (isset($_GET['logout'])) {
         error_log("Error executing experiences query: " . $conn->error);
         $experiencias_result = false;
     }
+    
+    $cart_count = isset($_SESSION['cart']['total_paquetes']) ? $_SESSION['cart']['total_paquetes'] : 0;
+    
+    $login_to_book = isset($lang['login_to_book']) ? $lang['login_to_book'] : 'Inicia sesión para reservar';
     ?>
 
     <nav class="navbar">
@@ -1016,15 +1029,11 @@ if (isset($_GET['logout'])) {
                 <li><a href="#reservas"><?php echo $lang['nav_reservations']; ?></a></li>
             </ul>
             <div class="auth-buttons">
-                <div class="lang-switch">
-                    <a href="?lang=es" class="lang-btn <?php if ($current_lang == 'es') echo 'active'; ?>"><?php echo $lang['lang_es']; ?></a>
-                    <a href="?lang=en" class="lang-btn <?php if ($current_lang == 'en') echo 'active'; ?>"><?php echo $lang['lang_en']; ?></a>
-                </div>
+
                 <?php if (!$is_logged_in): ?>
                     <a href="src/auth/login.php" class="btn btn-secondary">
                         <i class="fas fa-user"></i> <?php echo $lang['login_button']; ?>
                     </a>
-
                 <?php else: ?>
                     <div class="user-profile">
                         <img src="<?php echo htmlspecialchars($_SESSION['user_picture'] ?? 'imagenes/default-avatar.png'); ?>" alt="Avatar">
@@ -1033,17 +1042,16 @@ if (isset($_GET['logout'])) {
                             <i class="fas fa-sign-out-alt"></i>
                         </a>
                     </div>
-                <?php endif; ?>
-
-                <?php if (isset($_SESSION['user_email'])): ?>
-                    <?php 
-                    $cart_count = isset($_SESSION['cart']['total_paquetes']) ? $_SESSION['cart']['total_paquetes'] : 0;
-                    ?>
-                    <a href="carrito.php" id="cart-icon" class="btn btn-secondary" style="position: relative;">
+                    <a href="src/reserva.php" id="cart-icon" class="btn btn-secondary" style="position: relative;">
                         <i class="fas fa-shopping-cart"></i>
-                        <span id="cart-count" style="position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 12px;"><?php echo $cart_count; ?></span>
+                        <span id="cart-count" style="position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px;"><?php echo $cart_count; ?></span>
                     </a>
                 <?php endif; ?>
+
+                <div class="lang-switch">
+                    <a href="?lang=es" class="lang-btn <?php if ($current_lang == 'es') echo 'active'; ?>"><?php echo $lang['lang_es']; ?></a>
+                    <a href="?lang=en" class="lang-btn <?php if ($current_lang == 'en') echo 'active'; ?>"><?php echo $lang['lang_en']; ?></a>
+                </div>
             </div>
             <div class="mobile-menu" onclick="toggleMobileMenu()">
                 <span></span>
@@ -1060,10 +1068,7 @@ if (isset($_GET['logout'])) {
         <a href="#experiencias"><?php echo $lang['nav_experiences']; ?></a>
         <a href="#reservas"><?php echo $lang['nav_reservations']; ?></a>
         <div class="mobile-auth-buttons">
-            <div class="lang-switch">
-                <a href="?lang=es" class="lang-btn <?php if ($current_lang == 'es') echo 'active'; ?>"><?php echo $lang['lang_es']; ?></a>
-                <a href="?lang=en" class="lang-btn <?php if ($current_lang == 'en') echo 'active'; ?>"><?php echo $lang['lang_en']; ?></a>
-            </div>
+
             <?php if (!$is_logged_in): ?>
                 <button class="btn btn-primary" onclick="toggleGoogleSignin()"><?php echo $lang['login_with_google']; ?></button>
                 <a href="src/auth/login.php" class="btn btn-secondary">
@@ -1080,7 +1085,15 @@ if (isset($_GET['logout'])) {
                         <i class="fas fa-sign-out-alt"></i>
                     </a>
                 </div>
+                <a href="src/reserva.php" id="cart-icon-mobile" class="btn btn-secondary" style="position: relative;">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="cart-count-mobile" style="position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px;"><?php echo $cart_count; ?></span>
+                </a>
             <?php endif; ?>
+            <div class="lang-switch">
+                <a href="?lang=es" class="lang-btn <?php if ($current_lang == 'es') echo 'active'; ?>"><?php echo $lang['lang_es']; ?></a>
+                <a href="?lang=en" class="lang-btn <?php if ($current_lang == 'en') echo 'active'; ?>"><?php echo $lang['lang_en']; ?></a>
+            </div>
         </div>
     </div>
 
@@ -1107,17 +1120,20 @@ if (isset($_GET['logout'])) {
             <div class="hero-content">
                 <h1><?php echo $lang['hero_title']; ?></h1>
                 <p><?php echo $lang['hero_subtitle']; ?></p>
-                <div class="tour-actions">
-                        <?php if (isset($_SESSION['user_email'])): ?>
-                            <button class="btn btn-primary add-to-cart" data-id="<?php echo $tour['id_tour']; ?>" data-titulo="<?php echo htmlspecialchars($tour['titulo']); ?>" data-precio="<?php echo $tour['precio']; ?>">
-                                <i class="fas fa-shopping-cart"></i> Agregar al Carrito
-                            </button>
-                        <?php else: ?>
-                            <a href="src/auth/login.php" class="btn btn-primary">
-                                <i class="fas fa-calendar-plus"></i> Inicia Sesión para Reservar
-                            </a>
-                        <?php endif; ?>
-                    </div>
+                <div class="hero-buttons">
+                    <a href="#tours" class="btn btn-primary">
+                        <i class="fas fa-compass"></i><span><?php echo $lang['hero_button_explore']; ?></span>
+                    </a>
+                    <?php if ($is_logged_in): ?>
+                        <a href="src/reserva.php" class="btn btn-primary" style="background: #F8F3E9; color: var(--primary-color);">
+                            <i class="fas fa-shopping-cart"></i><span><?php echo $lang['hero_button_book']; ?></span>
+                        </a>
+                    <?php else: ?>
+                        <a href="src/auth/login.php" class="btn btn-primary" style="background: #F8F3E9; color: var(--primary-color);">
+                            <i class="fas fa-user"></i><span><?php echo $login_to_book; ?></span>
+                        </a>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
         <div class="hero-indicators">
@@ -1145,6 +1161,7 @@ if (isset($_GET['logout'])) {
 
             <div class="tours-container" id="toursContainer">
                 <?php if ($tours_result && $tours_result->num_rows > 0): ?>
+                    <?php $tours_result->data_seek(0); ?>
                     <?php while ($tour = $tours_result->fetch_assoc()): ?>
                         <?php
                         $categoria = 'cusco';
@@ -1194,10 +1211,9 @@ if (isset($_GET['logout'])) {
                                     <?php endif; ?>
                                 </div>
 
-                                
                                 <div class="tour-actions">
-                                    <a href="src/reserva.php" class="btn btn-primary">
-                                        <i class="fas fa-calendar-plus"></i> <?php echo $lang['tour_card_book']; ?>
+                                    <a href="src/detalles.php?id_tour=<?php echo $tour['id_tour']; ?>" class="btn btn-primary">
+                                        <i class="fas fa-info-circle"></i> <?php echo $lang['tour_card_details']; ?>
                                     </a>
                                 </div>
                             </div>
@@ -1402,60 +1418,57 @@ if (isset($_GET['logout'])) {
         </div>
     </section>
 
-    <footer class="footer" id="contacto">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section"> 
-                    <h3><?php echo $lang['footer_about_title']; ?></h3>
-                    <p><?php echo $lang['footer_about_text']; ?></p>
-                    <div class="social-links">
-                        <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-whatsapp"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-tripadvisor"></i></a>
-                    </div>
-                </div>
-                
-                <div class="footer-section">
-                    <h3><?php echo $lang['footer_contact_title']; ?></h3>
-                    <ul>
-                        <li><i class="fas fa-map-marker-alt"></i> <?php echo $lang['footer_contact_address']; ?></li>
-                        <li><i class="fas fa-phone"></i> +51 966 217 821</li>
-                        <li><i class="fas fa-phone"></i> +51 958 940 100</li>
-                        <li><i class="fas fa-envelope"></i> antares.travel.cusco@gmail.com</li>
-                        <li><i class="fas fa-globe"></i> www.antarestravelcusco.com</li>
-                    </ul>
-                </div>
-                
-                <div class="footer-section">
-                    <h3><?php echo $lang['footer_services_title']; ?></h3>
-                    <ul>
-                        <li><a href="#tours"><?php echo $lang['footer_service_cusco']; ?></a></li>
-                        <li><a href="#tours"><?php echo $lang['footer_service_sacred_valley']; ?></a></li>
-                        <li><a href="#tours"><?php echo $lang['footer_service_machu_picchu']; ?></a></li>
-                        <li><a href="#tours"><?php echo $lang['footer_service_adventure']; ?></a></li>
-                        <li><a href="#guias"><?php echo $lang['footer_service_guides']; ?></a></li>
-                        <li><a href="#tours"><?php echo $lang['footer_service_transport']; ?></a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-section">
-                    <h3><?php echo $lang['footer_legal_title']; ?></h3>
-                    <ul>
-                        <li>RUC: 20XXXXXXXX</li>
-                        <li><?php echo $lang['footer_legal_license']; ?>: XXXX-XXXX</li>
-                        <li><a href="#"><?php echo $lang['footer_legal_terms']; ?></a></li>
-                        <li><a href="#"><?php echo $lang['footer_legal_privacy']; ?></a></li>
-                        <li><a href="#"><?php echo $lang['footer_legal_cancellation']; ?></a></li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="footer-bottom">
-                <p><?php echo $lang['footer_copyright']; ?></p>
+    <footer class="footer">
+    <div class="footer-content">
+        <div class="footer-section"> 
+            <h3><?php echo $lang['footer_about_title']; ?></h3>
+            <p><?php echo $lang['footer_about_text']; ?></p>
+            <div class="social-links">
+                <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-whatsapp"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-tripadvisor"></i></a>
             </div>
         </div>
-    </footer>
+        <div class="footer-section">
+            <h3><?php echo $lang['footer_contact_title']; ?></h3>
+            <ul>
+                <li><i class="fas fa-map-marker-alt"></i> <?php echo $lang['footer_contact_address']; ?></li>
+                <li><i class="fas fa-phone"></i> +51 966 217 821</li>
+                <li><i class="fas fa-phone"></i> +51 958 940 100</li>
+                <li><i class="fas fa-envelope"></i> antares.travel.cusco@gmail.com</li>
+                <li><i class="fas fa-globe"></i> www.antarestravelcusco.com</li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h3><?php echo $lang['footer_services_title']; ?></h3>
+            <ul>
+                <li><a href="../index.php#tours"><?php echo $lang['footer_service_cusco']; ?></a></li>
+                <li><a href="../index.php#tours"><?php echo $lang['footer_service_sacred_valley']; ?></a></li>
+                <li><a href="../index.php#tours"><?php echo $lang['footer_service_machu_picchu']; ?></a></li>
+                <li><a href="../index.php#tours"><?php echo $lang['footer_service_adventure']; ?></a></li>
+                <li><a href="../index.php#guias"><?php echo $lang['footer_service_guides']; ?></a></li>
+                <li><a href="../index.php#tours"><?php echo $lang['footer_service_transport']; ?></a></li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h3><?php echo $lang['footer_legal_title']; ?></h3>
+            <ul>
+                <li>RUC: 20XXXXXXXX</li>
+                <li><?php echo $lang['footer_legal_license']; ?>: XXXX-XXXX</li>
+                <li><a href="#"><?php echo $lang['footer_legal_terms']; ?></a></li>
+                <li><a href="#"><?php echo $lang['footer_legal_privacy']; ?></a></li>
+                <li><a href="#"><?php echo $lang['footer_legal_cancellation']; ?></a></li>
+            </ul>
+            <div class="admin-btn-wrapper" style="margin-top:20px; text-align:center;">
+                <a href="src/admin" class="custom-admin-btn2">Panel Admin</a>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p><?php echo $lang['footer_copyright']; ?></p>
+    </div>
+</footer>
 
     <script>
         let currentHeroImage = 0;
@@ -1737,49 +1750,6 @@ if (isset($_GET['logout'])) {
                 googleSignin.classList.remove('active');
             }
         });
-
-        // Manejo del carrito con AJAX
-document.addEventListener('DOMContentLoaded', function() {
-    const addButtons = document.querySelectorAll('.add-to-cart');
-    addButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            if (!<?php echo isset($_SESSION['user_email']) ? 'true' : 'false'; ?>) {
-                alert('Debes iniciar sesión para agregar al carrito.');
-                window.location.href = 'src/auth/login.php';
-                return;
-            }
-
-            const idTour = this.dataset.id;
-            const titulo = this.dataset.titulo;
-            const precio = parseFloat(this.dataset.precio);
-
-            // AJAX para agregar
-            fetch('agregar_carrito.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `id_tour=${idTour}&titulo=${encodeURIComponent(titulo)}&precio=${precio}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Actualizar contador
-                    document.getElementById('cart-count').textContent = data.total_paquetes;
-                    // Notificación
-                    alert('Tour agregado al carrito!');
-                    // Opcional: Animación en botón
-                    this.style.background = 'green';
-                    setTimeout(() => { this.style.background = ''; }, 1000);
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error al agregar al carrito.');
-            });
-        });
-    });
-});
     </script>
 </body>
 </html>

@@ -1,150 +1,112 @@
 <?php
-// reserva.php
 session_start();
-require_once 'config/conexion.php';
+require_once __DIR__ . '/languages/' . (isset($_SESSION['lang']) ? $_SESSION['lang'] : 'es') . '.php';
+require_once __DIR__ . '/config/conexion.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
-if (!isset($_SESSION['user_email'])) {
-    header("Location: auth/login.php");
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+if (!isset($_SESSION['user_email']) || !filter_var($_SESSION['user_email'], FILTER_VALIDATE_EMAIL)) {
+    header('Location: auth/login.php?redirect=reserva.php');
     exit;
 }
 
-$user_email = $_SESSION['user_email'];
-$user_query = "SELECT id_usuario, nombre FROM usuarios WHERE email = ?";
-$stmt = $conn->prepare($user_query);
-$stmt->bind_param("s", $user_email);
-$stmt->execute();
-$result = $stmt->get_result();
-$user = $result->fetch_assoc();
-$id_usuario = $user['id_usuario'] ?? null;
-$user_name = $user['nombre'] ?? '';
+// Set language
+if (isset($_GET['lang']) && in_array($_GET['lang'], ['es', 'en'])) {
+    $_SESSION['lang'] = $_GET['lang'];
+}
+$current_lang = isset($_SESSION['lang']) ? $_SESSION['lang'] : 'es';
 
-$tours_query = "SELECT id_tour, titulo, precio FROM tours ORDER BY titulo";
-$tours_result = $conn->query($tours_query);
-
-$is_whatsapp = false;
-
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $id_tour = $_POST['id_tour'] ?? '';
-    $fecha_tour = $_POST['fecha_tour'] ?? '';
-    $observaciones = $_POST['observaciones'] ?? '';
-
-    // Arrays para múltiples pasajeros
-    $nombres = $_POST['nombre'] ?? [];
-    $apellidos = $_POST['apellido'] ?? [];
-    $dnis = $_POST['dni'] ?? [];
-    $nacionalidades = $_POST['nacionalidad'] ?? [];
-    $telefonos = $_POST['telefono'] ?? [];
-    $tipos = $_POST['tipo'] ?? [];
-
-    if (isset($_POST['whatsapp'])) {
-        $is_whatsapp = true;
+// Get user ID
+if (!isset($_SESSION['user_id'])) {
+    $query_user = "SELECT id_usuario FROM usuarios WHERE email = ?";
+    $stmt_user = $conn->prepare($query_user);
+    $stmt_user->bind_param("s", $_SESSION['user_email']);
+    $stmt_user->execute();
+    $result_user = $stmt_user->get_result();
+    if ($user = $result_user->fetch_assoc()) {
+        $_SESSION['user_id'] = $user['id_usuario'];
+    } else {
+        error_log("User not found for email: {$_SESSION['user_email']}");
+        die('Error: User not found.');
     }
+    $stmt_user->close();
+}
 
-    // Validación básica
-    $errors = [];
-    if (empty($id_tour) || empty($fecha_tour)) {
-        $errors[] = 'Tour y fecha son requeridos.';
+$id_usuario = $_SESSION['user_id'];
+$cart = $_SESSION['cart'] ?? ['paquetes' => [], 'total_paquetes' => 0];
+
+if (empty($cart['paquetes'])) {
+    header('Location: ../index.php?empty_cart=1');
+    exit;
+}
+
+// Handle remove item
+if (isset($_POST['remove_item']) && isset($_POST['index'])) {
+    $index = filter_input(INPUT_POST, 'index', FILTER_VALIDATE_INT);
+    if ($index !== false && isset($cart['paquetes'][$index])) {
+        unset($cart['paquetes'][$index]);
+        $cart['paquetes'] = array_values($cart['paquetes']);
+        $cart['total_paquetes'] = count($cart['paquetes']);
+        $_SESSION['cart'] = $cart;
+        header('Location: reserva.php');
+        exit;
     }
-    $num_pasajeros = count($nombres);
-    if ($num_pasajeros < 1) {
-        $errors[] = 'Debe agregar al menos un pasajero.';
+}
+
+// Get tour details
+$tour_details = [];
+$total_price = 0;
+foreach ($cart['paquetes'] as $item) {
+    $query_tour = "SELECT id_tour, titulo, descripcion, precio, hora_salida, hora_llegada, lugar_salida FROM tours WHERE id_tour = ?";
+    $stmt_tour = $conn->prepare($query_tour);
+    $stmt_tour->bind_param("i", $item['id_tour']);
+    $stmt_tour->execute();
+    $result = $stmt_tour->get_result();
+    if ($tour_detail = $result->fetch_assoc()) {
+        $tour_detail['total_price'] = $tour_detail['precio'] * ($item['adultos'] + $item['ninos']);
+        $total_price += $tour_detail['total_price'];
+        $tour_details[$item['id_tour']] = $tour_detail;
+    } else {
+        error_log("Tour not found for id_tour: {$item['id_tour']}");
+        die("Error: Tour ID {$item['id_tour']} not found.");
     }
-    for ($i = 0; $i < $num_pasajeros; $i++) {
-        if (empty($nombres[$i]) || empty($apellidos[$i]) || empty($dnis[$i])) {
-            $errors[] = "Pasajero " . ($i + 1) . ": Nombre, apellido y DNI son requeridos.";
-        }
-        // Tipo por defecto
-        $tipos[$i] = $tipos[$i] ?? 'Adulto';
+    $stmt_tour->close();
+}
+
+$contacto = [
+    'nombre' => $_SESSION['user_name'] ?? '',
+    'email' => $_SESSION['user_email'] ?? '',
+    'telefono' => $_SESSION['user_phone'] ?? ''
+];
+
+function getImagePath($imagePath) {
+    $fallbackImage = 'https://images.unsplash.com/photo-1587595431973-160d0d94add1?w=1200&h=600&fit=crop&crop=center';
+    if (empty($imagePath) || !is_string($imagePath)) {
+        return $fallbackImage;
     }
-    if ($is_whatsapp && empty($telefonos[0])) {
-        $errors[] = 'El teléfono del primer pasajero es requerido para enviar por WhatsApp.';
+    if (preg_match('/^https?:\/\//i', $imagePath)) {
+        return htmlspecialchars($imagePath, ENT_QUOTES, 'UTF-8');
     }
-
-    if (empty($errors)) {
-        // Obtener precio del tour
-        $tour_query = "SELECT precio, titulo FROM tours WHERE id_tour = ?";
-        $stmt = $conn->prepare($tour_query);
-        $stmt->bind_param("i", $id_tour);
-        $stmt->execute();
-        $tour_result = $stmt->get_result();
-        $tour = $tour_result->fetch_assoc();
-        $precio_unitario = $tour['precio'] ?? 0;
-        $monto_total = $precio_unitario * $num_pasajeros; // Asumiendo mismo precio por pasajero
-        $tour_titulo = $tour['titulo'] ?? '';
-
-        // Transacción para inserts atómicos
-        $conn->begin_transaction();
-        try {
-            // Insertar reserva
-            $insert_reserva = "INSERT INTO reservas (id_usuario, id_tour, fecha_tour, monto_total, observaciones, estado) VALUES (?, ?, ?, ?, ?, 'Pendiente')";
-            $stmt = $conn->prepare($insert_reserva);
-            $stmt->bind_param("iisds", $id_usuario, $id_tour, $fecha_tour, $monto_total, $observaciones);
-            $stmt->execute();
-            $id_reserva = $conn->insert_id;
-
-            // Insertar pasajeros
-            $insert_pasajero = "INSERT INTO pasajeros (id_reserva, nombre, apellido, dni_pasaporte, nacionalidad, telefono, tipo_pasajero) VALUES (?, ?, ?, ?, ?, ?, ?)";
-            $stmt = $conn->prepare($insert_pasajero);
-            for ($i = 0; $i < $num_pasajeros; $i++) {
-                $nacionalidad = $nacionalidades[$i] ?? '';
-                $telefono = $telefonos[$i] ?? '';
-                // Agregar código de país automáticamente si es Perú y no tiene prefijo
-                if (strtolower($nacionalidad) === 'peru' || strtolower($nacionalidad) === 'perú') {
-                    $telefono = preg_replace('/[^0-9]/', '', $telefono);
-                    if (strlen($telefono) === 9 && !str_starts_with($telefono, '51')) {
-                        $telefono = '+51' . $telefono;
-                    } elseif (!str_starts_with($telefono, '+')) {
-                        $telefono = '+' . $telefono;
-                    }
-                }
-                $stmt->bind_param("issssss", $id_reserva, $nombres[$i], $apellidos[$i], $dnis[$i], $nacionalidad, $telefono, $tipos[$i]);
-                $stmt->execute();
-            }
-
-            $conn->commit();
-
-            $boleta_url = 'http://' . $_SERVER['HTTP_HOST'] . '/boleta.php?id_reserva=' . $id_reserva;
-
-            if ($is_whatsapp) {
-                // Preparar número de WhatsApp del primer pasajero
-                $telefono_ws = preg_replace('/[^0-9]/', '', $telefonos[0] ?? ''); // Limpiar
-                if (strlen($telefono_ws) == 9) { // Número peruano típico
-                    $telefono_ws = '51' . $telefono_ws;
-                } elseif (strlen($telefono_ws) == 10 && substr($telefono_ws, 0, 1) == '0') {
-                    $telefono_ws = '51' . substr($telefono_ws, 1);
-                } elseif (!str_starts_with($telefono_ws, '51') && !str_starts_with($telefono_ws, '+51')) {
-                    $telefono_ws = '51' . $telefono_ws;
-                }
-                // Mensaje para "guardar" en su propio WhatsApp
-                $nombre_ws = $nombres[0] ?? '';
-                $apellido_ws = $apellidos[0] ?? '';
-                $message = urlencode("Boleta de reserva para $nombre_ws $apellido_ws: $boleta_url");
-                $wa_url = "https://wa.me/$telefono_ws?text=$message";
-                header("Location: $wa_url");
-                exit;
-            } else {
-                // Redirigir a la página de boleta
-                header("Location: boleta.php?id_reserva=" . $id_reserva);
-                exit;
-            }
-        } catch (Exception $e) {
-            $conn->rollback();
-            $errors[] = 'Error al procesar la reserva: ' . $e->getMessage();
-        }
+    $imagePath = str_replace('\\', '/', trim($imagePath, '/\\'));
+    $baseDir = '../Uploads/tours/';
+    if (strpos($imagePath, 'uploads/') !== false) {
+        $baseDir = '../';
+    } elseif (strpos($imagePath, 'tours/') !== false) {
+        $baseDir = '../Uploads/';
     }
-
-    if (!empty($errors)) {
-        echo "<script>alert('" . implode("\\n", $errors) . "');</script>";
-    }
+    $fullPath = $baseDir . $imagePath;
+    return file_exists($fullPath) ? htmlspecialchars($fullPath, ENT_QUOTES, 'UTF-8') : $fallbackImage;
 }
 ?>
 
 <!DOCTYPE html>
-<html lang="es">
+<html lang="<?php echo $current_lang; ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reservas - Antares Travel Peru</title>
+    <title><?php echo $lang['cart_title'] ?? 'Your Cart'; ?> - Antares Travel Peru</title>
     <link rel="icon" type="image/png" href="../imagenes/antares_logozz3.png">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -158,19 +120,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             --text-dark: #2c2c2c;
             --text-light: #666;
             --white: #ffffff;
-            --transition: all 0.3s ease;
-            --shadow: 0 8px 24px rgba(162, 119, 65, 0.1);
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow: 0 10px 30px rgba(162, 119, 65, 0.15);
+            --shadow-hover: 0 15px 50px rgba(162, 119, 65, 0.25);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Poppins', sans-serif;
-            line-height: 1.6;
+            line-height: 1.7;
             color: var(--text-dark);
             background: var(--primary-bg);
             overflow-x: hidden;
@@ -180,55 +138,52 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             position: fixed;
             top: 0;
             width: 100%;
-            background: rgba(255, 250, 240, 0.95);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 250, 240, 0.92);
+            backdrop-filter: blur(20px);
             z-index: 1000;
-            padding: 1rem 0;
+            padding: 1.2rem 0;
             transition: var(--transition);
-            border-bottom: 1px solid rgba(162, 119, 65, 0.1);
+            border-bottom: 1px solid rgba(162, 119, 65, 0.15);
         }
 
+        .navbar.scrolled { background: rgba(255, 250, 240, 0.98); box-shadow: var(--shadow); }
         .nav-container {
-            max-width: 1200px;
+            max-width: 1440px;
             margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 2rem;
+            padding: 0 2.5rem;
         }
 
         .logo {
             display: flex;
             align-items: center;
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             font-weight: 700;
             color: var(--primary-color);
             text-decoration: none;
-            gap: 10px;
+            gap: 12px;
+            transition: var(--transition);
         }
 
-        .nav-links {
-            display: flex;
-            list-style: none;
-            gap: 2rem;
-        }
-
+        .logo img { vertical-align: middle; transition: transform 0.3s ease; }
+        .logo:hover img { transform: scale(1.1); }
+        .nav-links { display: flex; list-style: none; gap: 2.5rem; }
         .nav-links a {
             color: var(--text-dark);
             text-decoration: none;
             font-weight: 500;
+            font-size: 1rem;
             transition: var(--transition);
             position: relative;
         }
 
-        .nav-links a:hover {
-            color: var(--primary-color);
-        }
-
+        .nav-links a:hover { color: var(--primary-color); }
         .nav-links a::after {
             content: '';
             position: absolute;
-            bottom: -5px;
+            bottom: -6px;
             left: 0;
             width: 0;
             height: 2px;
@@ -236,62 +191,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             transition: var(--transition);
         }
 
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
-        .auth-buttons {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            position: relative;
-        }
-
+        .nav-links a:hover::after { width: 100%; }
+        .auth-buttons { display: flex; align-items: center; gap: 1.2rem; }
         .lang-switch {
             display: flex;
             border: 2px solid var(--primary-color);
-            border-radius: 25px;
+            border-radius: 50px;
             overflow: hidden;
+            background: var(--white);
         }
 
         .lang-btn {
-            padding: 0.5rem 1rem;
-            border: none;
+            padding: 0.6rem 1.2rem;
+            text-decoration: none;
             background: transparent;
             color: var(--primary-color);
             cursor: pointer;
             transition: var(--transition);
             font-weight: 600;
+            font-size: 0.9rem;
         }
 
-        .lang-btn.active {
-            background: var(--primary-color);
-            color: var(--white);
-        }
-
+        .lang-btn.active { background: var(--primary-color); color: var(--white); }
         .btn {
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.7rem 1.5rem;
+            gap: 0.6rem;
+            padding: 0.8rem 1.8rem;
             border: none;
             border-radius: 50px;
             text-decoration: none;
             font-weight: 600;
+            font-size: 0.95rem;
             transition: var(--transition);
             cursor: pointer;
-            height: 40px;
-        }
-
-        .btn-primary {
-            background: var(--primary-color);
-            color: var(--white);
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
         }
 
         .btn-secondary {
@@ -303,244 +238,178 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .btn-secondary:hover {
             background: var(--primary-color);
             color: var(--white);
+            transform: translateY(-3px);
         }
 
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            position: relative;
-        }
-
+        .user-profile { display: flex; align-items: center; gap: 0.8rem; }
         .user-profile img {
-            width: 40px;
-            height: 40px;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
             border: 2px solid var(--primary-color);
             object-fit: cover;
-        }
-
-        .user-profile span {
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: var(--text-dark);
-        }
-
-        .user-profile .logout-btn {
-            padding: 0.5rem;
-            background: none;
-            border: none;
-            color: var(--primary-color);
-            cursor: pointer;
-        }
-
-        .google-signin-container {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            background: var(--white);
-            padding: 1rem;
-            border-radius: 10px;
-            box-shadow: var(--shadow);
-            z-index: 1001;
-            display: none;
             transition: var(--transition);
         }
 
-        .google-signin-container.active {
-            display: block;
-        }
-
-        .google-signin-container .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: none;
-            border: none;
-            font-size: 1.2rem;
-            cursor: pointer;
-            color: var(--text-light);
-        }
-
-        .mobile-menu {
-            display: none;
-            flex-direction: column;
-            cursor: pointer;
-            gap: 4px;
-            z-index: 1001;
-        }
-
+        .user-profile span { font-size: 0.95rem; font-weight: 500; color: var(--text-dark); }
+        .logout-btn { color: var(--primary-color); text-decoration: none; transition: var(--transition); }
+        .logout-btn:hover { color: var(--primary-dark); }
+        .mobile-menu { display: none; flex-direction: column; cursor: pointer; gap: 5px; z-index: 1001; }
         .mobile-menu span {
-            width: 25px;
+            width: 28px;
             height: 3px;
             background: var(--primary-color);
+            border-radius: 2px;
             transition: var(--transition);
         }
 
+        .mobile-menu.active span:first-child { transform: rotate(45deg) translate(6px, 6px); }
+        .mobile-menu.active span:nth-child(2) { opacity: 0; }
+        .mobile-menu.active span:last-child { transform: rotate(-45deg) translate(8px, -8px); }
         .mobile-nav {
             position: fixed;
             top: 80px;
             right: -100%;
             width: 100%;
-            max-width: 300px;
+            max-width: 320px;
             height: calc(100vh - 80px);
             background: var(--white);
             box-shadow: var(--shadow);
-            transition: var(--transition);
+            transition: right 0.4s ease;
             z-index: 999;
             padding: 2rem;
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 1.2rem;
         }
 
-        .mobile-nav.active {
-            right: 0;
-        }
-
+        .mobile-nav.active { right: 0; }
         .mobile-nav a {
             color: var(--text-dark);
             text-decoration: none;
             padding: 1rem 0;
             border-bottom: 1px solid rgba(162, 119, 65, 0.1);
             font-weight: 500;
+            font-size: 1rem;
+            transition: var(--transition);
         }
 
-        .mobile-auth-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .section {
-            padding: 80px 0;
-        }
-
-        .section-header {
-            text-align: center;
-            margin-bottom: 50px;
-        }
-
-        .section-title {
-            font-size: 2.5rem;
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-            position: relative;
-        }
-
-        .section-title::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60px;
-            height: 3px;
-            background: var(--primary-light);
-        }
-
-        .section-subtitle {
-            font-size: 1.1rem;
-            color: var(--text-light);
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        form {
-            max-width: 600px;
-            margin: 0 auto;
+        .mobile-nav a:hover { color: var(--primary-color); padding-left: 1.2rem; }
+        .cart-section { max-width: 1200px; margin: 80px auto 2rem; padding: 0 2rem; animation: fadeInUp 0.8s ease-out; }
+        .cart-item {
             background: var(--white);
-            padding: 20px;
-            border-radius: 10px;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
             box-shadow: var(--shadow);
+            display: flex;
+            gap: 1rem;
+            animation: fadeInUp 0.6s ease-out;
         }
 
-        form div {
-            margin-bottom: 15px;
-        }
-
-        form label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-        }
-
-        form input, form select, form textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid var(--primary-light);
-            border-radius: 5px;
-        }
-
-        form button {
-            margin-right: 10px;
-        }
-
-        .pasajero {
-            border: 1px solid var(--primary-light);
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-        }
-
-        .remove-pasajero {
-            background: red;
+        .cart-item img { width: 100px; height: 100px; object-fit: cover; border-radius: 8px; }
+        .cart-details { flex: 1; }
+        .tour-info { margin-bottom: 1rem; }
+        .tour-icon { color: var(--primary-color); margin-right: 0.5rem; }
+        .tour-description { font-style: italic; color: var(--text-light); margin-top: 0.5rem; }
+        .quantities { display: flex; gap: 1rem; margin: 0.5rem 0; font-weight: 500; }
+        .remove-btn {
+            background: #dc3545;
             color: white;
             border: none;
-            padding: 5px 10px;
-            cursor: pointer;
+            padding: 0.5rem 1rem;
             border-radius: 5px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .remove-btn:hover { background: #c82333; }
+        .contact-form, .passenger-section {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            box-shadow: var(--shadow);
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .passenger-form {
+            border: 1px solid rgba(162, 119, 65, 0.2);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .form-group { margin-bottom: 1.5rem; position: relative; }
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid rgba(162, 119, 65, 0.2);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus { border-color: var(--primary-color); outline: none; }
+        .confirm-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .confirm-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+        .iti { width: 100%; }
+        .iti__flag-container { padding: 0.5rem; }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .footer {
             background: var(--primary-dark);
             color: var(--white);
-            padding: 40px 0 20px;
+            padding: 3.5rem 0 1.5rem;
+            margin-top: 3rem;
         }
 
         .footer-content {
+            max-width: 1280px;
+            margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 30px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 2.5rem;
+            padding: 0 2.5rem;
         }
 
-        .footer-section h3 {
-            color: var(--primary-light);
-            margin-bottom: 15px;
-            font-size: 1.2rem;
-        }
-
-        .footer-section p, .footer-section li {
-            color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 8px;
-            line-height: 1.5;
-        }
-
-        .footer-section ul {
-            list-style: none;
-        }
-
+        .footer-section h3 { color: var(--primary-light); margin-bottom: 1.2rem; font-size: 1.3rem; }
+        .footer-section ul { list-style: none; }
+        .footer-section ul li { margin-bottom: 0.7rem; }
         .footer-section a {
-            color: rgba(255, 255, 255, 0.8);
+            color: rgba(255, 255, 255, 0.85);
             text-decoration: none;
             transition: var(--transition);
         }
 
-        .footer-section a:hover {
-            color: var(--primary-light);
-        }
-
-        .social-links {
-            display: flex;
-            gap: 12px;
-            margin-top: 15px;
-        }
-
+        .footer-section a:hover { color: var(--primary-light); padding-left: 0.5rem; }
+        .social-links { display: flex; gap: 1.2rem; margin-top: 1.2rem; }
         .social-link {
-            width: 36px;
-            height: 36px;
+            width: 44px;
+            height: 44px;
             background: var(--primary-color);
             border-radius: 50%;
             display: flex;
@@ -553,61 +422,58 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         .social-link:hover {
             background: var(--primary-light);
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
         }
 
         .footer-bottom {
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-            padding-top: 15px;
             text-align: center;
-            color: rgba(255, 255, 255, 0.6);
+            margin-top: 2.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.25);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
         }
 
         @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
-
-            .auth-buttons {
-                display: none;
-            }
-
-            .mobile-menu {
-                display: flex;
-            }
-
-            .container {
-                padding: 0 1rem;
-            }
+            .cart-item { flex-direction: column; text-align: center; }
+            .nav-links, .auth-buttons { display: none; }
+            .mobile-menu { display: flex; }
+            .cart-section { padding: 0 1rem; }
         }
+
+        .price-info { font-weight: 600; color: var(--primary-color); margin-top: 0.5rem; }
     </style>
 </head>
 <body>
-    <nav class="navbar">
+    <nav class="navbar" id="navbar">
         <div class="nav-container">
             <a href="../index.php#inicio" class="logo">
                 <img src="../imagenes/antares_logozz2.png" alt="Antares Travel Peru Logo" height="50" loading="lazy">
                 ANTARES TRAVEL PERU
             </a>
             <ul class="nav-links">
-                <li><a href="../index.php#inicio">Inicio</a></li>
-                <li><a href="../index.php#tours">Tours</a></li>
-                <li><a href="../index.php#guias">Guías</a></li>
-                <li><a href="../index.php#experiencias">Experiencias</a></li>
-                <li><a href="../index.php#reservas">Reservas</a></li>
+                <li><a href="../index.php#inicio"><?php echo $lang['nav_home'] ?? 'Home'; ?></a></li>
+                <li><a href="../index.php#tours"><?php echo $lang['nav_tours'] ?? 'Tours'; ?></a></li>
+                <li><a href="../index.php#guias"><?php echo $lang['nav_guides'] ?? 'Guides'; ?></a></li>
+                <li><a href="../index.php#experiencias"><?php echo $lang['nav_experiences'] ?? 'Experiences'; ?></a></li>
+                <li><a href="../index.php#reservas"><?php echo $lang['nav_reservations'] ?? 'Reservations'; ?></a></li>
             </ul>
             <div class="auth-buttons">
-                <div class="lang-switch">
-                    <button class="lang-btn active" data-lang="es">ES</button>
-                    <button class="lang-btn" data-lang="en">EN</button>
-                    <button class="lang-btn" data-lang="fr">FR</button>
-                </div>
                 <div class="user-profile">
                     <img src="<?php echo htmlspecialchars($_SESSION['user_picture'] ?? '../imagenes/default-avatar.png'); ?>" alt="Avatar">
                     <span><?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
-                    <a href="../index.php?logout=1" class="logout-btn">
+                    <a href="../index.php?logout=1" class="logout-btn" title="<?php echo $lang['logout_button'] ?? 'Log Out'; ?>">
                         <i class="fas fa-sign-out-alt"></i>
                     </a>
+                </div>
+                <a href="reserva.php" class="btn btn-secondary" style="position: relative;">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span style="position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px;"><?php echo $cart['total_paquetes']; ?></span>
+                </a>
+                <div class="lang-switch">
+                    <a href="?lang=es" class="lang-btn <?php echo $current_lang == 'es' ? 'active' : ''; ?>"><?php echo $lang['lang_es'] ?? 'ES'; ?></a>
+                    <a href="?lang=en" class="lang-btn <?php echo $current_lang == 'en' ? 'active' : ''; ?>"><?php echo $lang['lang_en'] ?? 'EN'; ?></a>
                 </div>
             </div>
             <div class="mobile-menu" onclick="toggleMobileMenu()">
@@ -619,212 +485,274 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </nav>
 
     <div class="mobile-nav" id="mobileNav">
-        <a href="../index.php#inicio">Inicio</a>
-        <a href="../index.php#tours">Tours</a>
-        <a href="../index.php#guias">Guías</a>
-        <a href="../index.php#experiencias">Experiencias</a>
-        <a href="../index.php#reservas">Reservas</a>
+        <a href="../index.php#inicio"><?php echo $lang['nav_home'] ?? 'Home'; ?></a>
+        <a href="../index.php#tours"><?php echo $lang['nav_tours'] ?? 'Tours'; ?></a>
+        <a href="../index.php#guias"><?php echo $lang['nav_guides'] ?? 'Guides'; ?></a>
+        <a href="../index.php#experiencias"><?php echo $lang['nav_experiences'] ?? 'Experiences'; ?></a>
+        <a href="../index.php#reservas"><?php echo $lang['nav_reservations'] ?? 'Reservations'; ?></a>
         <div class="mobile-auth-buttons">
-            <div class="lang-switch">
-                <button class="lang-btn active" data-lang="es">ES</button>
-                <button class="lang-btn" data-lang="en">EN</button>
-                <button class="lang-btn" data-lang="fr">FR</button>
-            </div>
             <div class="user-profile">
                 <img src="<?php echo htmlspecialchars($_SESSION['user_picture'] ?? '../imagenes/default-avatar.png'); ?>" alt="Avatar">
                 <span><?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
-                <a href="../index.php?logout=1" class="logout-btn">
+                <a href="../index.php?logout=1" class="logout-btn" title="<?php echo $lang['logout_button'] ?? 'Log Out'; ?>">
                     <i class="fas fa-sign-out-alt"></i>
                 </a>
+            </div>
+            <a href="reserva.php" class="btn btn-secondary" style="position: relative;">
+                <i class="fas fa-shopping-cart"></i>
+                <span style="position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px;"><?php echo $cart['total_paquetes']; ?></span>
+            </a>
+            <div class="lang-switch">
+                <a href="?lang=es" class="lang-btn <?php echo $current_lang == 'es' ? 'active' : ''; ?>"><?php echo $lang['lang_es'] ?? 'ES'; ?></a>
+                <a href="?lang=en" class="lang-btn <?php echo $current_lang == 'en' ? 'active' : ''; ?>"><?php echo $lang['lang_en'] ?? 'EN'; ?></a>
             </div>
         </div>
     </div>
 
-    <section class="section">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Formulario de Reserva</h2>
-                <p class="section-subtitle">Completa los datos para realizar tu reserva</p>
-            </div>
-
-            <form method="POST" action="">
-                <div>
-                    <label for="id_tour">Tour:</label>
-                    <select name="id_tour" id="id_tour" required>
-                        <?php while ($tour = $tours_result->fetch_assoc()): ?>
-                            <option value="<?php echo $tour['id_tour']; ?>">
-                                <?php echo htmlspecialchars($tour['titulo']); ?> - S/ <?php echo $tour['precio']; ?>
-                            </option>
-                        <?php endwhile; ?>
-                    </select>
-                </div>
-
-                <div>
-                    <label for="fecha_tour">Fecha del Tour:</label>
-                    <input type="date" name="fecha_tour" id="fecha_tour" required min="<?php echo date('Y-m-d'); ?>">
-                </div>
-
-                <h3>Pasajeros</h3>
-                <div id="pasajeros">
-                    <div class="pasajero">
-                        <h4>Pasajero 1</h4>
-                        <div>
-                            <label for="nombre[]">Nombre:</label>
-                            <input type="text" name="nombre[]" required>
+    <section class="cart-section">
+        <h1 class="fade-in"><?php echo $lang['cart_title'] ?? 'Your Reservation Cart'; ?></h1>
+        <form method="POST" action="reserva.php">
+            <?php foreach ($cart['paquetes'] as $index => $item): 
+                $detail = $tour_details[$item['id_tour']] ?? [];
+                $hora_salida = $detail['hora_salida'] ? date('H:i', strtotime($detail['hora_salida'])) : 'TBD';
+                $hora_llegada = $detail['hora_llegada'] ? date('H:i', strtotime($detail['hora_llegada'])) : 'TBD';
+                $descripcion = $detail['descripcion'] ?? 'No description available.';
+                $lugar_salida = $detail['lugar_salida'] ?? 'Cusco';
+            ?>
+                <div class="cart-item">
+                    <img src="<?php echo getImagePath($item['imagen']); ?>" alt="<?php echo htmlspecialchars($item['titulo']); ?>">
+                    <div class="cart-details">
+                        <h3><?php echo htmlspecialchars($item['titulo']); ?></h3>
+                        <div class="tour-info">
+                            <i class="fas fa-map-marker-alt tour-icon"></i>
+                            <span>Departure: <?php echo htmlspecialchars($lugar_salida); ?></span>
                         </div>
-                        <div>
-                            <label for="apellido[]">Apellido:</label>
-                            <input type="text" name="apellido[]" required>
+                        <div class="tour-info">
+                            <i class="fas fa-clock tour-icon"></i>
+                            <span>Time: <?php echo $hora_salida; ?> to <?php echo $hora_llegada; ?></span>
                         </div>
-                        <div>
-                            <label for="dni[]">DNI/Pasaporte:</label>
-                            <input type="text" name="dni[]" required>
+                        <div class="tour-description">
+                            <i class="fas fa-info-circle tour-icon"></i>
+                            <p><?php echo nl2br(htmlspecialchars(substr($descripcion, 0, 200)) . (strlen($descripcion) > 200 ? '...' : '')); ?></p>
                         </div>
-                        <div>
-                            <label for="nacionalidad[]">Nacionalidad:</label>
-                            <input type="text" name="nacionalidad[]">
+                        <div class="quantities">
+                            <span><i class="fas fa-user"></i> Adults: <?php echo $item['adultos']; ?> x $<?php echo number_format($detail['precio'] ?? 0, 2); ?></span>
+                            <span><i class="fas fa-child"></i> Children: <?php echo $item['ninos']; ?> x $<?php echo number_format($detail['precio'] ?? 0, 2); ?></span>
+                            <span><i class="fas fa-baby"></i> Infants: <?php echo $item['infantes']; ?> x $0.00</span>
                         </div>
-                        <div>
-                            <label for="telefono[]">Teléfono :</label>
-                            <input type="text" name="telefono[]" placeholder="999999999">
+                        <div class="price-info">
+                            Total for this tour: $<?php echo number_format($detail['total_price'] ?? 0, 2); ?>
                         </div>
-                        <div>
-                            <label for="tipo[]">Tipo de Pasajero:</label>
-                            <select name="tipo[]">
-                                <option value="Adulto">Adulto</option>
-                                <option value="Niño">Niño</option>
-                                <option value="Infante">Infante</option>
-                            </select>
-                        </div>
-                        <button type="button" class="remove-pasajero" style="display:none;" onclick="removePasajero(this)">Eliminar Pasajero</button>
                     </div>
+                    <input type="hidden" name="index" value="<?php echo $index; ?>">
+                    <button type="submit" name="remove_item" class="remove-btn" onclick="return confirm('<?php echo $lang['remove_confirm'] ?? 'Remove this tour from cart?'; ?>');">
+                        <i class="fas fa-trash"></i> Remove
+                    </button>
                 </div>
-                <button type="button" onclick="addPasajero()">Añadir Pasajero</button>
+            <?php endforeach; ?>
+            <div class="price-info" style="text-align: right; font-size: 1.2rem;">
+                Total Price: $<?php echo number_format($total_price, 2); ?>
+            </div>
+        </form>
 
-                <div>
-                    <label for="observaciones">Observaciones:</label>
-                    <textarea name="observaciones" id="observaciones"></textarea>
+        <div class="contact-form">
+            <h2><i class="fas fa-user"></i> <?php echo $lang['contact_details'] ?? 'Contact Details (Main Contact)'; ?></h2>
+            <form method="POST" action="boleta.php" id="reservaForm">
+                <input type="hidden" name="total_tours" value="<?php echo count($cart['paquetes']); ?>">
+                <input type="hidden" name="total_price" value="<?php echo $total_price; ?>">
+                <div class="form-group">
+                    <label class="form-label" for="contacto_nombre"><i class="fas fa-user"></i> Name:</label>
+                    <input type="text" id="contacto_nombre" name="contacto[nombre]" class="form-input" value="<?php echo htmlspecialchars($contacto['nombre']); ?>" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="contacto_email"><i class="fas fa-envelope"></i> Email:</label>
+                    <input type="email" id="contacto_email" name="contacto[email]" class="form-input" value="<?php echo htmlspecialchars($contacto['email']); ?>" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="contacto_telefono"><i class="fas fa-phone"></i> Phone:</label>
+                    <input type="tel" id="contacto_telefono" name="contacto[telefono]" class="form-input" value="<?php echo htmlspecialchars($contacto['telefono']); ?>" required>
                 </div>
 
-                <button type="submit" class="btn btn-primary">Reservar y Ver Boleta</button>
-                <button type="submit" name="whatsapp" value="1" class="btn btn-secondary">Reservar y Enviar por WhatsApp</button>
+                <?php foreach ($cart['paquetes'] as $tour_index => $item): 
+                    $detail = $tour_details[$item['id_tour']] ?? [];
+                ?>
+                    <div class="passenger-section">
+                        <h3><i class="fas fa-map-signs"></i> <?php echo htmlspecialchars($item['titulo']); ?> - Date: <?php echo date('d/m/Y', strtotime($item['fecha'])); ?></h3>
+                        <p><i class="fas fa-clock"></i> Time: <?php echo $hora_salida; ?> to <?php echo $hora_llegada; ?></p>
+                        <div class="price-info">Price per person: $<?php echo number_format($detail['precio'] ?? 0, 2); ?> (Infants free)</div>
+
+                        <?php 
+                        // Adults
+                        for ($a = 0; $a < $item['adultos']; $a++): ?>
+                            <div class="passenger-form">
+                                <h4><i class="fas fa-user"></i> Adult <?php echo $a+1; ?></h4>
+                                <input type="hidden" name="pasajeros[<?php echo $tour_index; ?>][adultos][<?php echo $a; ?>][tipo]" value="Adulto">
+                                <div class="form-group">
+                                    <label class="form-label"><i class="fas fa-user"></i> Name:</label>
+                                    <input type="text" name="pasajeros[<?php echo $tour_index; ?>][adultos][<?php echo $a; ?>][nombre]" class="form-input" placeholder="Name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label"><i class="fas fa-user"></i> Last Name:</label>
+                                    <input type="text" name="pasajeros[<?php echo $tour_index; ?>][adultos][<?php echo $a; ?>][apellido]" class="form-input" placeholder="Last Name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label"><i class="fas fa-globe"></i> Nationality:</label>
+                                    <input type="text" name="pasajeros[<?php echo $tour_index; ?>][adultos][<?php echo $a; ?>][nacionalidad]" class="form-input" placeholder="Nationality" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label"><i class="fas fa-id-card"></i> DNI/Passport:</label>
+                                    <input type="text" name="pasajeros[<?php echo $tour_index; ?>][adultos][<?php echo $a; ?>][dni_pasaporte]" class="form-input" placeholder="DNI or Passport Number" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label"><i class="fas fa-phone"></i> Phone:</label>
+                                    <input type="tel" name="pasajeros[<?php echo $tour_index; ?>][adultos][<?php echo $a; ?>][telefono]" class="form-input" placeholder="Phone" required>
+                                </div>
+                            </div>
+                        <?php endfor; 
+
+                        // Children
+                        for ($n = 0; $n < $item['ninos']; $n++): ?>
+                            <div class="passenger-form">
+                                <h4><i class="fas fa-child"></i> Child <?php echo $n+1; ?></h4>
+                                <input type="hidden" name="pasajeros[<?php echo $tour_index; ?>][ninos][<?php echo $n; ?>][tipo]" value="Niño">
+                                <div class="form-group">
+                                    <label class="form-label"><i class="fas fa-user"></i> Name:</label>
+                                    <input type="text" name="pasajeros[<?php echo $tour_index; ?>][ninos][<?php echo $n; ?>][nombre]" class="form-input" placeholder="Name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label"><i class="fas fa-user"></i> Last Name:</label>
+                                    <input type="text" name="pasajeros[<?php echo $tour_index; ?>][ninos][<?php echo $n; ?>][apellido]" class="form-input" placeholder="Last Name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label"><i class="fas fa-globe"></i> Nationality:</label>
+                                    <input type="text" name="pasajeros[<?php echo $tour_index; ?>][ninos][<?php echo $n; ?>][nacionalidad]" class="form-input" placeholder="Nationality" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label"><i class="fas fa-id-card"></i> DNI/Passport:</label>
+                                    <input type="text" name="pasajeros[<?php echo $tour_index; ?>][ninos][<?php echo $n; ?>][dni_pasaporte]" class="form-input" placeholder="DNI or Passport Number" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label"><i class="fas fa-phone"></i> Phone:</label>
+                                    <input type="tel" name="pasajeros[<?php echo $tour_index; ?>][ninos][<?php echo $n; ?>][telefono]" class="form-input" placeholder="Phone (optional)">
+                                </div>
+                            </div>
+                        <?php endfor; 
+
+                        // Infants
+                        for ($i = 0; $i < $item['infantes']; $i++): ?>
+                            <div class="passenger-form">
+                                <h4><i class="fas fa-baby"></i> Infant <?php echo $i+1; ?></h4>
+                                <input type="hidden" name="pasajeros[<?php echo $tour_index; ?>][infantes][<?php echo $i; ?>][tipo]" value="Infante">
+                                <div class="form-group">
+                                    <label class="form-label"><i class="fas fa-user"></i> Name:</label>
+                                    <input type="text" name="pasajeros[<?php echo $tour_index; ?>][infantes][<?php echo $i; ?>][nombre]" class="form-input" placeholder="Name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label"><i class="fas fa-user"></i> Last Name:</label>
+                                    <input type="text" name="pasajeros[<?php echo $tour_index; ?>][infantes][<?php echo $i; ?>][apellido]" class="form-input" placeholder="Last Name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label"><i class="fas fa-globe"></i> Nationality:</label>
+                                    <input type="text" name="pasajeros[<?php echo $tour_index; ?>][infantes][<?php echo $i; ?>][nacionalidad]" class="form-input" placeholder="Nationality" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label"><i class="fas fa-id-card"></i> DNI/Passport:</label>
+                                    <input type="text" name="pasajeros[<?php echo $tour_index; ?>][infantes][<?php echo $i; ?>][dni_pasaporte]" class="form-input" placeholder="DNI or Passport Number" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label"><i class="fas fa-phone"></i> Phone:</label>
+                                    <input type="tel" name="pasajeros[<?php echo $tour_index; ?>][infantes][<?php echo $i; ?>][telefono]" class="form-input" placeholder="Phone (optional)">
+                                </div>
+                            </div>
+                        <?php endfor; ?>
+                    </div>
+                <?php endforeach; ?>
+
+                <button type="submit" class="confirm-btn" onclick="return confirm('<?php echo $lang['confirm_reservation'] ?? 'Confirm your reservation? Please ensure all details are correct as they cannot be changed later.'; ?>');">
+                    <i class="fas fa-check-circle"></i> Confirm Reservation
+                </button>
             </form>
         </div>
     </section>
 
-    <footer class="footer" id="contacto">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>Antares Travel Peru</h3>
-                    <p>Somos una empresa especializada en turismo receptivo en la ciudad del Cusco, con más de 10 años de experiencia brindando servicios de calidad y experiencias inolvidables a nuestros viajeros.</p>
-                    <div class="social-links">
-                        <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-whatsapp"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-tripadvisor"></i></a>
-                    </div>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>Contacto</h3>
-                    <ul>
-                        <li><i class="fas fa-map-marker-alt"></i> Calle Triunfo 392, Cusco - Perú</li>
-                        <li><i class="fas fa-phone"></i> +51 966 217 821</li>
-                        <li><i class="fas fa-phone"></i> +51 958 940 100</li>
-                        <li><i class="fas fa-envelope"></i> antares.travel.cusco@gmail.com</li>
-                        <li><i class="fas fa-globe"></i> www.antarestravelcusco.com</li>
-                    </ul>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>Servicios</h3>
-                    <ul>
-                        <li><a href="../index.php#tours">Tours en Cusco</a></li>
-                        <li><a href="../index.php#tours">Valle Sagrado</a></li>
-                        <li><a href="../index.php#tours">Machu Picchu</a></li>
-                        <li><a href="../index.php#tours">Tours de Aventura</a></li>
-                        <li><a href="../index.php#guias">Guías Profesionales</a></li>
-                        <li><a href="../index.php#tours">Transporte Turístico</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>Información Legal</h3>
-                    <ul>
-                        <li>RUC: 20XXXXXXXXX</li>
-                        <li>Licencia de Turismo: XXXX-XXXX</li>
-                        <li><a href="#">Términos y Condiciones</a></li>
-                        <li><a href="#">Política de Privacidad</a></li>
-                        <li><a href="#">Política de Cancelación</a></li>
-                    </ul>
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3><?php echo $lang['footer_about_title'] ?? 'About Antares Travel'; ?></h3>
+                <p><?php echo $lang['footer_about_text'] ?? 'Your expert travel agency in Peru.'; ?></p>
+                <div class="social-links">
+                    <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-whatsapp"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-tripadvisor"></i></a>
                 </div>
             </div>
-            
-            <div class="footer-bottom">
-                <p>&copy; 2024 Antares Travel Peru. Todos los derechos reservados.</p>
+            <div class="footer-section">
+                <h3><?php echo $lang['footer_contact_title'] ?? 'Contact'; ?></h3>
+                <ul>
+                    <li><i class="fas fa-map-marker-alt"></i> <?php echo $lang['footer_contact_address'] ?? 'Cusco, Peru'; ?></li>
+                    <li><i class="fas fa-phone"></i> +51 966 217 821</li>
+                    <li><i class="fas fa-phone"></i> +51 958 940 100</li>
+                    <li><i class="fas fa-envelope"></i> antares.travel.cusco@gmail.com</li>
+                    <li><i class="fas fa-globe"></i> www.antarestravelcusco.com</li>
+                </ul>
             </div>
+            <div class="footer-section">
+                <h3><?php echo $lang['footer_services_title'] ?? 'Services'; ?></h3>
+                <ul>
+                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_cusco'] ?? 'Cusco Tours'; ?></a></li>
+                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_sacred_valley'] ?? 'Sacred Valley'; ?></a></li>
+                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_machu_picchu'] ?? 'Machu Picchu'; ?></a></li>
+                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_adventure'] ?? 'Adventures'; ?></a></li>
+                    <li><a href="../index.php#guias"><?php echo $lang['footer_service_guides'] ?? 'Expert Guides'; ?></a></li>
+                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_transport'] ?? 'Transport'; ?></a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3><?php echo $lang['footer_legal_title'] ?? 'Legal'; ?></h3>
+                <ul>
+                    <li>RUC: 20XXXXXXXX</li>
+                    <li><?php echo $lang['footer_legal_license'] ?? 'License'; ?>: XXXX-XXXX</li>
+                    <li><a href="#"><?php echo $lang['footer_legal_terms'] ?? 'Terms and Conditions'; ?></a></li>
+                    <li><a href="#"><?php echo $lang['footer_legal_privacy'] ?? 'Privacy Policy'; ?></a></li>
+                    <li><a href="#"><?php echo $lang['footer_legal_cancellation'] ?? 'Cancellation Policy'; ?></a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p><?php echo $lang['footer_copyright'] ?? '© 2025 Antares Travel Peru.'; ?></p>
         </div>
     </footer>
 
     <script>
-        function toggleMobileMenu() {
-            const mobileNav = document.getElementById('mobileNav');
-            const mobileMenu = document.querySelector('.mobile-menu');
-            
-            mobileNav.classList.toggle('active');
-            mobileMenu.classList.toggle('active');
-            
-            const spans = mobileMenu.querySelectorAll('span');
-            if (mobileNav.classList.contains('active')) {
-                spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
-                spans[1].style.opacity = '0';
-                spans[2].style.transform = 'rotate(-45deg) translate(7px, -6px)';
-            } else {
-                spans[0].style.transform = 'none';
-                spans[1].style.opacity = '1';
-                spans[2].style.transform = 'none';
-            }
-        }
+        document.addEventListener('DOMContentLoaded', function() {
+            const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animation = 'fadeInUp 0.6s ease-out';
+                        entry.target.style.opacity = '1';
+                    }
+                });
+            }, observerOptions);
 
-        document.addEventListener('click', function(event) {
-            const mobileNav = document.getElementById('mobileNav');
-            const mobileMenu = document.querySelector('.mobile-menu');
-            
-            if (mobileNav.classList.contains('active') && 
-                !mobileNav.contains(event.target) && 
-                !mobileMenu.contains(event.target)) {
-                toggleMobileMenu();
-            }
-        });
-
-        let pasajeroCount = 1;
-
-        function addPasajero() {
-            pasajeroCount++;
-            const pasajerosDiv = document.getElementById('pasajeros');
-            const newPasajero = pasajerosDiv.firstElementChild.cloneNode(true);
-            newPasajero.querySelector('h4').textContent = `Pasajero ${pasajeroCount}`;
-            newPasajero.querySelector('.remove-pasajero').style.display = 'block';
-            const inputs = newPasajero.querySelectorAll('input');
-            inputs.forEach(input => input.value = '');
-            const select = newPasajero.querySelector('select');
-            select.value = 'Adulto';
-            pasajerosDiv.appendChild(newPasajero);
-        }
-
-        function removePasajero(button) {
-            const pasajeroDiv = button.parentElement;
-            pasajeroDiv.remove();
-            const pasajeros = document.querySelectorAll('.pasajero');
-            pasajeros.forEach((p, index) => {
-                p.querySelector('h4').textContent = `Pasajero ${index + 1}`;
-                if (index === 0) {
-                    p.querySelector('.remove-pasajero').style.display = 'none';
-                }
+            document.querySelectorAll('.cart-item, .passenger-section, .passenger-form').forEach(el => {
+                el.style.opacity = '0';
+                observer.observe(el);
             });
-            pasajeroCount--;
-        }
+
+            window.toggleMobileMenu = function() {
+                const mobileNav = document.getElementById('mobileNav');
+                const mobileMenu = document.querySelector('.mobile-menu');
+                mobileNav.classList.toggle('active');
+                mobileMenu.classList.toggle('active');
+            };
+
+            window.addEventListener('scroll', () => {
+                const navbar = document.querySelector('.navbar');
+                navbar.classList.toggle('scrolled', window.scrollY > 50);
+            });
+        });
     </script>
 </body>
 </html>
