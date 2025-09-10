@@ -269,7 +269,6 @@ if (!isset($_SESSION['cart'])) {
         .btn-secondary:hover {
             background: var(--primary-color);
             color: var(--white);
-            transform: translateY(-3px);
         }
 
         .user-profile {
@@ -962,6 +961,155 @@ if (!isset($_SESSION['cart'])) {
         border-radius: 50px;
         text-decoration: none;
     }
+
+    .whatsapp-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #25D366;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
+        .whatsapp-button:hover {
+            background: #128C7E;
+            transform: scale(1.1);
+        }
+
+        .whatsapp-button i {
+            color: var(--white);
+            font-size: 30px;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .auth-buttons {
+                display: none;
+            }
+
+            .mobile-menu {
+                display: flex;
+            }
+
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-content p {
+                font-size: 1rem;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .tours-container {
+                grid-template-columns: 1fr;
+            }
+
+            .guias-container {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+
+            .carousel-nav {
+                width: 36px;
+                height: 36px;
+            }
+
+            .google-signin-container {
+                width: 90%;
+                max-width: 300px;
+                right: 50%;
+                transform: translateX(50%);
+            }
+
+            .photos-mural {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+
+            .whatsapp-button {
+                width: 50px;
+                height: 50px;
+            }
+
+            .whatsapp-button i {
+                font-size: 24px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-content h1 {
+                font-size: 1.8rem;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .tour-card {
+                margin: 0 10px;
+            }
+
+            .guias-filters {
+                flex-direction: column;
+            }
+
+            .whatsapp-button {
+                width: 45px;
+                height: 45px;
+            }
+
+            .whatsapp-button i {
+                font-size: 20px;
+            }
+
+            }
+
+        
     </style>
 </head>
 <body>
@@ -991,10 +1139,16 @@ if (!isset($_SESSION['cart'])) {
                             <i class="fas fa-sign-out-alt"></i>
                         </a>
                     </div>
-                    <a href="reserva.php" id="cart-icon" class="btn btn-secondary" style="position: relative;">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span id="cart-count" style="position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px; z-index: 1000;"><?php echo $cart_count; ?></span>
-                    </a>
+                    <div style="position: relative; display: inline-block;">
+                        <a href="reserva.php" id="cart-icon" class="btn btn-secondary">
+                            <i class="fas fa-shopping-cart"></i>
+                        </a>
+                        <span id="cart-count" data-count="<?php echo $cart_count; ?>" 
+                                style="position:absolute;top:-8px;right:-8px;background:red;color:#fff;border-radius:50%;min-width:20px;height:20px;padding:0 5px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;z-index:1;">
+                            <?php echo $cart_count; ?>
+                        </span>
+                        </div>
+
                 <?php endif; ?>
                 <div class="lang-switch">
                     <a href="?lang=es&id_tour=<?php echo $id_tour; ?>" class="lang-btn <?php if ($current_lang == 'es') echo 'active'; ?>"><?php echo $lang['lang_es']; ?></a>
@@ -1032,10 +1186,16 @@ if (!isset($_SESSION['cart'])) {
                         <i class="fas fa-sign-out-alt"></i>
                     </a>
                 </div>
-                <a href="reserva.php" id="cart-icon-mobile" class="btn btn-secondary" style="position: relative;">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span id="cart-count-mobile" style="position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px;"><?php echo $cart_count; ?></span>
-                </a>
+                <div style="position: relative; display: inline-block;">
+                    <a href="reserva.php" id="cart-icon-mobile" class="btn btn-secondary">
+                        <i class="fas fa-shopping-cart"></i>
+                    </a>
+                    <span id="cart-count-mobile" data-count="<?php echo $cart_count; ?>"
+                            style="position:absolute;top:-8px;right:-8px;background:red;color:#fff;border-radius:50%;min-width:20px;height:20px;padding:0 5px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;z-index:1;">
+                        <?php echo $cart_count; ?>
+                    </span>
+                    </div>
+
             <?php endif; ?>
             <div class="lang-switch">
                 <a href="?lang=es&id_tour=<?php echo $id_tour; ?>" class="lang-btn <?php if ($current_lang == 'es') echo 'active'; ?>"><?php echo $lang['lang_es']; ?></a>
@@ -1055,7 +1215,9 @@ if (!isset($_SESSION['cart'])) {
              data-logo_alignment="left">
         </div>
     </div>
-
+    <a href="https://wa.me/51958940006" class="whatsapp-button" target="_blank" title="<?php echo $current_lang == 'es' ? 'Contacta por WhatsApp' : 'Contact via WhatsApp'; ?>">
+        <i class="fab fa-whatsapp"></i>
+    </a>
     <section class="detail-section">
         <?php 
         $imagePath = getImagePath($tour['imagen_principal']);
@@ -1169,52 +1331,47 @@ if (!isset($_SESSION['cart'])) {
     </section>
 
     <footer class="footer">
-    <div class="footer-content">
-        <div class="footer-section"> 
-            <h3><?php echo $lang['footer_about_title']; ?></h3>
-            <p><?php echo $lang['footer_about_text']; ?></p>
-            <div class="social-links">
-                <a href="https://wa.me/51958940006" class="social-link" target="_blank"><i class="fab fa-whatsapp"></i></a>
+        <div class="footer-content">
+            <div class="footer-section"> 
+                <h3><?php echo $lang['footer_about_title']; ?></h3>
+                <p><?php echo $lang['footer_about_text']; ?></p>
+                <div class="social-links">
+                    <a href="https://wa.me/51958940006" class="social-link" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3><?php echo $lang['footer_contact_title']; ?></h3>
+                <ul>
+                    <li><a href="https://maps.app.goo.gl/hpDo9q2vNQ238Ln46" target="_blank"><i class="fas fa-map-marker-alt"></i> <?php echo $lang['footer_contact_address']; ?></a></li>
+                    <li><a href="tel:+51958940006"><i class="fas fa-phone"></i> +51 958 940 006</a></li>
+                    <li><a href="mailto:antarestravelperu@gmail.com"><i class="fas fa-envelope"></i> antarestravelperu@gmail.com</a></li>
+                    <li><a href="https://www.antarestravelperu.com" target="_blank"><i class="fas fa-globe"></i> www.antarestravelperu.com</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3><?php echo $lang['footer_services_title']; ?></h3>
+                <ul>
+                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_cusco']; ?></a></li>
+                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_sacred_valley']; ?></a></li>
+                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_machu_picchu']; ?></a></li>
+                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_adventure']; ?></a></li>
+                    <li><a href="../index.php#guias"><?php echo $lang['footer_service_guides']; ?></a></li>
+                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_transport']; ?></a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3><?php echo $lang['footer_legal_title']; ?></h3>
+                <ul>
+                    <li><a href="#"><?php echo $lang['footer_legal_terms']; ?></a></li>
+                    <li><a href="#"><?php echo $lang['footer_legal_privacy']; ?></a></li>
+                </ul>
+
             </div>
         </div>
-        <div class="footer-section">
-            <h3><?php echo $lang['footer_contact_title']; ?></h3>
-            <ul>
-                <li><i class="fas fa-map-marker-alt"></i> <?php echo $lang['footer_contact_address']; ?></li>
-                <li><i class="fas fa-phone"></i> +51 958 940 006</li>
-                <li><i class="fas fa-envelope"></i> antarestravelperu@gmail.com </li>
-                <li><i class="fas fa-globe"></i> www.antarestravelperu.com</li>
-            </ul>
+        <div class="footer-bottom">
+            <p><?php echo $lang['footer_copyright']; ?></p>
         </div>
-        <div class="footer-section">
-            <h3><?php echo $lang['footer_services_title']; ?></h3>
-            <ul>
-                <li><a href="../index.php#tours"><?php echo $lang['footer_service_cusco']; ?></a></li>
-                <li><a href="../index.php#tours"><?php echo $lang['footer_service_sacred_valley']; ?></a></li>
-                <li><a href="../index.php#tours"><?php echo $lang['footer_service_machu_picchu']; ?></a></li>
-                <li><a href="../index.php#tours"><?php echo $lang['footer_service_adventure']; ?></a></li>
-                <li><a href="../index.php#guias"><?php echo $lang['footer_service_guides']; ?></a></li>
-                <li><a href="../index.php#tours"><?php echo $lang['footer_service_transport']; ?></a></li>
-            </ul>
-        </div>
-        <div class="footer-section">
-            <h3><?php echo $lang['footer_legal_title']; ?></h3>
-            <ul>
-                <li>RUC: 20XXXXXXXX</li>
-                <li><?php echo $lang['footer_legal_license']; ?>: XXXX-XXXX</li>
-                <li><a href="#"><?php echo $lang['footer_legal_terms']; ?></a></li>
-                <li><a href="#"><?php echo $lang['footer_legal_privacy']; ?></a></li>
-                <li><a href="#"><?php echo $lang['footer_legal_cancellation']; ?></a></li>
-            </ul>
-            <div class="admin-btn-wrapper" style="margin-top:20px; text-align:center;">
-                <a href="src/admin" class="custom-admin-btn2">Panel Admin</a>
-            </div>
-        </div>
-    </div>
-    <div class="footer-bottom">
-        <p><?php echo $lang['footer_copyright']; ?></p>
-    </div>
-</footer>
+    </footer>
 
     <script>
         const tourPrice = <?php echo $tour['precio'] ? $tour['precio'] : 0; ?>;

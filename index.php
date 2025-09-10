@@ -7,7 +7,6 @@ if (isset($_GET['lang']) && ($_GET['lang'] == 'es' || $_GET['lang'] == 'en')) {
 
 $current_lang = isset($_SESSION['lang']) ? $_SESSION['lang'] : 'es';
 require_once __DIR__ . '/src/languages/' . $current_lang . '.php';
-
 require_once __DIR__ . '/src/funtions/google_auth.php';
 
 $client = getGoogleClient();
@@ -28,6 +27,35 @@ if (isset($_GET['logout'])) {
     header("Location: index.php");
     exit;
 }
+
+function limitRequests($ip, $max_requests = 10, $time_window = 1) {
+    $cache_dir = __DIR__ . '/cache/';
+    if (!is_dir($cache_dir)) {
+        mkdir($cache_dir, 0755, true);
+    }
+    $file = $cache_dir . 'rate_limit_' . md5($ip) . '.txt';
+    $current_time = time();
+
+    if (file_exists($file)) {
+        $data = file_get_contents($file);
+        list($count, $last_time) = explode(':', $data);
+
+        if ($current_time - $last_time < $time_window) {
+            if ($count >= $max_requests) {
+                http_response_code(429);
+                die('Too Many Requests');
+            }
+            file_put_contents($file, ($count + 1) . ':' . $last_time);
+        } else {
+            file_put_contents($file, '1:' . $current_time);
+        }
+    } else {
+        file_put_contents($file, '1:' . $current_time);
+    }
+}
+
+$ip = $_SERVER['REMOTE_ADDR'];
+limitRequests($ip);
 ?>
 
 <!DOCTYPE html>
@@ -35,12 +63,75 @@ if (isset($_GET['logout'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $lang['page_title']; ?></title>
+    <title><?php echo $current_lang == 'es' ? 'Turismo en Cusco | Tours a Machu Picchu y Valle Sagrado - Antares Travel Perú' : 'Cusco Tourism | Machu Picchu and Sacred Valley Tours - Antares Travel Peru'; ?></title>
+    <meta name="description" content="<?php echo $current_lang == 'es' ? 'Explora Cusco con Antares Travel Perú. Tours a Machu Picchu, Valle Sagrado y aventuras únicas. ¡Reserva tu experiencia inolvidable!' : 'Explore Cusco with Antares Travel Peru. Machu Picchu, Sacred Valley, and unique adventure tours. Book your unforgettable experience now!'; ?>">
+    <meta name="keywords" content="<?php echo $current_lang == 'es' ? 'turismo en Cusco, tours a Machu Picchu, Valle Sagrado, agencia de viajes Cusco, tours de aventura Perú, guías turísticos Cusco, reservas Machu Picchu' : 'Cusco tourism, Machu Picchu tours, Sacred Valley, Cusco travel agency, Peru adventure tours, Cusco tour guides, Machu Picchu bookings'; ?>">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="Antares Travel Perú">
+    <meta name="geo.region" content="PE-CUS">
+    <meta name="geo.placename" content="Cusco, Perú">
+    <meta name="geo.position" content="-13.5167;-71.9781">
+    <link rel="canonical" href="https://www.antarestravelperu.com<?php echo $current_lang == 'es' ? '' : '/en'; ?>">
     <link rel="icon" type="image/png" href="imagenes/antares_logozz3.png">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "TravelAgency",
+      "name": "Antares Travel Perú",
+      "description": "<?php echo $current_lang == 'es' ? 'Agencia de turismo en Cusco especializada en tours a Machu Picchu, Valle Sagrado y aventuras en Perú.' : 'Travel agency in Cusco specializing in Machu Picchu, Sacred Valley, and adventure tours in Peru.'; ?>",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Calle Plateros 365",
+        "addressLocality": "Cusco",
+        "addressRegion": "Cusco",
+        "postalCode": "08002",
+        "addressCountry": "PE"
+      },
+      "telephone": "+51 958 940 006",
+      "email": "antarestravelperu@gmail.com",
+      "url": "https://www.antarestravelperu.com",
+      "image": "https://www.antarestravelperu.com/imagenes/antares_logozz3.png",
+      "openingHours": "Mo-Su 08:00-20:00",
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "-13.5167",
+        "longitude": "-71.9781"
+      },
+      "sameAs": [
+        "https://wa.me/51958940006",
+        "https://www.facebook.com/antarestravelperu",
+        "https://www.instagram.com/antarestravelperu",
+        "https://www.tripadvisor.com/AntaresTravelPeru"
+      ],
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "reviewCount": "150"
+      },
+      "offers": [
+        {
+          "@type": "Offer",
+          "name": "<?php echo $current_lang == 'es' ? 'Tour a Machu Picchu' : 'Machu Picchu Tour'; ?>",
+          "description": "<?php echo $current_lang == 'es' ? 'Tour de 1 día a Machu Picchu desde Cusco con transporte y guía incluido.' : 'One-day Machu Picchu tour from Cusco with transportation and guide included.'; ?>",
+          "url": "https://www.antarestravelperu.com/tours/tour-machu-picchu",
+          "priceCurrency": "PEN",
+          "price": "300"
+        },
+        {
+          "@type": "Offer",
+          "name": "<?php echo $current_lang == 'es' ? 'Tour al Valle Sagrado' : 'Sacred Valley Tour'; ?>",
+          "description": "<?php echo $current_lang == 'es' ? 'Explora el Valle Sagrado desde Cusco con visitas a Pisac, Ollantaytambo y Chinchero.' : 'Explore the Sacred Valley from Cusco with visits to Pisac, Ollantaytambo, and Chinchero.'; ?>",
+          "url": "https://www.antarestravelperu.com/tours/tour-valle-sagrado",
+          "priceCurrency": "PEN",
+          "price": "150"
+        }
+      ]
+    }
+    </script>
     <style>
-                :root {
+        :root {
             --primary-bg: #FFFAF0;
             --primary-color: #A27741;
             --primary-dark: #8B6332;
@@ -141,7 +232,7 @@ if (isset($_GET['logout'])) {
         .lang-switch {
             display: flex;
             border: 2px solid var(--primary-color);
-            border-radius: 2px;
+            border-radius: 50px;
             overflow: hidden;
         }
 
@@ -842,6 +933,31 @@ if (isset($_GET['logout'])) {
             color: rgba(255, 255, 255, 0.6);
         }
 
+        .whatsapp-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #25D366;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
+        .whatsapp-button:hover {
+            background: #128C7E;
+            transform: scale(1.1);
+        }
+
+        .whatsapp-button i {
+            color: var(--white);
+            font-size: 30px;
+        }
+
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -924,6 +1040,15 @@ if (isset($_GET['logout'])) {
             .photos-mural {
                 grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             }
+
+            .whatsapp-button {
+                width: 50px;
+                height: 50px;
+            }
+
+            .whatsapp-button i {
+                font-size: 24px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -943,6 +1068,15 @@ if (isset($_GET['logout'])) {
             .guias-filters {
                 flex-direction: column;
             }
+
+            .whatsapp-button {
+                width: 45px;
+                height: 45px;
+            }
+
+            .whatsapp-button i {
+                font-size: 20px;
+            }
         }
 
         .loading {
@@ -960,12 +1094,57 @@ if (isset($_GET['logout'])) {
         }
 
         .custom-admin-btn2 {
-        padding: 12px 24px;
-        color: #A27741; 
-        border: 1px solid #ffffff; 
-        border-radius: 50px;
-        text-decoration: none;
-    }
+            padding: 12px 24px;
+            color: #A27741;
+            border: 1px solid #ffffff;
+            border-radius: 50px;
+            text-decoration: none;
+        }
+
+        #cart-icon {
+                position: relative !important;
+                display: inline-flex !important;
+                align-items: center;
+                justify-content: center;
+            }
+
+
+            #cart-count, #cart-count-mobile {
+                position: absolute !important;
+                top: -8px !important;
+                right: -8px !important;
+                background: #e53e3e !important;
+                color: white !important;
+                border-radius: 50% !important;
+                width: 22px !important;
+                height: 22px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                font-size: 11px !important;
+                font-weight: 600 !important;
+                border: 2px solid white !important;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+                z-index: 10 !important;
+                min-width: 22px !important;
+                line-height: 1 !important;
+            }
+
+            #cart-count[data-count="0"], 
+            #cart-count-mobile[data-count="0"] {
+                display: none !important;
+            }
+
+            @media (max-width: 768px) {
+                #cart-count, #cart-count-mobile {
+                    width: 20px !important;
+                    height: 20px !important;
+                    font-size: 10px !important;
+                    top: -6px !important;
+                    right: -6px !important;
+                }
+            }
+            
     </style>
 </head>
 <body>
@@ -1012,13 +1191,13 @@ if (isset($_GET['logout'])) {
     
     $cart_count = isset($_SESSION['cart']['total_paquetes']) ? $_SESSION['cart']['total_paquetes'] : 0;
     
-    $login_to_book = isset($lang['login_to_book']) ? $lang['login_to_book'] : 'Inicia sesión para reservar';
+    $login_to_book = isset($lang['login_to_book']) ? $lang['login_to_book'] : ($current_lang == 'es' ? 'Inicia sesión para reservar' : 'Log in to book');
     ?>
 
     <nav class="navbar">
         <div class="nav-container">
             <a href="#inicio" class="logo">
-                <img src="imagenes/antares_logozz2.png" alt="Antares Travel Peru Logo" height="50" loading="lazy">
+                <img src="imagenes/antares_logozz2.png" alt="<?php echo $current_lang == 'es' ? 'Antares Travel Perú Logo' : 'Antares Travel Peru Logo'; ?>" height="50" loading="lazy">
                 ANTARES TRAVEL PERU
             </a>
             <ul class="nav-links">
@@ -1029,25 +1208,23 @@ if (isset($_GET['logout'])) {
                 <li><a href="#reservas"><?php echo $lang['nav_reservations']; ?></a></li>
             </ul>
             <div class="auth-buttons">
-
                 <?php if (!$is_logged_in): ?>
                     <a href="src/auth/login.php" class="btn btn-secondary">
                         <i class="fas fa-user"></i> <?php echo $lang['login_button']; ?>
                     </a>
                 <?php else: ?>
                     <div class="user-profile">
-                        <img src="<?php echo htmlspecialchars($_SESSION['user_picture'] ?? 'imagenes/default-avatar.png'); ?>" alt="Avatar">
+                        <img src="<?php echo htmlspecialchars($_SESSION['user_picture'] ?? 'imagenes/default-avatar.png'); ?>" alt="<?php echo $current_lang == 'es' ? 'Avatar de usuario' : 'User avatar'; ?>" loading="lazy">
                         <span><?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
                         <a href="index.php?logout=1" class="logout-btn" title="<?php echo $lang['logout_button']; ?>">
                             <i class="fas fa-sign-out-alt"></i>
                         </a>
                     </div>
-                    <a href="src/reserva.php" id="cart-icon" class="btn btn-secondary" style="position: relative;">
+                    <a href="reserva.php" id="cart-icon" class="btn btn-secondary" style="position: relative;">
                         <i class="fas fa-shopping-cart"></i>
-                        <span id="cart-count" style="position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px;"><?php echo $cart_count; ?></span>
+                        <span id="cart-count" data-count="<?php echo $cart_count; ?>"><?php echo $cart_count; ?></span>
                     </a>
                 <?php endif; ?>
-
                 <div class="lang-switch">
                     <a href="?lang=es" class="lang-btn <?php if ($current_lang == 'es') echo 'active'; ?>"><?php echo $lang['lang_es']; ?></a>
                     <a href="?lang=en" class="lang-btn <?php if ($current_lang == 'en') echo 'active'; ?>"><?php echo $lang['lang_en']; ?></a>
@@ -1068,7 +1245,6 @@ if (isset($_GET['logout'])) {
         <a href="#experiencias"><?php echo $lang['nav_experiences']; ?></a>
         <a href="#reservas"><?php echo $lang['nav_reservations']; ?></a>
         <div class="mobile-auth-buttons">
-
             <?php if (!$is_logged_in): ?>
                 <button class="btn btn-primary" onclick="toggleGoogleSignin()"><?php echo $lang['login_with_google']; ?></button>
                 <a href="src/auth/login.php" class="btn btn-secondary">
@@ -1079,15 +1255,15 @@ if (isset($_GET['logout'])) {
                 </a>
             <?php else: ?>
                 <div class="user-profile">
-                    <img src="<?php echo htmlspecialchars($_SESSION['user_picture'] ?? 'imagenes/default-avatar.png'); ?>" alt="Avatar">
+                    <img src="<?php echo htmlspecialchars($_SESSION['user_picture'] ?? 'imagenes/default-avatar.png'); ?>" alt="<?php echo $current_lang == 'es' ? 'Avatar de usuario' : 'User avatar'; ?>" loading="lazy">
                     <span><?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
                     <a href="index.php?logout=1" class="logout-btn" title="<?php echo $lang['logout_button']; ?>">
                         <i class="fas fa-sign-out-alt"></i>
                     </a>
                 </div>
-                <a href="src/reserva.php" id="cart-icon-mobile" class="btn btn-secondary" style="position: relative;">
+                <a href="reserva.php" id="cart-icon-mobile" class="btn btn-secondary" style="position: relative;">
                     <i class="fas fa-shopping-cart"></i>
-                    <span id="cart-count-mobile" style="position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px;"><?php echo $cart_count; ?></span>
+                    <span id="cart-count-mobile" data-count="<?php echo $cart_count; ?>"><?php echo $cart_count; ?></span>
                 </a>
             <?php endif; ?>
             <div class="lang-switch">
@@ -1109,6 +1285,10 @@ if (isset($_GET['logout'])) {
         </div>
     </div>
 
+    <a href="https://wa.me/51958940006" class="whatsapp-button" target="_blank" title="<?php echo $current_lang == 'es' ? 'Contacta por WhatsApp' : 'Contact via WhatsApp'; ?>">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
     <section id="inicio" class="hero">
         <div class="hero-image active" style="background-image: url('imagenes/fondo01.jpg')"></div>
         <div class="hero-image" style="background-image: url('imagenes/fondo02.jpg')"></div>
@@ -1118,7 +1298,7 @@ if (isset($_GET['logout'])) {
         <div class="hero-bg"></div>
         <div class="container">
             <div class="hero-content">
-                <h1><?php echo $lang['hero_title']; ?></h1>
+                <h1><?php echo $current_lang == 'es' ? 'Turismo en Cusco y Machu Picchu con Antares Travel Perú' : 'Cusco and Machu Picchu Tourism with Antares Travel Peru'; ?></h1>
                 <p><?php echo $lang['hero_subtitle']; ?></p>
                 <div class="hero-buttons">
                     <a href="#tours" class="btn btn-primary">
@@ -1148,7 +1328,7 @@ if (isset($_GET['logout'])) {
     <section id="tours" class="section tours-section">
         <div class="container">
             <div class="section-header fade-in">
-                <h2 class="section-title"><?php echo $lang['tours_section_title']; ?></h2>
+                <h2 class="section-title"><?php echo $current_lang == 'es' ? 'Tours Populares en Cusco y Machu Picchu' : 'Popular Tours in Cusco and Machu Picchu'; ?></h2>
                 <p class="section-subtitle"><?php echo $lang['tours_section_subtitle']; ?></p>
             </div>
 
@@ -1231,7 +1411,7 @@ if (isset($_GET['logout'])) {
     <section id="guias" class="section guias-section">
         <div class="container">
             <div class="section-header fade-in">
-                <h2 class="section-title"><?php echo $lang['guides_section_title']; ?></h2>
+                <h2 class="section-title"><?php echo $current_lang == 'es' ? 'Guías Turísticos en Cusco' : 'Tour Guides in Cusco'; ?></h2>
                 <p class="section-subtitle"><?php echo $lang['guides_section_subtitle']; ?></p>
             </div>
 
@@ -1262,8 +1442,8 @@ if (isset($_GET['logout'])) {
                         <?php $rating = floatval($guia['rating_promedio'] ?: 0); ?>
                         <div class="guia-card" data-rating="<?php echo $rating; ?>" data-estado="<?php echo strtolower($guia['estado']); ?>" data-idiomas="<?php echo $guia['idiomas'] ?: ''; ?>">
                             <img src="<?php echo htmlspecialchars($guia['foto_url'] ?: 'imagenes/default-guide.jpg'); ?>" 
-                                 alt="<?php echo htmlspecialchars($guia['nombre']); ?>" 
-                                 class="guia-avatar">
+                                 alt="<?php echo $current_lang == 'es' ? 'Guía turístico en Cusco ' . htmlspecialchars($guia['nombre']) : 'Cusco tour guide ' . htmlspecialchars($guia['nombre']); ?>" 
+                                 class="guia-avatar" loading="lazy">
                             <h3 class="guia-name">
                                 <?php echo htmlspecialchars($guia['nombre'] . ' ' . ($guia['apellido'] ?: '')); ?>
                             </h3>
@@ -1307,7 +1487,7 @@ if (isset($_GET['logout'])) {
     <section id="experiencias" class="section experiencias-section">
         <div class="container">
             <div class="section-header fade-in">
-                <h2 class="section-title"><?php echo $lang['experiences_section_title']; ?></h2>
+                <h2 class="section-title"><?php echo $current_lang == 'es' ? 'Experiencias de Turismo en Cusco' : 'Cusco Tourism Experiences'; ?></h2>
                 <p class="section-subtitle"><?php echo $lang['experiences_section_subtitle']; ?></p>
             </div>
 
@@ -1328,10 +1508,10 @@ if (isset($_GET['logout'])) {
                 <?php if (!empty($photos)): ?>
                     <?php foreach ($photos as $photo): ?>
                         <div class="photo-item">
-                            <img src="<?php echo htmlspecialchars($photo['imagen_url']); ?>" alt="Foto de experiencia">
+                            <img src="<?php echo htmlspecialchars($photo['imagen_url']); ?>" alt="<?php echo $current_lang == 'es' ? 'Foto de experiencia en Cusco' : 'Cusco experience photo'; ?>" loading="lazy">
                             <div class="photo-info">
                                 <img src="<?php echo htmlspecialchars($photo['avatar_url'] ?: 'imagenes/default-avatar.png'); ?>" 
-                                    alt="Usuario" class="small-avatar">
+                                    alt="<?php echo $current_lang == 'es' ? 'Avatar de usuario' : 'User avatar'; ?>" class="small-avatar" loading="lazy">
                                 <span><?php echo htmlspecialchars($photo['nombre'] ?: $lang['experiences_anonymous']); ?></span>
                                 <span><?php echo date('d/m/Y', strtotime($photo['fecha_publicacion'])); ?></span>
                             </div>
@@ -1364,7 +1544,7 @@ if (isset($_GET['logout'])) {
                                     <div class="experiencia-content" style="padding: 30px;">
                                         <div class="experiencia-user" style="margin-bottom: 15px;">
                                             <img src="<?php echo htmlspecialchars($comment['avatar_url'] ?: 'imagenes/default-avatar.png'); ?>" 
-                                                 alt="Usuario" class="experiencia-avatar">
+                                                 alt="<?php echo $current_lang == 'es' ? 'Avatar de usuario' : 'User avatar'; ?>" class="experiencia-avatar" loading="lazy">
                                             <div>
                                                 <div class="experiencia-name"><?php echo htmlspecialchars($comment['nombre'] ?: $lang['experiences_anonymous_user']); ?></div>
                                                 <div class="experiencia-date"><?php echo date('d/m/Y', strtotime($comment['fecha_publicacion'])); ?></div>
@@ -1419,52 +1599,47 @@ if (isset($_GET['logout'])) {
     </section>
 
     <footer class="footer">
-    <div class="footer-content">
-        <div class="footer-section"> 
-            <h3><?php echo $lang['footer_about_title']; ?></h3>
-            <p><?php echo $lang['footer_about_text']; ?></p>
-            <div class="social-links">
-                <a href="https://wa.me/51958940006" class="social-link" target="_blank"><i class="fab fa-whatsapp"></i></a>
+        <div class="footer-content">
+            <div class="footer-section"> 
+                <h3><?php echo $lang['footer_about_title']; ?></h3>
+                <p><?php echo $lang['footer_about_text']; ?></p>
+                <div class="social-links">
+                    <a href="https://wa.me/51958940006" class="social-link" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3><?php echo $lang['footer_contact_title']; ?></h3>
+                <ul>
+                    <li><a href="https://maps.app.goo.gl/hpDo9q2vNQ238Ln46" target="_blank"><i class="fas fa-map-marker-alt"></i> <?php echo $lang['footer_contact_address']; ?></a></li>
+                    <li><a href="tel:+51958940006"><i class="fas fa-phone"></i> +51 958 940 006</a></li>
+                    <li><a href="mailto:antarestravelperu@gmail.com"><i class="fas fa-envelope"></i> antarestravelperu@gmail.com</a></li>
+                    <li><a href="https://www.antarestravelperu.com" target="_blank"><i class="fas fa-globe"></i> www.antarestravelperu.com</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3><?php echo $lang['footer_services_title']; ?></h3>
+                <ul>
+                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_cusco']; ?></a></li>
+                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_sacred_valley']; ?></a></li>
+                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_machu_picchu']; ?></a></li>
+                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_adventure']; ?></a></li>
+                    <li><a href="../index.php#guias"><?php echo $lang['footer_service_guides']; ?></a></li>
+                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_transport']; ?></a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3><?php echo $lang['footer_legal_title']; ?></h3>
+                <ul>
+                    <li><a href="#"><?php echo $lang['footer_legal_terms']; ?></a></li>
+                    <li><a href="#"><?php echo $lang['footer_legal_privacy']; ?></a></li>
+                </ul>
+
             </div>
         </div>
-        <div class="footer-section">
-            <h3><?php echo $lang['footer_contact_title']; ?></h3>
-            <ul>
-                <li><i class="fas fa-map-marker-alt"></i> <?php echo $lang['footer_contact_address']; ?></li>
-                <li><i class="fas fa-phone"></i> +51 958 940 006</li>
-                <li><i class="fas fa-envelope"></i> antarestravelperu@gmail.com </li>
-                <li><i class="fas fa-globe"></i> www.antarestravelperu.com</li>
-            </ul>
+        <div class="footer-bottom">
+            <p><?php echo $lang['footer_copyright']; ?></p>
         </div>
-        <div class="footer-section">
-            <h3><?php echo $lang['footer_services_title']; ?></h3>
-            <ul>
-                <li><a href="../index.php#tours"><?php echo $lang['footer_service_cusco']; ?></a></li>
-                <li><a href="../index.php#tours"><?php echo $lang['footer_service_sacred_valley']; ?></a></li>
-                <li><a href="../index.php#tours"><?php echo $lang['footer_service_machu_picchu']; ?></a></li>
-                <li><a href="../index.php#tours"><?php echo $lang['footer_service_adventure']; ?></a></li>
-                <li><a href="../index.php#guias"><?php echo $lang['footer_service_guides']; ?></a></li>
-                <li><a href="../index.php#tours"><?php echo $lang['footer_service_transport']; ?></a></li>
-            </ul>
-        </div>
-        <div class="footer-section">
-            <h3><?php echo $lang['footer_legal_title']; ?></h3>
-            <ul>
-                <li>RUC: 20XXXXXXXX</li>
-                <li><?php echo $lang['footer_legal_license']; ?>: XXXX-XXXX</li>
-                <li><a href="#"><?php echo $lang['footer_legal_terms']; ?></a></li>
-                <li><a href="#"><?php echo $lang['footer_legal_privacy']; ?></a></li>
-                <li><a href="#"><?php echo $lang['footer_legal_cancellation']; ?></a></li>
-            </ul>
-            <div class="admin-btn-wrapper" style="margin-top:20px; text-align:center;">
-                <a href="src/admin" class="custom-admin-btn2">Panel Admin</a>
-            </div>
-        </div>
-    </div>
-    <div class="footer-bottom">
-        <p><?php echo $lang['footer_copyright']; ?></p>
-    </div>
-</footer>
+    </footer>
 
     <script>
         let currentHeroImage = 0;
