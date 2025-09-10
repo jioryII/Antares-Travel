@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
+
+
+<url>
+  <loc>https://antarestravelperu.com/</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/auth/login.php</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/?lang=es</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/?lang=en</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/auth/register.php</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?id_tour=17</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?id_tour=19</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?id_tour=20</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?id_tour=21</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?id_tour=23</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?id_tour=24</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?id_tour=25</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?id_tour=26</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?id_tour=27</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?id_tour=28</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?id_tour=29</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?id_tour=30</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?id_tour=31</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?id_tour=32</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?id_tour=33</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?id_tour=34</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?id_tour=35</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/index.php</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/auth/oauth_callback.php?provider=apple</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/auth/oauth_callback.php?provider=microsoft</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/../index.php</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=es&amp;id_tour=17</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=en&amp;id_tour=17</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=es&amp;id_tour=19</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=en&amp;id_tour=19</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=es&amp;id_tour=20</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=en&amp;id_tour=20</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=es&amp;id_tour=21</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=en&amp;id_tour=21</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=es&amp;id_tour=23</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=en&amp;id_tour=23</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=es&amp;id_tour=24</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=en&amp;id_tour=24</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=es&amp;id_tour=25</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=en&amp;id_tour=25</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=es&amp;id_tour=26</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=en&amp;id_tour=26</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=es&amp;id_tour=27</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=en&amp;id_tour=27</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=es&amp;id_tour=28</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=en&amp;id_tour=28</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=es&amp;id_tour=29</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=en&amp;id_tour=29</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=es&amp;id_tour=30</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=en&amp;id_tour=30</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=es&amp;id_tour=31</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=en&amp;id_tour=31</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=es&amp;id_tour=32</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=en&amp;id_tour=32</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=es&amp;id_tour=33</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=en&amp;id_tour=33</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=es&amp;id_tour=34</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=en&amp;id_tour=34</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=es&amp;id_tour=35</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/src/detalles.php?lang=en&amp;id_tour=35</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/index.php?lang=es</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://antarestravelperu.com/index.php?lang=en</loc>
+  <lastmod>2025-09-10T07:15:09+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+
+
+</urlset>
