@@ -124,7 +124,7 @@ function registrarAdmin($nombre, $email, $password) {
             
             // Enviar correo de verificación
             require_once __DIR__ . '/enviar_correo_admin.php';
-            $link = "http://localhost:8000/src/admin/auth/verificar_email_admin.php?token=" . $token_verificacion;
+            $link = "https://antarestravelperu.com/src/admin/auth/verificar_email_admin.php?token=" . $token_verificacion;
             $resultado_correo = enviarCorreoVerificacionAdmin($email, $nombre, $link);
             
             if ($resultado_correo === true) {
@@ -231,7 +231,7 @@ function reenviarVerificacionAdmin($email) {
         // Enviar correo de verificación
         require_once __DIR__ . '/enviar_correo_admin.php';
         $nombre = $admin['nombre'];
-        $link = "http://localhost:8000/src/admin/auth/verificar_email_admin.php?token=" . $token;
+        $link = "https://antarestravelperu.com/src/admin/auth/verificar_email_admin.php?token=" . $token;
         $resultado = enviarCorreoVerificacionAdmin($email, $nombre, $link);
 
         if ($resultado === true) {

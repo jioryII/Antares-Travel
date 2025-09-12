@@ -82,7 +82,7 @@ Se han reemplazado exitosamente todas las referencias de "**root**" por "**super
 - ✅ Validaciones de seguridad mantenidas
 - ✅ Tokens de aprobación funcionando
 - ✅ Templates de email actualizados
-- ✅ URLs de localhost:8000 preservadas
+- ✅ URLs de producción configuradas (https://antarestravelperu.com)
 - ✅ Interfaz de usuario consistente
 
 ---
@@ -98,8 +98,8 @@ Se han reemplazado exitosamente todas las referencias de "**root**" por "**super
 
 ## 🌐 **URLs de Prueba**
 
-- **Login:** `http://localhost:8000/src/admin/auth/login.php`
-- **Aprobaciones:** `http://localhost:8000/src/admin/auth/aprobar_admin.php?token=TOKEN&accion=aprobar`
+- **Login:** `https://antarestravelperu.com/src/admin/auth/login.php`
+- **Aprobaciones:** `https://antarestravelperu.com/src/admin/auth/aprobar_admin.php?token=TOKEN&accion=aprobar`
 
 ---
 

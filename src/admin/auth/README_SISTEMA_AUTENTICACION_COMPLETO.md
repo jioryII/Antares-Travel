@@ -42,7 +42,7 @@ Usuario recibe correo → Clic en enlace → Verificación de token → Marca em
 
 **URL de verificación:**
 ```
-http://localhost:8000/src/admin/auth/verificar_email_admin.php?token=<token_32_hex>
+https://antarestravelperu.com/src/admin/auth/verificar_email_admin.php?token=<token_32_hex>
 ```
 
 **Archivos involucrados:**

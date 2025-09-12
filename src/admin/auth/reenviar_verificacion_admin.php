@@ -44,7 +44,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['email'])) {
 
             // Enviar correo de verificación
             $nombre = $admin['nombre'];
-            $link = "http://localhost:8000/src/admin/auth/verificar_email_admin.php?token=" . $token;
+            $link = "https://antarestravelperu.com/src/admin/auth/verificar_email_admin.php?token=" . $token;
             $resultado = enviarCorreoVerificacionAdmin($email, $nombre, $link);
 
             if ($resultado === true) {

@@ -29,7 +29,7 @@ function enviarCorreoVerificacionAdmin($email, $nombre, $link) {
         $mail->Body = "
           <div style='font-family: Arial, sans-serif; background: #f8fafc; padding: 32px; border-radius: 12px; max-width: 600px; margin: auto;'>
             <div style='text-align: center; margin-bottom: 32px;'>
-              <img src='http://localhost:8000/imagenes/antares_logozz2.png' alt='Antares Travel' style='max-width: 150px; height: auto;'>
+              <img src='https://antarestravelperu.com/imagenes/antares_logozz2.png' alt='Antares Travel' style='max-width: 150px; height: auto;'>
             </div>
             
             <div style='background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);'>
@@ -114,7 +114,7 @@ function enviarCorreoActivacionCompleta($email, $nombre) {
         $mail->Body = "
           <div style='font-family: Arial, sans-serif; background: #f8fafc; padding: 32px; border-radius: 12px; max-width: 600px; margin: auto;'>
             <div style='text-align: center; margin-bottom: 32px;'>
-              <img src='http://localhost:8000/imagenes/antares_logozz2.png' alt='Antares Travel' style='max-width: 150px; height: auto;'>
+              <img src='https://antarestravelperu.com/imagenes/antares_logozz2.png' alt='Antares Travel' style='max-width: 150px; height: auto;'>
             </div>
             
             <div style='background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);'>
@@ -177,15 +177,15 @@ function enviarCorreoSolicitudAprobacion($email_superadmin, $nombre_superadmin, 
         $mail->setFrom('noreply@antares.com', 'Antares Travel - Sistema de Administración');
         $mail->addAddress($email_superadmin, $nombre_superadmin);
 
-        $link_aprobar = "http://localhost:8000/src/admin/auth/aprobar_admin.php?token=$token_aprobacion&accion=aprobar";
-        $link_rechazar = "http://localhost:8000/src/admin/auth/aprobar_admin.php?token=$token_rechazo&accion=rechazar";
+        $link_aprobar = "https://antarestravelperu.com/src/admin/auth/aprobar_admin.php?token=$token_aprobacion&accion=aprobar";
+        $link_rechazar = "https://antarestravelperu.com/src/admin/auth/aprobar_admin.php?token=$token_rechazo&accion=rechazar";
 
         $mail->isHTML(true);
         $mail->Subject = '🚨 Solicitud de Aprobación - Nuevo Administrador | Antares Travel';
         $mail->Body = "
           <div style='font-family: Arial, sans-serif; background: #f8fafc; padding: 32px; border-radius: 12px; max-width: 600px; margin: auto;'>
             <div style='text-align: center; margin-bottom: 32px;'>
-              <img src='http://localhost:8000/imagenes/antares_logozz2.png' alt='Antares Travel' style='max-width: 150px; height: auto;'>
+              <img src='https://antarestravelperu.com/imagenes/antares_logozz2.png' alt='Antares Travel' style='max-width: 150px; height: auto;'>
             </div>
             
             <div style='background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);'>
@@ -298,7 +298,7 @@ function enviarCorreoAccesoAprobado($email, $nombre) {
         $mail->Body = "
           <div style='font-family: Arial, sans-serif; background: #f8fafc; padding: 32px; border-radius: 12px; max-width: 600px; margin: auto;'>
             <div style='text-align: center; margin-bottom: 32px;'>
-              <img src='http://localhost:8000/imagenes/antares_logozz2.png' alt='Antares Travel' style='max-width: 150px; height: auto;'>
+              <img src='https://antarestravelperu.com/imagenes/antares_logozz2.png' alt='Antares Travel' style='max-width: 150px; height: auto;'>
             </div>
             
             <div style='background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);'>
@@ -314,7 +314,7 @@ function enviarCorreoAccesoAprobado($email, $nombre) {
               </p>
               
               <div style='text-align: center; margin: 32px 0;'>
-                <a href='http://localhost:8000/src/admin/auth/login.php' style='
+                <a href='https://antarestravelperu.com/src/admin/auth/login.php' style='
                   background: linear-gradient(135deg, #059669, #10b981); 
                   color: white; 
                   padding: 16px 32px; 
@@ -384,7 +384,7 @@ function enviarCorreoAccesoRechazado($email, $nombre) {
         $mail->Body = "
           <div style='font-family: Arial, sans-serif; background: #f8fafc; padding: 32px; border-radius: 12px; max-width: 600px; margin: auto;'>
             <div style='text-align: center; margin-bottom: 32px;'>
-              <img src='http://localhost:8000/imagenes/antares_logozz2.png' alt='Antares Travel' style='max-width: 150px; height: auto;'>
+              <img src='https://antarestravelperu.com/imagenes/antares_logozz2.png' alt='Antares Travel' style='max-width: 150px; height: auto;'>
             </div>
             
             <div style='background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);'>
