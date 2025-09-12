@@ -121,7 +121,7 @@ function eliminarUsuario($conn, $id_usuario) {
 }
 function cerrarSesion() {
     session_destroy();
-    header("Location: index.php");
+    header("Location: /");
     exit;
 }
 

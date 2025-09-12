@@ -38,7 +38,7 @@ $id_usuario = $_SESSION['user_id'];
 $cart = $_SESSION['cart'] ?? ['paquetes' => [], 'total_paquetes' => 0];
 
 if (empty($cart['paquetes'])) {
-    header('Location: ../index.php?empty_cart=1');
+    header('Location: /?empty_cart=1');
     exit;
 }
 
@@ -626,22 +626,22 @@ function getImagePath($imagePath) {
 <body>
     <nav class="navbar" id="navbar">
         <div class="nav-container">
-            <a href="../index.php#inicio" class="logo">
+            <a href="/#inicio" class="logo">
                 <img src="../imagenes/antares_logozz2.png" alt="Antares Travel Peru Logo" height="50" loading="lazy">
                 ANTARES TRAVEL PERU
             </a>
             <ul class="nav-links">
-                <li><a href="../index.php#inicio"><?php echo $lang['nav_home'] ?? 'Home'; ?></a></li>
-                <li><a href="../index.php#tours"><?php echo $lang['nav_tours'] ?? 'Tours'; ?></a></li>
-                <li><a href="../index.php#guias"><?php echo $lang['nav_guides'] ?? 'Guides'; ?></a></li>
-                <li><a href="../index.php#experiencias"><?php echo $lang['nav_experiences'] ?? 'Experiences'; ?></a></li>
-                <li><a href="../index.php#reservas"><?php echo $lang['nav_reservations'] ?? 'Reservations'; ?></a></li>
+                <li><a href="/#inicio"><?php echo $lang['nav_home'] ?? 'Home'; ?></a></li>
+                <li><a href="/#tours"><?php echo $lang['nav_tours'] ?? 'Tours'; ?></a></li>
+                <li><a href="/#guias"><?php echo $lang['nav_guides'] ?? 'Guides'; ?></a></li>
+                <li><a href="/#experiencias"><?php echo $lang['nav_experiences'] ?? 'Experiences'; ?></a></li>
+                <li><a href="/#reservas"><?php echo $lang['nav_reservations'] ?? 'Reservations'; ?></a></li>
             </ul>
             <div class="auth-buttons">
                 <div class="user-profile">
                     <img src="<?php echo htmlspecialchars($_SESSION['user_picture'] ?? '../imagenes/default-avatar.png'); ?>" alt="Avatar">
                     <span><?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
-                    <a href="../index.php?logout=1" class="logout-btn" title="<?php echo $lang['logout_button'] ?? 'Log Out'; ?>">
+                    <a href="/?logout=1" class="logout-btn" title="<?php echo $lang['logout_button'] ?? 'Log Out'; ?>">
                         <i class="fas fa-sign-out-alt"></i>
                     </a>
                 </div>
@@ -668,16 +668,16 @@ function getImagePath($imagePath) {
     </nav>
 
     <div class="mobile-nav" id="mobileNav">
-        <a href="../index.php#inicio"><?php echo $lang['nav_home'] ?? 'Home'; ?></a>
-        <a href="../index.php#tours"><?php echo $lang['nav_tours'] ?? 'Tours'; ?></a>
-        <a href="../index.php#guias"><?php echo $lang['nav_guides'] ?? 'Guides'; ?></a>
-        <a href="../index.php#experiencias"><?php echo $lang['nav_experiences'] ?? 'Experiences'; ?></a>
-        <a href="../index.php#reservas"><?php echo $lang['nav_reservations'] ?? 'Reservations'; ?></a>
+        <a href="/#inicio"><?php echo $lang['nav_home'] ?? 'Home'; ?></a>
+        <a href="/#tours"><?php echo $lang['nav_tours'] ?? 'Tours'; ?></a>
+        <a href="/#guias"><?php echo $lang['nav_guides'] ?? 'Guides'; ?></a>
+        <a href="/#experiencias"><?php echo $lang['nav_experiences'] ?? 'Experiences'; ?></a>
+        <a href="/#reservas"><?php echo $lang['nav_reservations'] ?? 'Reservations'; ?></a>
         <div class="mobile-auth-buttons">
             <div class="user-profile">
                 <img src="<?php echo htmlspecialchars($_SESSION['user_picture'] ?? '../imagenes/default-avatar.png'); ?>" alt="Avatar">
                 <span><?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
-                <a href="../index.php?logout=1" class="logout-btn" title="<?php echo $lang['logout_button'] ?? 'Log Out'; ?>">
+                <a href="/?logout=1" class="logout-btn" title="<?php echo $lang['logout_button'] ?? 'Log Out'; ?>">
                     <i class="fas fa-sign-out-alt"></i>
                 </a>
             </div>
@@ -889,12 +889,12 @@ function getImagePath($imagePath) {
             <div class="footer-section">
                 <h3><?php echo $lang['footer_services_title']; ?></h3>
                 <ul>
-                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_cusco']; ?></a></li>
-                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_sacred_valley']; ?></a></li>
-                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_machu_picchu']; ?></a></li>
-                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_adventure']; ?></a></li>
-                    <li><a href="../index.php#guias"><?php echo $lang['footer_service_guides']; ?></a></li>
-                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_transport']; ?></a></li>
+                    <li><a href="/#tours"><?php echo $lang['footer_service_cusco']; ?></a></li>
+                    <li><a href="/#tours"><?php echo $lang['footer_service_sacred_valley']; ?></a></li>
+                    <li><a href="/#tours"><?php echo $lang['footer_service_machu_picchu']; ?></a></li>
+                    <li><a href="/#tours"><?php echo $lang['footer_service_adventure']; ?></a></li>
+                    <li><a href="/#guias"><?php echo $lang['footer_service_guides']; ?></a></li>
+                    <li><a href="/#tours"><?php echo $lang['footer_service_transport']; ?></a></li>
                 </ul>
             </div>
             <div class="footer-section">

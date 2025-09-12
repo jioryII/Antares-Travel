@@ -13,7 +13,7 @@ $client = getGoogleClient();
 
 if (isset($_POST['credential'])) {
     if (procesarGoogleCredential($_POST['credential'], $conn, $client)) {
-        header("Location: index.php");
+        header("Location: /");
         exit;
     } else {
         echo "❌ Token inválido";
@@ -24,7 +24,7 @@ if (isset($_POST['credential'])) {
 if (isset($_GET['logout'])) {
     session_unset();
     session_destroy();
-    header("Location: index.php");
+    header("Location: /");
     exit;
 }
 
@@ -1217,7 +1217,7 @@ limitRequests($ip);
                     <div class="user-profile">
                         <img src="<?php echo htmlspecialchars($_SESSION['user_picture'] ?? 'imagenes/default-avatar.png'); ?>" alt="<?php echo $current_lang == 'es' ? 'Avatar de usuario' : 'User avatar'; ?>" loading="lazy">
                         <span><?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
-                        <a href="index.php?logout=1" class="logout-btn" title="<?php echo $lang['logout_button']; ?>">
+                        <a href="/?logout=1" class="logout-btn" title="<?php echo $lang['logout_button']; ?>">
                             <i class="fas fa-sign-out-alt"></i>
                         </a>
                     </div>
@@ -1258,7 +1258,7 @@ limitRequests($ip);
                 <div class="user-profile">
                     <img src="<?php echo htmlspecialchars($_SESSION['user_picture'] ?? 'imagenes/default-avatar.png'); ?>" alt="<?php echo $current_lang == 'es' ? 'Avatar de usuario' : 'User avatar'; ?>" loading="lazy">
                     <span><?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
-                    <a href="index.php?logout=1" class="logout-btn" title="<?php echo $lang['logout_button']; ?>">
+                    <a href="/?logout=1" class="logout-btn" title="<?php echo $lang['logout_button']; ?>">
                         <i class="fas fa-sign-out-alt"></i>
                     </a>
                 </div>
@@ -1620,12 +1620,12 @@ limitRequests($ip);
             <div class="footer-section">
                 <h3><?php echo $lang['footer_services_title']; ?></h3>
                 <ul>
-                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_cusco']; ?></a></li>
-                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_sacred_valley']; ?></a></li>
-                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_machu_picchu']; ?></a></li>
-                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_adventure']; ?></a></li>
-                    <li><a href="../index.php#guias"><?php echo $lang['footer_service_guides']; ?></a></li>
-                    <li><a href="../index.php#tours"><?php echo $lang['footer_service_transport']; ?></a></li>
+                    <li><a href="#tours"><?php echo $lang['footer_service_cusco']; ?></a></li>
+                    <li><a href="#tours"><?php echo $lang['footer_service_sacred_valley']; ?></a></li>
+                    <li><a href="#tours"><?php echo $lang['footer_service_machu_picchu']; ?></a></li>
+                    <li><a href="#tours"><?php echo $lang['footer_service_adventure']; ?></a></li>
+                    <li><a href="#guias"><?php echo $lang['footer_service_guides']; ?></a></li>
+                    <li><a href="#tours"><?php echo $lang['footer_service_transport']; ?></a></li>
                 </ul>
             </div>
             <div class="footer-section">

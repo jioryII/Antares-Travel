@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$tour) {
         $_SESSION['error'] = 'Tour no encontrado.';
-        header('Location: ../index.php');
+        header('Location: /');
         exit;
     }
 
