@@ -50,6 +50,8 @@ $total_tours = $resultado['success'] ? $resultado['total'] : 0;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Tours - Antares Travel Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <title><?php echo $page_title; ?> - <?php echo SITE_NAME; ?></title>
+    <link rel="icon" type="image/png" href="../../../../imagenes/antares_logozz2.png">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         .line-clamp-3 {
