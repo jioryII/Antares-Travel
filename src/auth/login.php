@@ -26,7 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $_SESSION['user_picture'] = isset($usuario['avatar_url']) 
               ? "/Antares-Travel/" . $usuario['avatar_url'] 
               : "/Antares-Travel/storage/uploads/avatars/default.png";
-            header("Location: ./../../index.php");
+            header("Location: ./../../");
             exit;
         } else {
             $error = "Debes verificar tu correo antes de iniciar sesión.";

@@ -64,7 +64,7 @@ switch ($provider) {
             $_SESSION['user_name']   = $nombre;
             $_SESSION['user_picture']= $avatar;
 
-            header("Location: ./../../index.php");
+            header("Location: ./../../");
             exit;
 
         } else {

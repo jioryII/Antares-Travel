@@ -39,7 +39,7 @@ if (!empty($token)) {
                 ? "https://antarestravelperu.com/" . $row['avatar_url'] 
                 : "https://antarestravelperu.com/uploads/avatars/default.png";
 
-            header("Location: ./../../index.php");
+            header("Location: ./../../");
             exit;
         } else {
             $mensaje = [
