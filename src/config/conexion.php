@@ -14,9 +14,15 @@ $password   = "3fwPqEHLOwWT680";
 $dbname     = "db_antares";
 
 try {
-    // Crear conexión
+    // Crear conexión MySQL
     $conn = new mysqli($servername, $username, $password, $dbname);
     $conn->set_charset("utf8mb4"); // Soporte para acentos y emojis
+    
+    // Crear conexión PDO (para consultas preparadas más seguras)
+    $pdo = new PDO("mysql:host=$servername;dbname=$dbname;charset=utf8mb4", $username, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+    
     // echo "✅ Conexión exitosa a la base de datos MySQL"; // opcional para debug
 } catch (mysqli_sql_exception $e) {
     // Captura errores de conexión

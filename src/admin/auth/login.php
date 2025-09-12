@@ -8,8 +8,16 @@ function getAdminUrl($path) {
     return '/src/admin/' . $cleanPath;
 }
 
-// Si ya está logueado, redirigir al dashboard
+// Si ya está logueado, verificar si hay parámetros de aprobación pendientes
 if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
+    // Verificar si hay parámetros de aprobación en la URL
+    if (isset($_GET['token']) && isset($_GET['accion']) && $_SESSION['admin_rol'] === 'superadmin') {
+        // Redirigir automáticamente a aprobar_admin.php con los parámetros
+        $token = urlencode($_GET['token']);
+        $accion = urlencode($_GET['accion']);
+        header('Location: ' . getAdminUrl('auth/aprobar_admin.php?token=' . $token . '&accion=' . $accion));
+        exit();
+    }
     header('Location: ' . getAdminUrl('pages/dashboard/'));
     exit();
 }
@@ -29,10 +37,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     } else {
         $resultado = autenticarAdmin($email, $password);
         if ($resultado['success']) {
+            // Verificar si hay parámetros de aprobación después del login exitoso
+            if (isset($_POST['approval_token']) && isset($_POST['approval_action']) && $resultado['admin']['rol'] === 'superadmin') {
+                // Redirigir automáticamente a aprobar_admin.php con los parámetros
+                $token = urlencode($_POST['approval_token']);
+                $accion = urlencode($_POST['approval_action']);
+                header('Location: ' . getAdminUrl('auth/aprobar_admin.php?token=' . $token . '&accion=' . $accion));
+                exit();
+            }
             header('Location: ' . getAdminUrl('pages/dashboard/'));
             exit();
         } else {
-            $error = $resultado['message'];
+            // Si requiere verificación, mostrar mensaje especial
+            if (isset($resultado['require_verification']) && $resultado['require_verification']) {
+                $error = $resultado['message'] . ' <a href="reenviar_verificacion_admin.php?email=' . urlencode($resultado['email']) . '" class="text-orange-500 hover:underline font-semibold">Reenviar correo de verificación</a>';
+            } elseif (isset($resultado['pending_approval']) && $resultado['pending_approval']) {
+                // Cuenta verificada pero pendiente de aprobación
+                $error = '⏳ <strong>Cuenta Pendiente de Aprobación</strong><br>' . $resultado['message'] . '<br><small class="text-gray-600 mt-2 block">Un superadministrador revisará tu solicitud y te notificará por correo cuando sea aprobada.</small>';
+            } else {
+                $error = $resultado['message'];
+            }
         }
     }
 }
@@ -49,7 +73,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
     if (empty($errores)) {
         $resultado = registrarAdmin($nombre, $email, $password);
         if ($resultado['success']) {
-            $success = $resultado['message'];
+            if (isset($resultado['require_verification']) && $resultado['require_verification']) {
+                $success = '✅ <strong>¡Registro Exitoso!</strong><br>' . $resultado['message'] . '<br><br>
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-3">
+                    <div class="text-sm text-yellow-800">
+                        <p class="font-medium mb-1">📋 Proceso de activación:</p>
+                        <p class="mb-1">1️⃣ Verifica tu correo electrónico (revisa spam)</p>
+                        <p class="mb-1">2️⃣ Un superadministrador aprobará tu solicitud</p>
+                        <p>3️⃣ Recibirás confirmación para acceder al sistema</p>
+                    </div>
+                </div>
+                <small class="text-gray-600 mt-2 block">¿No recibiste el correo? <a href="reenviar_verificacion_admin.php?email=' . urlencode($email) . '" class="text-orange-500 hover:underline">Reenviar verificación</a></small>';
+            } else {
+                $success = $resultado['message'];
+            }
         } else {
             $error = $resultado['message'];
         }
@@ -377,11 +414,27 @@ if (isset($_GET['error'])) {
                     </div>
                 <?php endif; ?>
 
+                <!-- Mensaje especial para aprobaciones pendientes -->
+                <?php if (isset($_GET['token']) && isset($_GET['accion'])): ?>
+                    <div class="mb-4 sm:mb-6 bg-blue-500/20 backdrop-blur-sm border border-blue-400/30 text-blue-100 px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl text-sm sm:text-base">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        <strong>🔐 Proceso de Aprobación Detectado</strong><br>
+                        <small class="text-blue-200 mt-1 block">Después de iniciar sesión, se procesará automáticamente la <?php echo $_GET['accion'] === 'aprobar' ? 'aprobación' : 'denegación'; ?> del administrador solicitante.</small>
+                    </div>
+                <?php endif; ?>
+
                 <!-- Formularios con contenedor animado -->
                 <div class="form-container">
                     <!-- Formulario de Login -->
                     <div id="loginFormWrapper" class="form-wrapper">
                         <form id="loginForm" method="POST" class="space-y-4 sm:space-y-6">
+                            <?php 
+                            // Preservar parámetros GET en campos ocultos
+                            if (isset($_GET['token']) && isset($_GET['accion'])) {
+                                echo '<input type="hidden" name="approval_token" value="' . htmlspecialchars($_GET['token']) . '">';
+                                echo '<input type="hidden" name="approval_action" value="' . htmlspecialchars($_GET['accion']) . '">';
+                            }
+                            ?>
                             <div class="space-y-1 sm:space-y-2">
                                 <label for="email" class="block text-xs sm:text-sm font-semibold text-white/90">
                                     <i class="fas fa-envelope mr-2 text-blue-300 text-xs sm:text-sm"></i>Correo Electrónico

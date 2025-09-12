@@ -14,8 +14,8 @@ function verificarSesionAdmin() {
         exit();
     }
     
-    // Verificar rol de admin
-    if (!isset($_SESSION['admin_rol']) || $_SESSION['admin_rol'] !== 'admin') {
+    // Verificar rol de admin o superadmin
+    if (!isset($_SESSION['admin_rol']) || !in_array($_SESSION['admin_rol'], ['admin', 'superadmin'])) {
         // Sin permisos suficientes
         header('Location: /src/admin/auth/login.php?error=insufficient_permissions');
         exit();

@@ -10,7 +10,7 @@ function autenticarAdmin($email, $password) {
     
     try {
         // Buscar administrador por email
-        $stmt = $conn->prepare("SELECT id_admin, nombre, email, password_hash, rol, bloqueado, intentos_fallidos FROM administradores WHERE email = ? LIMIT 1");
+        $stmt = $conn->prepare("SELECT id_admin, nombre, email, password_hash, rol, bloqueado, intentos_fallidos, email_verificado, acceso_aprobado FROM administradores WHERE email = ? LIMIT 1");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -20,6 +20,25 @@ function autenticarAdmin($email, $password) {
         }
         
         $admin = $result->fetch_assoc();
+        
+        // Verificar si el email está verificado
+        if (!$admin['email_verificado']) {
+            return [
+                'success' => false, 
+                'message' => 'Debes verificar tu correo electrónico antes de iniciar sesión.',
+                'require_verification' => true,
+                'email' => $admin['email']
+            ];
+        }
+
+        // Verificar si el acceso está aprobado
+        if (!$admin['acceso_aprobado']) {
+            return [
+                'success' => false, 
+                'message' => 'Tu cuenta está pendiente de aprobación por un superadministrador. Te notificaremos cuando sea aprobada.',
+                'pending_approval' => true
+            ];
+        }
         
         // Verificar si está bloqueado
         if ($admin['bloqueado']) {
@@ -92,16 +111,40 @@ function registrarAdmin($nombre, $email, $password) {
         // Hash de la contraseña
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
         
-        // Insertar nuevo administrador
-        $stmt = $conn->prepare("INSERT INTO administradores (nombre, email, password_hash, rol, email_verificado) VALUES (?, ?, ?, 'admin', TRUE)");
-        $stmt->bind_param("sss", $nombre, $email, $password_hash);
+        // Generar token de verificación
+        $token_verificacion = bin2hex(random_bytes(32));
+        $token_expira = date('Y-m-d H:i:s', strtotime('+24 hours'));
+        
+        // Insertar nuevo administrador (email_verificado = FALSE, acceso_aprobado = FALSE por defecto)
+        $stmt = $conn->prepare("INSERT INTO administradores (nombre, email, password_hash, rol, email_verificado, acceso_aprobado, token_verificacion, token_expira) VALUES (?, ?, ?, 'admin', FALSE, FALSE, ?, ?)");
+        $stmt->bind_param("sssss", $nombre, $email, $password_hash, $token_verificacion, $token_expira);
         
         if ($stmt->execute()) {
-            return [
-                'success' => true, 
-                'message' => 'Administrador registrado exitosamente',
-                'admin_id' => $stmt->insert_id
-            ];
+            $admin_id = $stmt->insert_id;
+            
+            // Enviar correo de verificación
+            require_once __DIR__ . '/enviar_correo_admin.php';
+            $link = "http://localhost:8000/src/admin/auth/verificar_email_admin.php?token=" . $token_verificacion;
+            $resultado_correo = enviarCorreoVerificacionAdmin($email, $nombre, $link);
+            
+            if ($resultado_correo === true) {
+                return [
+                    'success' => true, 
+                    'message' => 'Administrador registrado exitosamente. Se ha enviado un correo de verificación a tu email.',
+                    'admin_id' => $admin_id,
+                    'require_verification' => true
+                ];
+            } else {
+                // Si falla el correo, eliminar el admin creado para mantener consistencia
+                $stmt_delete = $conn->prepare("DELETE FROM administradores WHERE id_admin = ?");
+                $stmt_delete->bind_param("i", $admin_id);
+                $stmt_delete->execute();
+                
+                return [
+                    'success' => false, 
+                    'message' => 'Error al enviar el correo de verificación: ' . $resultado_correo
+                ];
+            }
         } else {
             return ['success' => false, 'message' => 'Error al registrar administrador'];
         }
@@ -142,5 +185,203 @@ function validarDatosRegistro($nombre, $email, $password, $confirmar_password) {
     }
     
     return $errores;
+}
+
+/**
+ * Reenvía correo de verificación para administrador
+ */
+function reenviarVerificacionAdmin($email) {
+    global $conn;
+    
+    try {
+        // Buscar administrador por email
+        $stmt = $conn->prepare("SELECT id_admin, nombre, email, email_verificado, token_verificacion, token_expira FROM administradores WHERE email = ? LIMIT 1");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows === 0) {
+            return ['success' => false, 'message' => 'No existe una cuenta de administrador con ese correo'];
+        }
+
+        $admin = $result->fetch_assoc();
+
+        if ($admin['email_verificado']) {
+            return ['success' => false, 'message' => 'El correo ya está verificado'];
+        }
+
+        // Verificar si tiene un token válido vigente
+        $tieneTokenValido = false;
+        if ($admin['token_verificacion'] && $admin['token_expira']) {
+            $tieneTokenValido = strtotime($admin['token_expira']) > time();
+        }
+
+        $token = $admin['token_verificacion'];
+        
+        if (!$tieneTokenValido) {
+            // Generar nuevo token
+            $token = bin2hex(random_bytes(32));
+            $fechaExpiracion = date('Y-m-d H:i:s', strtotime('+24 hours'));
+            
+            $stmtUpdate = $conn->prepare("UPDATE administradores SET token_verificacion = ?, token_expira = ? WHERE id_admin = ?");
+            $stmtUpdate->bind_param("ssi", $token, $fechaExpiracion, $admin['id_admin']);
+            $stmtUpdate->execute();
+        }
+
+        // Enviar correo de verificación
+        require_once __DIR__ . '/enviar_correo_admin.php';
+        $nombre = $admin['nombre'];
+        $link = "http://localhost:8000/src/admin/auth/verificar_email_admin.php?token=" . $token;
+        $resultado = enviarCorreoVerificacionAdmin($email, $nombre, $link);
+
+        if ($resultado === true) {
+            return ['success' => true, 'message' => 'Correo de verificación enviado correctamente'];
+        } else {
+            return ['success' => false, 'message' => 'Error al enviar el correo: ' . $resultado];
+        }
+
+    } catch (Exception $e) {
+        error_log("Error al reenviar verificación admin: " . $e->getMessage());
+        return ['success' => false, 'message' => 'Error interno del servidor'];
+    }
+}
+
+/**
+ * Notifica a superadministradores sobre nueva solicitud de acceso
+ */
+function notificarSuperadministradores($id_admin_solicitante) {
+    global $conn;
+    
+    try {
+        // Obtener datos del administrador solicitante
+        $stmt = $conn->prepare("SELECT nombre, email FROM administradores WHERE id_admin = ? LIMIT 1");
+        $stmt->bind_param("i", $id_admin_solicitante);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $solicitante = $result->fetch_assoc();
+        
+        if (!$solicitante) {
+            return ['success' => false, 'message' => 'Administrador solicitante no encontrado'];
+        }
+
+        // Generar tokens de aprobación y rechazo
+        $token_aprobacion = bin2hex(random_bytes(32));
+        $token_rechazo = bin2hex(random_bytes(32));
+        $fecha_expiracion = date('Y-m-d H:i:s', strtotime('+72 hours'));
+
+        // Insertar tokens en tabla de aprobación
+        $stmt_token = $conn->prepare("INSERT INTO tokens_aprobacion (id_admin_solicitante, token_aprobacion, token_rechazo, fecha_expiracion) VALUES (?, ?, ?, ?)");
+        $stmt_token->bind_param("isss", $id_admin_solicitante, $token_aprobacion, $token_rechazo, $fecha_expiracion);
+        $stmt_token->execute();
+
+        // Buscar todos los superadministradores
+        $stmt_superadmins = $conn->prepare("SELECT nombre, email FROM administradores WHERE rol = 'superadmin' AND email_verificado = TRUE AND acceso_aprobado = TRUE");
+        $stmt_superadmins->execute();
+        $result_superadmins = $stmt_superadmins->get_result();
+
+        $correos_enviados = 0;
+        require_once __DIR__ . '/enviar_correo_admin.php';
+
+        while ($superadmin = $result_superadmins->fetch_assoc()) {
+            $resultado = enviarCorreoSolicitudAprobacion(
+                $superadmin['email'], 
+                $superadmin['nombre'], 
+                $solicitante['nombre'], 
+                $solicitante['email'],
+                $token_aprobacion,
+                $token_rechazo
+            );
+            
+            if ($resultado === true) {
+                $correos_enviados++;
+            }
+        }
+
+        return [
+            'success' => true, 
+            'message' => "Notificación enviada a $correos_enviados superadministradores",
+            'correos_enviados' => $correos_enviados
+        ];
+
+    } catch (Exception $e) {
+        error_log("Error al notificar superadministradores: " . $e->getMessage());
+        return ['success' => false, 'message' => 'Error interno del servidor'];
+    }
+}
+
+/**
+ * Procesa aprobación o rechazo de administrador
+ */
+function procesarAprobacionAdmin($token, $accion, $admin_aprobador_id) {
+    global $conn;
+    
+    try {
+        // Determinar qué token usar según la acción
+        $campo_token = ($accion === 'aprobar') ? 'token_aprobacion' : 'token_rechazo';
+        
+        // Buscar token válido no procesado
+        $stmt = $conn->prepare("
+            SELECT ta.*, a.nombre, a.email 
+            FROM tokens_aprobacion ta 
+            JOIN administradores a ON ta.id_admin_solicitante = a.id_admin 
+            WHERE ta.$campo_token = ? 
+            AND ta.fecha_expiracion > NOW() 
+            AND ta.procesado = FALSE 
+            LIMIT 1
+        ");
+        $stmt->bind_param("s", $token);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows === 0) {
+            return ['success' => false, 'message' => 'Token inválido o expirado'];
+        }
+
+        $datos = $result->fetch_assoc();
+        $id_solicitante = $datos['id_admin_solicitante'];
+        $nombre_solicitante = $datos['nombre'];
+        $email_solicitante = $datos['email'];
+
+        if ($accion === 'aprobar') {
+            // Aprobar administrador
+            $stmt_aprobar = $conn->prepare("
+                UPDATE administradores 
+                SET acceso_aprobado = TRUE, 
+                    aprobado_por = ?, 
+                    fecha_aprobacion = NOW() 
+                WHERE id_admin = ?
+            ");
+            $stmt_aprobar->bind_param("ii", $admin_aprobador_id, $id_solicitante);
+            $stmt_aprobar->execute();
+
+            // Enviar correo de aprobación
+            require_once __DIR__ . '/enviar_correo_admin.php';
+            enviarCorreoAccesoAprobado($email_solicitante, $nombre_solicitante);
+
+            $mensaje = "Administrador $nombre_solicitante aprobado exitosamente";
+        } else {
+            // Rechazar administrador - eliminar registro
+            $stmt_rechazar = $conn->prepare("DELETE FROM administradores WHERE id_admin = ?");
+            $stmt_rechazar->bind_param("i", $id_solicitante);
+            $stmt_rechazar->execute();
+
+            // Enviar correo de rechazo (opcional)
+            require_once __DIR__ . '/enviar_correo_admin.php';
+            enviarCorreoAccesoRechazado($email_solicitante, $nombre_solicitante);
+
+            $mensaje = "Solicitud de $nombre_solicitante rechazada";
+        }
+
+        // Marcar token como procesado
+        $stmt_procesado = $conn->prepare("UPDATE tokens_aprobacion SET procesado = TRUE WHERE id = ?");
+        $stmt_procesado->bind_param("i", $datos['id']);
+        $stmt_procesado->execute();
+
+        return ['success' => true, 'message' => $mensaje];
+
+    } catch (Exception $e) {
+        error_log("Error al procesar aprobación admin: " . $e->getMessage());
+        return ['success' => false, 'message' => 'Error interno del servidor'];
+    }
 }
 ?>

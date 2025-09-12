@@ -27,6 +27,7 @@
 - [🚀 Instalación y Configuración](#-instalación-y-configuración)
 - [🎮 Uso del Sistema](#-uso-del-sistema)
 - [🔐 Autenticación y Seguridad](#-autenticación-y-seguridad)
+- [👥 Sistema de Administradores](#-sistema-de-administradores)
 - [🎨 Interfaz de Usuario](#-interfaz-de-usuario)
 - [📱 Responsividad](#-responsividad)
 - [🔧 Configuración](#-configuración)
@@ -335,6 +336,121 @@ CREATE TABLE reservas (
    // Enviar email de verificación
    mail($email, "Verificar cuenta", "Token: $token");
    ```
+
+## 👥 Sistema de Administradores
+
+### 🔐 **Sistema de Autenticación de Administradores**
+
+El sistema cuenta con un robusto mecanismo de autenticación y aprobación para administradores con los siguientes componentes:
+
+#### **Roles Administrativos:**
+- **`admin`**: Administrador regular con acceso al panel administrativo
+- **`superadmin`**: Superadministrador con capacidades de aprobación y gestión de otros administradores
+
+#### **Estados de Cuenta:**
+- **`email_verificado`**: Email confirmado por el usuario ✅/❌
+- **`acceso_aprobado`**: Cuenta aprobada por superadministrador ✅/❌
+- **`bloqueado`**: Cuenta bloqueada por seguridad ✅/❌
+
+### 🔄 **Flujo de Registro y Aprobación**
+
+```mermaid
+graph TD
+    A[📝 Registro Admin] --> B[📧 Verificar Email]
+    B --> C[✅ Email Verificado]
+    C --> D[📬 Notificación a Superadmins]
+    D --> E[🔍 Revisión de Solicitud]
+    E --> F{Decisión}
+    F -->|Aprobar| G[✅ Acceso Concedido]
+    F -->|Rechazar| H[❌ Cuenta Eliminada]
+    G --> I[📧 Correo de Bienvenida]
+    H --> J[📧 Notificación de Rechazo]
+```
+
+#### **Proceso Detallado:**
+
+1. **📝 Registro**: Admin completa formulario → Inserción en BD → Email de verificación
+2. **✅ Verificación**: Clic en enlace → Token validado → Email marcado como verificado
+3. **📬 Notificación**: Sistema notifica automáticamente a todos los superadministradores
+4. **🔐 Aprobación Automática**: Superadmin recibe correo → Clic en aprobar → Login (si necesario) → Procesamiento automático
+5. **🎯 Finalización**: Email de confirmación → Acceso al panel administrativo
+
+### 🛠️ **Características Técnicas**
+
+#### **Seguridad Avanzada:**
+- **Tokens únicos**: 32 bytes hexadecimales para verificación y aprobación
+- **Expiración temporal**: 24h para verificación, 72h para aprobación
+- **Control de intentos**: Bloqueo automático tras fallos repetidos
+- **Prepared statements**: Prevención total de SQL injection
+
+#### **Flujo de Aprobación Automática:**
+- **Preservación de parámetros**: Tokens mantenidos durante navegación
+- **Login transparente**: Redirección automática post-autenticación
+- **Procesamiento inmediato**: Sin intervención adicional del superadministrador
+- **Confirmación visual**: Feedback completo del proceso
+
+### 📧 **Sistema de Correos**
+
+#### **Plantillas Personalizadas:**
+- **🎨 Diseño corporativo**: Colores naranja/amarillo de Antares Travel
+- **📱 Responsive**: Optimizadas para móviles y desktop
+- **🔗 Enlaces directos**: Botones de acción para aprobar/rechazar
+- **ℹ️ Información completa**: Datos del solicitante y contexto
+
+#### **Tipos de Correo:**
+1. **Verificación de email**: Para nuevos administradores
+2. **Solicitud de aprobación**: Para superadministradores
+3. **Confirmación de aprobación**: Para administrador aprobado
+4. **Notificación de rechazo**: Para administrador rechazado
+
+### 🗄️ **Base de Datos**
+
+```sql
+-- Tabla principal de administradores
+CREATE TABLE administradores (
+    id_admin INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    rol ENUM('admin', 'superadmin') DEFAULT 'admin',
+    email_verificado BOOLEAN DEFAULT FALSE,
+    acceso_aprobado BOOLEAN DEFAULT FALSE,
+    bloqueado BOOLEAN DEFAULT FALSE,
+    token_verificacion VARCHAR(64),
+    token_expira DATETIME,
+    aprobado_por INT,
+    fecha_aprobacion DATETIME,
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabla de tokens de aprobación
+CREATE TABLE tokens_aprobacion (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_admin_solicitante INT NOT NULL,
+    token_aprobacion VARCHAR(64) NOT NULL,
+    token_rechazo VARCHAR(64) NOT NULL,
+    fecha_expiracion DATETIME NOT NULL,
+    procesado BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (id_admin_solicitante) REFERENCES administradores(id_admin)
+);
+```
+
+### 📊 **Panel de Administración**
+
+#### **Dashboard Centralizado:**
+- **📈 Métricas en tiempo real**: Estadísticas de usuarios, reservas, tours
+- **👥 Gestión de administradores**: Lista, estados, aprobaciones pendientes
+- **🎯 Accesos rápidos**: Funciones principales del sistema
+- **🔍 Monitoreo de actividad**: Logs de acciones administrativas
+
+#### **Módulos Principales:**
+- **🏨 Gestión de Tours**: Crear, editar, programar tours
+- **👨‍🏫 Gestión de Guías**: Alta, baja, asignaciones
+- **🚗 Gestión de Vehículos**: Inventario, mantenimiento, disponibilidad
+- **📋 Gestión de Reservas**: Estados, confirmaciones, cancelaciones
+- **💰 Reportes Financieros**: Ingresos, gastos, comisiones
+
+> 📚 **Documentación Completa**: [Sistema de Autenticación Detallado](src/admin/auth/README_SISTEMA_AUTENTICACION_COMPLETO.md)
 
 ## 🎨 Interfaz de Usuario
 
