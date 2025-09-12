@@ -1734,8 +1734,8 @@ limitRequests($ip);
                     google.accounts.id.initialize({
                         client_id: '<?php echo htmlspecialchars($client->getClientId()); ?>',
                         callback: handleCredentialResponse,
-                        auto_select: false,
-                        cancel_on_tap_outside: false
+                        auto_select: true,
+                        cancel_on_tap_outside: true
                     });
 
                     google.accounts.id.renderButton(
@@ -1749,6 +1749,16 @@ limitRequests($ip);
                             logo_alignment: "left"
                         }
                     );
+
+                    // Mostrar automáticamente el One Tap si el usuario no está logueado
+                    <?php if (!isset($_SESSION['user_email'])): ?>
+                    google.accounts.id.prompt((notification) => {
+                        console.log('🔔 One Tap notification:', notification);
+                        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                            console.log('⚠️ One Tap no se mostró:', notification.getNotDisplayedReason());
+                        }
+                    });
+                    <?php endif; ?>
 
                     console.log('✅ Google One Tap initialized successfully');
                 } catch (error) {
