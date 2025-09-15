@@ -15,7 +15,7 @@
 
 ---
 
-*"El mundo es un libro y aquellos que no viajan leen solo una página."* - San Agustín
+_"El mundo es un libro y aquellos que no viajan leen solo una página."_ - San Agustín
 
 </div>
 
@@ -40,14 +40,17 @@
 **Antares Travel** es un sistema integral de gestión turística desarrollado en PHP 8+ que permite a las agencias de viajes administrar tours, reservas, personal y clientes de manera eficiente. Combina una landing page atractiva para clientes con un panel administrativo completo para la gestión interna.
 
 ### 🌟 **Misión**
+
 Transformar la manera en que las personas descubren y experimentan el mundo, creando conexiones auténticas entre viajeros y destinos extraordinarios.
 
 ### 🎪 **Visión**
+
 Ser la plataforma líder en gestión turística que democratiza el acceso a experiencias de viaje únicas y personalizadas.
 
 ## ✨ Características Principales
 
 ### 🌐 **Landing Page Moderna**
+
 - 🎨 **Diseño Responsivo**: Mobile-first con animaciones CSS3 avanzadas
 - 🖼️ **Galería Interactiva**: Carousel automático con 5 imágenes hero
 - 🌍 **Multiidioma**: Soporte completo ES/EN con switching dinámico
@@ -60,6 +63,7 @@ Ser la plataforma líder en gestión turística que democratiza el acceso a expe
 - 📧 **Información de Contacto**: Múltiples canales de comunicación
 
 ### 🔐 **Sistema de Autenticación Híbrida**
+
 - 🔑 **Login Manual**: Email/password con hash seguro
 - 🚀 **OAuth Integrado**: Google, Microsoft, Apple Sign-In
 - ✉️ **Verificación Email**: Sistema de confirmación por correo
@@ -68,6 +72,7 @@ Ser la plataforma líder en gestión turística que democratiza el acceso a expe
 - 🛡️ **Sesiones Seguras**: Manejo robusto de sesiones PHP
 
 ### 📊 **Panel Administrativo Completo**
+
 - 📈 **Dashboard Analytics**: Estadísticas en tiempo real
 - 📅 **Gestión de Tours**: Programación y administración de tours
 - 📝 **Sistema de Reservas**: CRUD completo de reservas
@@ -77,6 +82,7 @@ Ser la plataforma líder en gestión turística que democratiza el acceso a expe
 - 🎯 **Configuración Sistema**: Personalización completa
 
 ### 🎨 **UI/UX Moderna**
+
 - 🎭 **Diseño Glassmorphism**: Efectos de vidrio y transparencias
 - 🌈 **Gradientes Dinámicos**: Paleta azul-púrpura profesional
 - ⚡ **Animaciones Fluidas**: Transiciones CSS optimizadas
@@ -88,15 +94,15 @@ Ser la plataforma líder en gestión turística que democratiza el acceso a expe
 
 ### 🔧 **Stack Tecnológico**
 
-| Tecnología | Versión | Propósito | Estado |
-|------------|---------|-----------|---------|
-| **PHP** | 8.0+ | Backend y lógica del servidor | ✅ Activo |
-| **MySQL** | 8.0+ | Base de datos principal | ✅ Activo |
-| **TailwindCSS** | 3.x | Framework CSS utilitario | ✅ Activo |
-| **Alpine.js** | 3.x | Reactividad en el frontend | ✅ Activo |
-| **Font Awesome** | 6.x | Iconografía | ✅ Activo |
-| **Google OAuth** | 2.0 | Autenticación social | ✅ Activo |
-| **XAMPP** | 8.x | Entorno de desarrollo | ✅ Activo |
+| Tecnología       | Versión | Propósito                     | Estado    |
+| ---------------- | ------- | ----------------------------- | --------- |
+| **PHP**          | 8.0+    | Backend y lógica del servidor | ✅ Activo |
+| **MySQL**        | 8.0+    | Base de datos principal       | ✅ Activo |
+| **TailwindCSS**  | 3.x     | Framework CSS utilitario      | ✅ Activo |
+| **Alpine.js**    | 3.x     | Reactividad en el frontend    | ✅ Activo |
+| **Font Awesome** | 6.x     | Iconografía                   | ✅ Activo |
+| **Google OAuth** | 2.0     | Autenticación social          | ✅ Activo |
+| **XAMPP**        | 8.x     | Entorno de desarrollo         | ✅ Activo |
 
 ### 📁 **Estructura de Directorios**
 
@@ -159,21 +165,24 @@ graph TD
 ### ⚡ **Instalación Rápida**
 
 1. **Clonar el repositorio:**
+
    ```bash
    git clone https://github.com/usuario/Antares-Travel.git
    cd Antares-Travel
    ```
 
 2. **Configurar XAMPP:**
+
    - Instalar XAMPP 8.0+
    - Iniciar Apache y MySQL
    - Copiar proyecto a `htdocs/`
 
 3. **Configurar base de datos:**
+
    ```sql
    CREATE DATABASE antares_travel;
    USE antares_travel;
-   
+
    -- Importar estructura desde schema.sql
    SOURCE database/schema.sql;
    ```
@@ -233,6 +242,7 @@ CREATE TABLE reservas (
 2. **Habilitar Google+ API**
 3. **Crear credenciales OAuth 2.0**
 4. **Configurar** en `src/functions/google_auth.php`:
+
    ```php
    $client->setClientId('tu-client-id.googleusercontent.com');
    $client->setClientSecret('tu-client-secret');
@@ -241,13 +251,14 @@ CREATE TABLE reservas (
 
 5. **Configurar One Tap** en `index.php`:
    ```html
-   <div id="g_id_onload"
-        data-client_id="tu-client-id.googleusercontent.com"
-        data-context="signin"
-        data-ux_mode="popup"
-        data-auto_prompt="true"
-        data-callback="handleCredentialResponse">
-   </div>
+   <div
+     id="g_id_onload"
+     data-client_id="tu-client-id.googleusercontent.com"
+     data-context="signin"
+     data-ux_mode="popup"
+     data-auto_prompt="true"
+     data-callback="handleCredentialResponse"
+   ></div>
    ```
 
 ## 🎮 Uso del Sistema
@@ -257,6 +268,7 @@ CREATE TABLE reservas (
 **Acceso:** `http://localhost/Antares-Travel/`
 
 **Características:**
+
 - ✨ Hero section con carousel automático (5 imágenes)
 - 🗺️ Sección de destinos destacados con overlay effects
 - 👥 Perfiles de guías especializados
@@ -271,23 +283,27 @@ CREATE TABLE reservas (
 **Acceso:** `http://localhost/Antares-Travel/src/admin/`
 
 #### 📊 **Dashboard Principal**
+
 - **Estadísticas en tiempo real**: Reservas, tours, usuarios, ventas
 - **Accesos rápidos**: Crear reservas, programar tours, ver reportes
 - **Vista responsiva**: Optimizada para móvil y desktop
 
 #### 🗓️ **Gestión de Tours**
+
 - Crear/editar/eliminar tours
 - Configurar precios y disponibilidad
 - Asignar guías y vehículos
 - Generar itinerarios
 
 #### 📝 **Sistema de Reservas**
+
 - Gestión completa de reservas
 - Estados: pendiente, confirmada, cancelada
 - Comunicación con clientes
 - Reportes de ocupación
 
 #### 👥 **Administración de Personal**
+
 - Gestión de guías turísticos
 - Control de choferes
 - Administración de vehículos
@@ -307,16 +323,18 @@ CREATE TABLE reservas (
 ### 🔑 **Flujo de Autenticación**
 
 1. **Registro Manual**:
+
    ```php
    // Hash seguro de contraseña
    $password_hash = password_hash($password, PASSWORD_BCRYPT);
-   
+
    // Inserción con prepared statement
    $stmt = $conn->prepare("INSERT INTO usuarios (nombre, email, password_hash) VALUES (?, ?, ?)");
    $stmt->bind_param("sss", $nombre, $email, $password_hash);
    ```
 
 2. **Google OAuth**:
+
    ```php
    // Verificación de token JWT
    $payload = $client->verifyIdToken($credential);
@@ -329,10 +347,11 @@ CREATE TABLE reservas (
    ```
 
 3. **Verificación de Email**:
+
    ```php
    // Generar token único
    $token = bin2hex(random_bytes(32));
-   
+
    // Enviar email de verificación
    mail($email, "Verificar cuenta", "Token: $token");
    ```
@@ -344,10 +363,12 @@ CREATE TABLE reservas (
 El sistema cuenta con un robusto mecanismo de autenticación y aprobación para administradores con los siguientes componentes:
 
 #### **Roles Administrativos:**
+
 - **`admin`**: Administrador regular con acceso al panel administrativo
 - **`superadmin`**: Superadministrador con capacidades de aprobación y gestión de otros administradores
 
 #### **Estados de Cuenta:**
+
 - **`email_verificado`**: Email confirmado por el usuario ✅/❌
 - **`acceso_aprobado`**: Cuenta aprobada por superadministrador ✅/❌
 - **`bloqueado`**: Cuenta bloqueada por seguridad ✅/❌
@@ -378,12 +399,14 @@ graph TD
 ### 🛠️ **Características Técnicas**
 
 #### **Seguridad Avanzada:**
+
 - **Tokens únicos**: 32 bytes hexadecimales para verificación y aprobación
 - **Expiración temporal**: 24h para verificación, 72h para aprobación
 - **Control de intentos**: Bloqueo automático tras fallos repetidos
 - **Prepared statements**: Prevención total de SQL injection
 
 #### **Flujo de Aprobación Automática:**
+
 - **Preservación de parámetros**: Tokens mantenidos durante navegación
 - **Login transparente**: Redirección automática post-autenticación
 - **Procesamiento inmediato**: Sin intervención adicional del superadministrador
@@ -392,12 +415,14 @@ graph TD
 ### 📧 **Sistema de Correos**
 
 #### **Plantillas Personalizadas:**
+
 - **🎨 Diseño corporativo**: Colores naranja/amarillo de Antares Travel
 - **📱 Responsive**: Optimizadas para móviles y desktop
 - **🔗 Enlaces directos**: Botones de acción para aprobar/rechazar
 - **ℹ️ Información completa**: Datos del solicitante y contexto
 
 #### **Tipos de Correo:**
+
 1. **Verificación de email**: Para nuevos administradores
 2. **Solicitud de aprobación**: Para superadministradores
 3. **Confirmación de aprobación**: Para administrador aprobado
@@ -438,12 +463,14 @@ CREATE TABLE tokens_aprobacion (
 ### 📊 **Panel de Administración**
 
 #### **Dashboard Centralizado:**
+
 - **📈 Métricas en tiempo real**: Estadísticas de usuarios, reservas, tours
 - **👥 Gestión de administradores**: Lista, estados, aprobaciones pendientes
 - **🎯 Accesos rápidos**: Funciones principales del sistema
 - **🔍 Monitoreo de actividad**: Logs de acciones administrativas
 
 #### **Módulos Principales:**
+
 - **🏨 Gestión de Tours**: Crear, editar, programar tours
 - **👨‍🏫 Gestión de Guías**: Alta, baja, asignaciones
 - **🚗 Gestión de Vehículos**: Inventario, mantenimiento, disponibilidad
@@ -457,19 +484,21 @@ CREATE TABLE tokens_aprobacion (
 ### 🎭 **Sistema de Diseño**
 
 **Paleta de Colores:**
+
 ```css
 :root {
-    --primary-bg: #0f172a;
-    --primary-light: #3b82f6;
-    --primary-dark: #1e40af;
-    --accent-gold: #fbbf24;
-    --glass-bg: rgba(255, 255, 255, 0.1);
-    --text-light: #f8fafc;
-    --text-dark: #1e293b;
+  --primary-bg: #0f172a;
+  --primary-light: #3b82f6;
+  --primary-dark: #1e40af;
+  --accent-gold: #fbbf24;
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --text-light: #f8fafc;
+  --text-dark: #1e293b;
 }
 ```
 
 **Tipografía:**
+
 - **Principal**: Poppins (300, 400, 500, 600, 700)
 - **Iconos**: Font Awesome 6.x
 - **Tamaños**: Sistema escalable con rem
@@ -477,42 +506,45 @@ CREATE TABLE tokens_aprobacion (
 ### 🌈 **Efectos Visuales**
 
 **Glassmorphism:**
+
 ```css
 .glass-card {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
 }
 ```
 
 **Hover Effects:**
+
 ```css
 .hover-lift {
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .hover-lift:hover {
-    transform: translateY(-8px);
+  transform: translateY(-8px);
 }
 ```
 
 **Animaciones:**
+
 ```css
 @keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .fade-in {
-    animation: fadeInUp 0.6s ease-out forwards;
+  animation: fadeInUp 0.6s ease-out forwards;
 }
 ```
 
@@ -524,64 +556,66 @@ CREATE TABLE tokens_aprobacion (
 /* Mobile First Approach */
 /* Mobile: 320px - 768px */
 .container {
-    padding: 0 1rem;
-    max-width: 100%;
+  padding: 0 1rem;
+  max-width: 100%;
 }
 
 /* Tablet: 768px - 1024px */
 @media (min-width: 768px) {
-    .container {
-        padding: 0 2rem;
-        max-width: 768px;
-    }
+  .container {
+    padding: 0 2rem;
+    max-width: 768px;
+  }
 }
 
 /* Desktop: 1024px+ */
 @media (min-width: 1024px) {
-    .container {
-        padding: 0 3rem;
-        max-width: 1200px;
-        margin: 0 auto;
-    }
+  .container {
+    padding: 0 3rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
 }
 ```
 
 ### 📱 **Características Móviles**
 
 **Navegación Móvil:**
+
 ```css
 .mobile-nav {
-    position: fixed;
-    top: 0;
-    left: -100%;
-    width: 80%;
-    height: 100vh;
-    background: var(--primary-bg);
-    transition: left 0.3s ease;
-    z-index: 1000;
+  position: fixed;
+  top: 0;
+  left: -100%;
+  width: 80%;
+  height: 100vh;
+  background: var(--primary-bg);
+  transition: left 0.3s ease;
+  z-index: 1000;
 }
 
 .mobile-nav.active {
-    left: 0;
+  left: 0;
 }
 ```
 
 **Sidebar Responsivo (Admin):**
+
 ```css
 @media (max-width: 768px) {
-    .sidebar-fixed { 
-        position: fixed; 
-        top: 0; 
-        left: 0; 
-        height: 100vh; 
-        z-index: 50; 
-        transform: translateX(-100%); 
-        transition: transform 0.3s ease-in-out;
-    }
-    
-    .sidebar-fixed.show {
-        transform: translateX(0);
-    }
+  .sidebar-fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+  }
+
+  .sidebar-fixed.show {
+    transform: translateX(0);
+  }
 }
 ```
 
@@ -671,6 +705,7 @@ $mail->Port = 587;
 ### 🐛 **Reportar Bugs**
 
 Usa el [issue tracker](https://github.com/usuario/Antares-Travel/issues) para reportar bugs. Incluye:
+
 - Descripción detallada del problema
 - Pasos para reproducir
 - Comportamiento esperado vs actual
@@ -725,7 +760,7 @@ Este proyecto está licenciado bajo la MIT License - ver el archivo [LICENSE.md]
 
 ---
 
-*"Donde cada viaje es una historia, y cada historia es una aventura extraordinaria."*
+_"Donde cada viaje es una historia, y cada historia es una aventura extraordinaria."_
 
 **© 2024 Antares Travel. Todos los derechos reservados.**
 
