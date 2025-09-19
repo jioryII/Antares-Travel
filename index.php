@@ -2792,7 +2792,7 @@ limitRequests($ip);
                 clearTimeout(timeout);
                 timeout = setTimeout(later, wait);
             };
-        }
+        } 
 
         window.changeHeroImage = changeHeroImage;
         window.toggleMobileMenu = toggleMobileMenu;
