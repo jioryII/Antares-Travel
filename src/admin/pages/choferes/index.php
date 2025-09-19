@@ -290,45 +290,319 @@ function getSortUrl($campo, $orden_actual, $direccion_actual) {
 
                 <!-- Filtros y búsqueda -->
                 <div class="bg-white rounded-lg shadow-lg p-4 lg:p-6 mb-6 lg:mb-8">
-                    <form method="GET" class="space-y-4 lg:space-y-0 lg:grid lg:grid-cols-4 lg:gap-4">
-                        <!-- Búsqueda -->
-                        <div class="lg:col-span-2">
-                            <label for="buscar" class="block text-sm font-medium text-gray-700 mb-2">Buscar</label>
+                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <!-- Búsqueda en tiempo real -->
+                        <div class="flex-1 lg:max-w-md">
                             <div class="relative">
-                                <input type="text" name="buscar" id="buscar" value="<?php echo htmlspecialchars($buscar); ?>" 
-                                       placeholder="Nombre, apellido, teléfono o licencia..." 
+                                <input type="text" id="buscar-tiempo-real" 
+                                       placeholder="Buscar por nombre, apellido, teléfono o licencia..." 
                                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
                                 <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
                             </div>
                         </div>
                         
-                        <!-- Espacio adicional para futuros filtros -->
-                        <div></div>
-                        
-                        <!-- Botones -->
-                        <div class="flex lg:items-end gap-2">
-                            <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
-                                <i class="fas fa-search mr-2"></i>Buscar
+                        <!-- Botones de acción -->
+                        <div class="flex gap-2">
+                            <button onclick="limpiarFiltros()" 
+                                    class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm">
+                                <i class="fas fa-times mr-2"></i>Limpiar
                             </button>
-                            <a href="index.php" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm">
-                                <i class="fas fa-times"></i>
-                            </a>
+                            <button onclick="exportarChoferes()" 
+                                    class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm">
+                                <i class="fas fa-download mr-2"></i>Exportar
+                            </button>
                         </div>
-                        
-                        <!-- Campos ocultos para mantener ordenación -->
-                        <input type="hidden" name="orden" value="<?php echo htmlspecialchars($orden); ?>">
-                        <input type="hidden" name="direccion" value="<?php echo htmlspecialchars($direccion); ?>">
-                    </form>
+                    </div>
                 </div>
 
                 <!-- Tabla de choferes -->
                 <div class="bg-white rounded-lg shadow-lg overflow-hidden">
                     <div class="px-6 py-4 border-b border-gray-200">
                         <h3 class="text-lg font-semibold text-gray-900">
-                            Choferes Registrados (<?php echo number_format($total_registros); ?>)
+                            Choferes Registrados 
+                            <span id="total-registros">(<?php echo number_format($total_registros); ?>)</span>
+                            <span id="registros-filtrados" class="text-blue-600 hidden"></span>
                         </h3>
                     </div>
                     
+                    <!-- Vista desktop con scroll -->
+                    <div class="hidden md:block">
+                        <div class="overflow-auto max-h-[600px]">
+                            <table class="min-w-full">
+                                <!-- Header sticky -->
+                                <thead class="bg-gray-50 sticky top-0 z-10">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">
+                                            #
+                                        </th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors">
+                                            <div class="flex items-center">
+                                                Chofer
+                                                <i class="fas fa-sort ml-2 text-gray-400"></i>
+                                            </div>
+                                        </th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Contacto
+                                        </th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Licencia
+                                        </th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Vehículos
+                                        </th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Tours
+                                        </th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
+                                            Acciones
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-choferes" class="bg-white divide-y divide-gray-200">
+                                    <?php foreach ($choferes as $index => $chofer): ?>
+                                        <tr class="hover:bg-gray-50 chofer-row" data-nombre="<?php echo strtolower($chofer['nombre'] . ' ' . ($chofer['apellido'] ?? '')); ?>" 
+                                            data-telefono="<?php echo strtolower($chofer['telefono'] ?? ''); ?>" 
+                                            data-licencia="<?php echo strtolower($chofer['licencia'] ?? ''); ?>">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <?php echo $chofer['id_chofer']; ?>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    <!-- Foto de perfil -->
+                                                    <div class="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center overflow-hidden border-2 border-white shadow-lg flex-shrink-0">
+                                                        <?php 
+                                                        $foto_url = $chofer['foto_url'] ?? '';
+                                                        $mostrar_foto = false;
+                                                        $foto_src = '';
+                                                        
+                                                        if (!empty($foto_url)) {
+                                                            // Manejar rutas tanto nuevas (completas) como legacy (solo nombre)
+                                                            $foto_path = strpos($foto_url, 'storage/uploads/choferes/') === 0 
+                                                                ? "../../../../" . $foto_url 
+                                                                : "../../../../storage/uploads/choferes/" . $foto_url;
+                                                            $foto_src = strpos($foto_url, 'storage/uploads/choferes/') === 0 
+                                                                ? "../../../../" . $foto_url 
+                                                                : "../../../../storage/uploads/choferes/" . $foto_url;
+                                                            
+                                                            $mostrar_foto = file_exists($foto_path);
+                                                        }
+                                                        
+                                                        if ($mostrar_foto): ?>
+                                                            <img src="<?php echo htmlspecialchars($foto_src); ?>" 
+                                                                 alt="<?php echo htmlspecialchars($chofer['nombre']); ?>" 
+                                                                 class="h-full w-full object-cover rounded-full">
+                                                        <?php else: ?>
+                                                            <span class="text-white font-medium text-sm">
+                                                                <?php echo strtoupper(substr($chofer['nombre'], 0, 1) . substr($chofer['apellido'] ?? '', 0, 1)); ?>
+                                                            </span>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                    <div class="ml-4 min-w-0 flex-1">
+                                                        <div class="text-sm font-medium text-gray-900 truncate">
+                                                            <?php echo htmlspecialchars($chofer['nombre'] . ' ' . ($chofer['apellido'] ?? '')); ?>
+                                                        </div>
+                                                        <div class="text-sm text-gray-500 truncate">ID: #<?php echo $chofer['id_chofer']; ?></div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <?php if ($chofer['telefono']): ?>
+                                                    <div class="flex items-center text-sm text-gray-900">
+                                                        <i class="fas fa-phone text-gray-400 mr-2"></i>
+                                                        <?php echo htmlspecialchars($chofer['telefono']); ?>
+                                                    </div>
+                                                <?php else: ?>
+                                                    <span class="text-gray-400 text-sm">No registrado</span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <?php if ($chofer['licencia']): ?>
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                                        <i class="fas fa-id-card mr-1"></i>
+                                                        <?php echo htmlspecialchars($chofer['licencia']); ?>
+                                                    </span>
+                                                <?php else: ?>
+                                                    <span class="text-gray-400 text-sm">Sin licencia</span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <?php if ($chofer['total_vehiculos'] > 0): ?>
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                        <i class="fas fa-car mr-1"></i>
+                                                        <?php echo $chofer['total_vehiculos']; ?> vehículo<?php echo $chofer['total_vehiculos'] > 1 ? 's' : ''; ?>
+                                                    </span>
+                                                <?php else: ?>
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                        Sin vehículos
+                                                    </span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex flex-wrap gap-1">
+                                                    <?php if ($chofer['total_tours'] > 0): ?>
+                                                        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                                            <i class="fas fa-map-marked-alt mr-1"></i><?php echo $chofer['total_tours']; ?> total
+                                                        </span>
+                                                        <?php if ($chofer['tours_proximos'] > 0): ?>
+                                                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-orange-100 text-orange-800">
+                                                                <i class="fas fa-calendar-day mr-1"></i><?php echo $chofer['tours_proximos']; ?> próximos
+                                                            </span>
+                                                        <?php endif; ?>
+                                                    <?php else: ?>
+                                                        <span class="text-gray-400 text-xs">Sin tours</span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                <div class="flex justify-end space-x-2">
+                                                    <a href="ver.php?id=<?php echo $chofer['id_chofer']; ?>" 
+                                                       class="text-blue-600 hover:text-blue-900 transition-colors" 
+                                                       title="Ver detalles">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a href="editar.php?id=<?php echo $chofer['id_chofer']; ?>" 
+                                                       class="text-yellow-600 hover:text-yellow-900 transition-colors" 
+                                                       title="Editar">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <button onclick="confirmarEliminar(<?php echo $chofer['id_chofer']; ?>, '<?php echo htmlspecialchars($chofer['nombre']); ?>')" 
+                                                            class="text-red-600 hover:text-red-900 transition-colors" 
+                                                            title="Eliminar">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Vista móvil con tarjetas -->
+                    <div class="md:hidden" id="vista-movil">
+                        <div id="tarjetas-choferes" class="space-y-4 p-4">
+                            <?php foreach ($choferes as $chofer): ?>
+                                <div class="chofer-card bg-white border border-gray-200 rounded-lg p-4 shadow-sm" 
+                                     data-nombre="<?php echo strtolower($chofer['nombre'] . ' ' . ($chofer['apellido'] ?? '')); ?>" 
+                                     data-telefono="<?php echo strtolower($chofer['telefono'] ?? ''); ?>" 
+                                     data-licencia="<?php echo strtolower($chofer['licencia'] ?? ''); ?>">
+                                    <!-- Header de la tarjeta -->
+                                    <div class="flex items-center justify-between mb-3">
+                                        <div class="flex items-center">
+                                            <!-- Foto de perfil -->
+                                            <div class="h-12 w-12 rounded-full bg-blue-600 flex items-center justify-center overflow-hidden border-2 border-white shadow-lg flex-shrink-0">
+                                                <?php 
+                                                $foto_url = $chofer['foto_url'] ?? '';
+                                                $mostrar_foto = false;
+                                                $foto_src = '';
+                                                
+                                                if (!empty($foto_url)) {
+                                                    // Manejar rutas tanto nuevas (completas) como legacy (solo nombre)
+                                                    $foto_path = strpos($foto_url, 'storage/uploads/choferes/') === 0 
+                                                        ? "../../../../" . $foto_url 
+                                                        : "../../../../storage/uploads/choferes/" . $foto_url;
+                                                    $foto_src = strpos($foto_url, 'storage/uploads/choferes/') === 0 
+                                                        ? "../../../../" . $foto_url 
+                                                        : "../../../../storage/uploads/choferes/" . $foto_url;
+                                                    
+                                                    $mostrar_foto = file_exists($foto_path);
+                                                }
+                                                
+                                                if ($mostrar_foto): ?>
+                                                    <img src="<?php echo htmlspecialchars($foto_src); ?>" 
+                                                         alt="<?php echo htmlspecialchars($chofer['nombre']); ?>" 
+                                                         class="h-full w-full object-cover rounded-full">
+                                                <?php else: ?>
+                                                    <span class="text-white font-medium">
+                                                        <?php echo strtoupper(substr($chofer['nombre'], 0, 1) . substr($chofer['apellido'] ?? '', 0, 1)); ?>
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
+                                            <div class="ml-3 min-w-0 flex-1">
+                                                <h3 class="text-sm font-semibold text-gray-900 truncate">
+                                                    <?php echo htmlspecialchars($chofer['nombre'] . ' ' . ($chofer['apellido'] ?? '')); ?>
+                                                </h3>
+                                                <p class="text-xs text-gray-500">ID: #<?php echo $chofer['id_chofer']; ?></p>
+                                            </div>
+                                        </div>
+                                        <div class="flex space-x-2">
+                                            <a href="ver.php?id=<?php echo $chofer['id_chofer']; ?>" 
+                                               class="text-blue-600 hover:text-blue-900 p-1">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="editar.php?id=<?php echo $chofer['id_chofer']; ?>" 
+                                               class="text-yellow-600 hover:text-yellow-900 p-1">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <!-- Información del chofer -->
+                                    <div class="space-y-2 mb-3">
+                                        <?php if ($chofer['telefono']): ?>
+                                            <div class="flex items-center text-sm text-gray-600">
+                                                <i class="fas fa-phone text-gray-400 mr-2"></i>
+                                                <?php echo htmlspecialchars($chofer['telefono']); ?>
+                                            </div>
+                                        <?php endif; ?>
+                                        <?php if ($chofer['licencia']): ?>
+                                            <div class="flex items-center text-sm text-gray-600">
+                                                <i class="fas fa-id-card text-gray-400 mr-2"></i>
+                                                Licencia: <?php echo htmlspecialchars($chofer['licencia']); ?>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+
+                                    <!-- Estadísticas -->
+                                    <div class="flex flex-wrap gap-2 mb-3">
+                                        <?php if ($chofer['total_vehiculos'] > 0): ?>
+                                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">
+                                                <i class="fas fa-car mr-1"></i><?php echo $chofer['total_vehiculos']; ?> vehículo<?php echo $chofer['total_vehiculos'] > 1 ? 's' : ''; ?>
+                                            </span>
+                                        <?php endif; ?>
+                                        
+                                        <?php if ($chofer['total_tours'] > 0): ?>
+                                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                                <i class="fas fa-map-marked-alt mr-1"></i><?php echo $chofer['total_tours']; ?> tours
+                                            </span>
+                                        <?php endif; ?>
+                                        
+                                        <?php if ($chofer['tours_proximos'] > 0): ?>
+                                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-orange-100 text-orange-800">
+                                                <i class="fas fa-calendar-day mr-1"></i><?php echo $chofer['tours_proximos']; ?> próximos
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
+
+                                    <!-- Botones de acción -->
+                                    <div class="flex gap-2 pt-3 border-t border-gray-100">
+                                        <a href="ver.php?id=<?php echo $chofer['id_chofer']; ?>" 
+                                           class="flex-1 px-3 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors text-center text-sm">
+                                            <i class="fas fa-eye mr-1"></i>Ver
+                                        </a>
+                                        <a href="editar.php?id=<?php echo $chofer['id_chofer']; ?>" 
+                                           class="flex-1 px-3 py-2 bg-yellow-50 text-yellow-700 rounded-lg hover:bg-yellow-100 transition-colors text-center text-sm">
+                                            <i class="fas fa-edit mr-1"></i>Editar
+                                        </a>
+                                        <button onclick="confirmarEliminar(<?php echo $chofer['id_chofer']; ?>, '<?php echo htmlspecialchars($chofer['nombre']); ?>')" 
+                                                class="px-3 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors text-sm">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    
+                    <!-- Mensaje cuando no hay resultados -->
+                    <div id="no-results" class="text-center py-12 hidden">
+                        <i class="fas fa-search text-4xl text-gray-300 mb-4"></i>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No se encontraron choferes</h3>
+                        <p class="text-gray-500">Intenta con otros términos de búsqueda.</p>
+                    </div>
+                    
+                    <!-- Mensaje cuando no hay choferes -->
                     <?php if (empty($choferes)): ?>
                         <div class="text-center py-12">
                             <i class="fas fa-id-card text-4xl text-gray-300 mb-4"></i>
@@ -338,385 +612,147 @@ function getSortUrl($campo, $orden_actual, $direccion_actual) {
                                 <i class="fas fa-plus mr-2"></i>Agregar Primer Chofer
                             </a>
                         </div>
-                    <?php else: ?>
-                        <!-- Vista de tarjetas para móvil -->
-                        <div class="md:hidden space-y-4 p-4">
-                            <?php foreach ($choferes as $chofer): ?>
-                                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                                    <!-- Header de la tarjeta -->
-                                    <div class="flex items-center justify-between mb-3">
-                                        <div class="flex items-center">
-                                            <div class="h-12 w-12 rounded-full bg-blue-600 flex items-center justify-center">
-                                                <span class="text-white font-medium">
-                                                    <?php echo strtoupper(substr($chofer['nombre'], 0, 1) . substr($chofer['apellido'] ?? '', 0, 1)); ?>
-                                                </span>
-                                            </div>
-                                            <div class="ml-3">
-                                                <h3 class="text-sm font-semibold text-gray-900">
-                                                    <?php echo htmlspecialchars($chofer['nombre'] . ' ' . ($chofer['apellido'] ?? '')); ?>
-                                                </h3>
-                                                <p class="text-xs text-gray-500">ID: #<?php echo $chofer['id_chofer']; ?></p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Información en grid -->
-                                    <div class="grid grid-cols-2 gap-3 mb-3">
-                                        <!-- Vehículos -->
-                                        <div>
-                                            <p class="text-xs font-medium text-gray-500">Vehículos</p>
-                                            <?php if ($chofer['total_vehiculos'] > 0): ?>
-                                                <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">
-                                                    <i class="fas fa-car mr-1"></i><?php echo $chofer['total_vehiculos']; ?>
-                                                </span>
-                                            <?php else: ?>
-                                                <span class="text-gray-400 text-xs">Sin vehículos</span>
-                                            <?php endif; ?>
-                                        </div>
-
-                                        <!-- Tours -->
-                                        <div>
-                                            <p class="text-xs font-medium text-gray-500">Tours</p>
-                                            <?php if ($chofer['total_tours'] > 0): ?>
-                                                <div class="flex flex-wrap gap-1">
-                                                    <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                                                        <i class="fas fa-map-marked-alt mr-1"></i><?php echo $chofer['total_tours']; ?>
-                                                    </span>
-                                                    <?php if ($chofer['tours_proximos'] > 0): ?>
-                                                        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-orange-100 text-orange-800">
-                                                            <i class="fas fa-calendar-day mr-1"></i><?php echo $chofer['tours_proximos']; ?>
-                                                        </span>
-                                                    <?php endif; ?>
-                                                </div>
-                                            <?php else: ?>
-                                                <span class="text-gray-400 text-xs">Sin tours</span>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-
-                                    <!-- Licencia y contacto -->
-                                    <div class="border-t border-gray-100 pt-3 mb-3">
-                                        <div class="text-xs text-gray-600 space-y-1">
-                                            <?php if ($chofer['licencia']): ?>
-                                                <div class="flex items-center">
-                                                    <i class="fas fa-id-badge text-gray-400 mr-2 flex-shrink-0"></i>
-                                                    <span>Lic: <?php echo htmlspecialchars($chofer['licencia']); ?></span>
-                                                </div>
-                                            <?php endif; ?>
-                                            <?php if ($chofer['telefono']): ?>
-                                                <div class="flex items-center truncate">
-                                                    <i class="fas fa-phone text-gray-400 mr-2 flex-shrink-0"></i>
-                                                    <span class="truncate"><?php echo htmlspecialchars($chofer['telefono']); ?></span>
-                                                </div>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-
-                                    <!-- Acciones -->
-                                    <div class="flex justify-center space-x-3 pt-2 border-t border-gray-100">
-                                        <a href="ver.php?id=<?php echo $chofer['id_chofer']; ?>" 
-                                           class="flex items-center px-3 py-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
-                                            <i class="fas fa-eye mr-2"></i>Ver
-                                        </a>
-                                        <a href="editar.php?id=<?php echo $chofer['id_chofer']; ?>" 
-                                           class="flex items-center px-3 py-2 text-green-600 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
-                                            <i class="fas fa-edit mr-2"></i>Editar
-                                        </a>
-                                        <button onclick="eliminarChofer(<?php echo $chofer['id_chofer']; ?>, '<?php echo htmlspecialchars($chofer['nombre'] . ' ' . ($chofer['apellido'] ?? '')); ?>')" 
-                                                class="flex items-center px-3 py-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
-                                            <i class="fas fa-trash mr-2"></i>Eliminar
-                                        </button>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-
-                        <!-- Tabla para pantallas medianas y grandes -->
-                        <div class="hidden md:block overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            <a href="<?php echo getSortUrl('nombre', $orden, $direccion); ?>" class="group inline-flex items-center hover:text-gray-900">
-                                                Chofer
-                                                <i class="<?php echo getSortIcon('nombre', $orden, $direccion); ?> ml-2"></i>
-                                            </a>
-                                        </th>
-                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
-                                            Contacto
-                                        </th>
-                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            <a href="<?php echo getSortUrl('licencia', $orden, $direccion); ?>" class="group inline-flex items-center hover:text-gray-900">
-                                                Licencia
-                                                <i class="<?php echo getSortIcon('licencia', $orden, $direccion); ?> ml-2"></i>
-                                            </a>
-                                        </th>
-                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Vehículos
-                                        </th>
-                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
-                                            Tours
-                                        </th>
-                                        <th scope="col" class="relative px-4 py-3">
-                                            <span class="sr-only">Acciones</span>
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    <?php foreach ($choferes as $chofer): ?>
-                                        <tr class="hover:bg-gray-50">
-                                            <!-- Columna Principal: Chofer -->
-                                            <td class="px-4 py-4">
-                                                <div class="flex items-center">
-                                                    <div class="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0">
-                                                        <span class="text-white font-medium text-sm">
-                                                            <?php echo strtoupper(substr($chofer['nombre'], 0, 1) . substr($chofer['apellido'] ?? '', 0, 1)); ?>
-                                                        </span>
-                                                    </div>
-                                                    <div class="ml-3 min-w-0 flex-1">
-                                                        <div class="text-sm font-medium text-gray-900 truncate">
-                                                            <?php echo htmlspecialchars($chofer['nombre'] . ' ' . ($chofer['apellido'] ?? '')); ?>
-                                                        </div>
-                                                        <div class="text-xs text-gray-500 truncate">
-                                                            ID: #<?php echo $chofer['id_chofer']; ?>
-                                                        </div>
-                                                        <!-- Info móvil: contacto visible solo en pantallas pequeñas -->
-                                                        <div class="lg:hidden mt-1">
-                                                            <?php if ($chofer['telefono']): ?>
-                                                                <div class="text-xs text-gray-600 truncate">
-                                                                    <i class="fas fa-phone mr-1"></i><?php echo htmlspecialchars($chofer['telefono']); ?>
-                                                                </div>
-                                                            <?php endif; ?>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            
-                                            <!-- Contacto (oculto en tablets) -->
-                                            <td class="px-4 py-4 hidden lg:table-cell">
-                                                <div class="text-sm text-gray-900">
-                                                    <?php if ($chofer['telefono']): ?>
-                                                        <div class="flex items-center truncate">
-                                                            <i class="fas fa-phone text-gray-400 mr-2 flex-shrink-0"></i>
-                                                            <span class="truncate"><?php echo htmlspecialchars($chofer['telefono']); ?></span>
-                                                        </div>
-                                                    <?php else: ?>
-                                                        <span class="text-gray-400 text-sm">Sin teléfono</span>
-                                                    <?php endif; ?>
-                                                </div>
-                                            </td>
-                                            
-                                            <!-- Licencia -->
-                                            <td class="px-4 py-4">
-                                                <?php if ($chofer['licencia']): ?>
-                                                    <div class="flex items-center">
-                                                        <i class="fas fa-id-badge text-gray-400 mr-2"></i>
-                                                        <span class="text-sm text-gray-900"><?php echo htmlspecialchars($chofer['licencia']); ?></span>
-                                                    </div>
-                                                <?php else: ?>
-                                                    <span class="text-gray-400 text-sm">Sin licencia</span>
-                                                <?php endif; ?>
-                                            </td>
-                                            
-                                            <!-- Vehículos -->
-                                            <td class="px-4 py-4">
-                                                <?php if ($chofer['total_vehiculos'] > 0): ?>
-                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                        <i class="fas fa-car mr-1"></i>
-                                                        <?php echo $chofer['total_vehiculos']; ?> vehículo<?php echo $chofer['total_vehiculos'] > 1 ? 's' : ''; ?>
-                                                    </span>
-                                                    <?php if ($chofer['dias_ocupados'] > 0): ?>
-                                                        <div class="text-xs text-gray-500 mt-1">
-                                                            <?php echo $chofer['dias_ocupados']; ?> días ocupados
-                                                        </div>
-                                                    <?php endif; ?>
-                                                <?php else: ?>
-                                                    <span class="text-gray-400 text-sm">Sin vehículos</span>
-                                                <?php endif; ?>
-                                            </td>
-                                            
-                                            <!-- Tours (oculto en pantallas grandes) -->
-                                            <td class="px-4 py-4 hidden xl:table-cell">
-                                                <?php if ($chofer['total_tours'] > 0): ?>
-                                                    <div class="space-y-1">
-                                                        <div class="flex flex-wrap gap-1">
-                                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                                                <i class="fas fa-map-marked-alt mr-1"></i>
-                                                                <?php echo $chofer['total_tours']; ?>
-                                                            </span>
-                                                            <?php if ($chofer['tours_proximos'] > 0): ?>
-                                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                                                                    <i class="fas fa-calendar-day mr-1"></i>
-                                                                    <?php echo $chofer['tours_proximos']; ?> próximos
-                                                                </span>
-                                                            <?php endif; ?>
-                                                        </div>
-                                                    </div>
-                                                <?php else: ?>
-                                                    <span class="text-gray-400 text-xs">Sin tours</span>
-                                                <?php endif; ?>
-                                            </td>
-                                            
-                                            <!-- Acciones -->
-                                            <td class="px-4 py-4 text-right">
-                                                <div class="flex items-center justify-end space-x-1">
-                                                    <a href="ver.php?id=<?php echo $chofer['id_chofer']; ?>" 
-                                                       class="text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50 transition-colors"
-                                                       title="Ver detalles">
-                                                        <i class="fas fa-eye text-sm"></i>
-                                                    </a>
-                                                    <a href="editar.php?id=<?php echo $chofer['id_chofer']; ?>" 
-                                                       class="text-green-600 hover:text-green-900 p-2 rounded-lg hover:bg-green-50 transition-colors"
-                                                       title="Editar">
-                                                        <i class="fas fa-edit text-sm"></i>
-                                                    </a>
-                                                    <button onclick="eliminarChofer(<?php echo $chofer['id_chofer']; ?>, '<?php echo htmlspecialchars($chofer['nombre'] . ' ' . ($chofer['apellido'] ?? '')); ?>')" 
-                                                            class="text-red-600 hover:text-red-900 p-2 rounded-lg hover:bg-red-50 transition-colors"
-                                                            title="Eliminar">
-                                                        <i class="fas fa-trash text-sm"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Paginación -->
-                        <?php if ($total_paginas > 1): ?>
-                            <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex-1 flex justify-between sm:hidden">
-                                        <?php if ($pagina > 1): ?>
-                                            <a href="?<?php echo http_build_query(array_merge($_GET, ['pagina' => $pagina - 1])); ?>" 
-                                               class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                                                Anterior
-                                            </a>
-                                        <?php endif; ?>
-                                        <?php if ($pagina < $total_paginas): ?>
-                                            <a href="?<?php echo http_build_query(array_merge($_GET, ['pagina' => $pagina + 1])); ?>" 
-                                               class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                                                Siguiente
-                                            </a>
-                                        <?php endif; ?>
-                                    </div>
-                                    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                                        <div>
-                                            <p class="text-sm text-gray-700">
-                                                Mostrando
-                                                <span class="font-medium"><?php echo (($pagina - 1) * $por_pagina) + 1; ?></span>
-                                                a
-                                                <span class="font-medium"><?php echo min($pagina * $por_pagina, $total_registros); ?></span>
-                                                de
-                                                <span class="font-medium"><?php echo number_format($total_registros); ?></span>
-                                                resultados
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                                                <?php if ($pagina > 1): ?>
-                                                    <a href="?<?php echo http_build_query(array_merge($_GET, ['pagina' => $pagina - 1])); ?>" 
-                                                       class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                                        <i class="fas fa-chevron-left"></i>
-                                                    </a>
-                                                <?php endif; ?>
-                                                
-                                                <?php
-                                                $inicio = max(1, $pagina - 2);
-                                                $fin = min($total_paginas, $pagina + 2);
-                                                
-                                                for ($i = $inicio; $i <= $fin; $i++):
-                                                ?>
-                                                    <a href="?<?php echo http_build_query(array_merge($_GET, ['pagina' => $i])); ?>" 
-                                                       class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium <?php echo $i === $pagina ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-50'; ?>">
-                                                        <?php echo $i; ?>
-                                                    </a>
-                                                <?php endfor; ?>
-                                                
-                                                <?php if ($pagina < $total_paginas): ?>
-                                                    <a href="?<?php echo http_build_query(array_merge($_GET, ['pagina' => $pagina + 1])); ?>" 
-                                                       class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                                        <i class="fas fa-chevron-right"></i>
-                                                    </a>
-                                                <?php endif; ?>
-                                            </nav>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endif; ?>
                     <?php endif; ?>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal de confirmación para eliminar -->
-    <div id="modalEliminar" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div class="mt-3 text-center">
-                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
-                    <i class="fas fa-exclamation-triangle text-red-600"></i>
-                </div>
-                <h3 class="text-lg font-medium text-gray-900 mt-4">Eliminar Chofer</h3>
-                <div class="mt-2 px-7 py-3">
-                    <p class="text-sm text-gray-500">
-                        ¿Estás seguro de que deseas eliminar al chofer <span id="nombreChofer" class="font-medium"></span>? 
-                        Esta acción no se puede deshacer.
-                    </p>
-                </div>
-                <div class="flex gap-3 mt-4">
-                    <button onclick="cerrarModal()" 
-                            class="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors">
-                        Cancelar
-                    </button>
-                    <button onclick="confirmarEliminacion()" 
-                            class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                        Eliminar
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script>
-        let choferAEliminar = null;
-
-        function eliminarChofer(id, nombre) {
-            choferAEliminar = id;
-            document.getElementById('nombreChofer').textContent = nombre;
-            document.getElementById('modalEliminar').classList.remove('hidden');
-        }
-
-        function cerrarModal() {
-            document.getElementById('modalEliminar').classList.add('hidden');
-            choferAEliminar = null;
-        }
-
-        function confirmarEliminacion() {
-            if (choferAEliminar) {
-                window.location.href = `eliminar.php?id=${choferAEliminar}`;
+        // Variables para el filtrado en tiempo real
+        let timeoutId;
+        const debounceDelay = 300;
+        
+        // Elementos del DOM
+        const searchInput = document.getElementById('buscar-tiempo-real');
+        const tablaChoferes = document.getElementById('tabla-choferes');
+        const tarjetasChoferes = document.getElementById('tarjetas-choferes');
+        const noResults = document.getElementById('no-results');
+        const totalRegistros = document.getElementById('total-registros');
+        const registrosFiltrados = document.getElementById('registros-filtrados');
+        
+        // Función de filtrado en tiempo real
+        function filtrarChoferes() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            
+            // Obtener todas las filas y tarjetas
+            const filasDesktop = document.querySelectorAll('.chofer-row');
+            const tarjetasMovil = document.querySelectorAll('.chofer-card');
+            
+            let visibleCount = 0;
+            
+            // Filtrar filas de desktop
+            filasDesktop.forEach(fila => {
+                const nombre = fila.dataset.nombre || '';
+                const telefono = fila.dataset.telefono || '';
+                const licencia = fila.dataset.licencia || '';
+                
+                const coincide = nombre.includes(searchTerm) || 
+                                telefono.includes(searchTerm) || 
+                                licencia.includes(searchTerm);
+                
+                if (coincide) {
+                    fila.style.display = '';
+                    visibleCount++;
+                } else {
+                    fila.style.display = 'none';
+                }
+            });
+            
+            // Filtrar tarjetas de móvil
+            tarjetasMovil.forEach(tarjeta => {
+                const nombre = tarjeta.dataset.nombre || '';
+                const telefono = tarjeta.dataset.telefono || '';
+                const licencia = tarjeta.dataset.licencia || '';
+                
+                const coincide = nombre.includes(searchTerm) || 
+                                telefono.includes(searchTerm) || 
+                                licencia.includes(searchTerm);
+                
+                if (coincide) {
+                    tarjeta.style.display = '';
+                } else {
+                    tarjeta.style.display = 'none';
+                }
+            });
+            
+            // Actualizar contadores y mostrar/ocultar mensaje de no resultados
+            if (searchTerm && visibleCount === 0) {
+                noResults.classList.remove('hidden');
+                if (tablaChoferes) tablaChoferes.parentElement.style.display = 'none';
+                if (tarjetasChoferes) tarjetasChoferes.style.display = 'none';
+            } else {
+                noResults.classList.add('hidden');
+                if (tablaChoferes) tablaChoferes.parentElement.style.display = '';
+                if (tarjetasChoferes) tarjetasChoferes.style.display = '';
+            }
+            
+            // Actualizar contador de resultados
+            if (searchTerm) {
+                totalRegistros.classList.add('hidden');
+                registrosFiltrados.classList.remove('hidden');
+                registrosFiltrados.textContent = `(${visibleCount} resultado${visibleCount !== 1 ? 's' : ''} encontrado${visibleCount !== 1 ? 's' : ''})`;
+            } else {
+                totalRegistros.classList.remove('hidden');
+                registrosFiltrados.classList.add('hidden');
             }
         }
-
+        
+        // Función de búsqueda con debounce
+        function debouncedSearch() {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(filtrarChoferes, debounceDelay);
+        }
+        
+        // Event listeners
+        if (searchInput) {
+            searchInput.addEventListener('input', debouncedSearch);
+            searchInput.addEventListener('keyup', function(e) {
+                if (e.key === 'Enter') {
+                    clearTimeout(timeoutId);
+                    filtrarChoferes();
+                }
+            });
+        }
+        
+        // Función para limpiar filtros
+        function limpiarFiltros() {
+            if (searchInput) {
+                searchInput.value = '';
+                filtrarChoferes();
+                searchInput.focus();
+            }
+        }
+        
+        // Función para confirmar eliminación
+        function confirmarEliminar(id, nombre) {
+            if (confirm(`¿Estás seguro de que quieres eliminar al chofer "${nombre}"?\n\nEsta acción no se puede deshacer.`)) {
+                // Crear formulario para enviar la eliminación
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = 'eliminar.php';
+                
+                const inputId = document.createElement('input');
+                inputId.type = 'hidden';
+                inputId.name = 'id_chofer';
+                inputId.value = id;
+                
+                form.appendChild(inputId);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+        
+        // Función para exportar
         function exportarChoferes() {
-            const params = new URLSearchParams(window.location.search);
-            params.set('exportar', '1');
-            window.location.href = 'exportar.php?' + params.toString();
+            window.location.href = 'exportar.php';
         }
-
-        // Cerrar modal al hacer clic fuera
-        document.getElementById('modalEliminar').addEventListener('click', function(e) {
-            if (e.target === this) {
-                cerrarModal();
-            }
-        });
-
-        // Cerrar modal con Escape
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                cerrarModal();
+        
+        // Inicializar tooltips o funcionalidades adicionales si es necesario
+        document.addEventListener('DOMContentLoaded', function() {
+            // Enfocar el campo de búsqueda si existe
+            if (searchInput) {
+                searchInput.focus();
             }
         });
     </script>

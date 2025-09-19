@@ -17,6 +17,8 @@ try {
     $id_usuario = intval($_POST['id_usuario'] ?? 0);
     $motivo = trim($_POST['motivo'] ?? '');
     
+    error_log("Eliminación iniciada - ID: $id_usuario, Motivo: $motivo");
+    
     if (!$id_usuario) {
         throw new Exception("ID de usuario no válido");
     }
@@ -45,65 +47,107 @@ try {
         throw new Exception("No se puede eliminar el usuario porque tiene $reservas_activas reserva(s) activa(s). Cancele primero las reservas pendientes o confirmadas.");
     }
     
-    // Iniciar transacción
-    $connection->beginTransaction();
-    
+    // Eliminación con manejo completo de foreign keys
     try {
-        // Registrar la eliminación en el log antes de eliminar
-        // TODO: Implementar función de registro de actividad
-        // registrarActividadAdmin(...)
+        // Iniciar transacción para asegurar consistencia
+        $connection->beginTransaction();
         
-        // Saltar eliminación de reseñas (tabla no existe)
-        // $delete_resenas_sql = "DELETE FROM resenas WHERE id_usuario = ?";
-        // $connection->prepare($delete_resenas_sql)->execute([$id_usuario]);
+        // Lista de tablas con foreign keys a usuarios (en orden de eliminación)
+        $tablas_relacionadas = [
+            'email_verificacion',
+            'calificaciones_guias', 
+            'cotizaciones',
+            'historial_uso_ofertas',
+            'ofertas_usuarios',
+            'preferencias_usuario',
+            'experiencias',
+            'comentarios' // Por si existe
+        ];
         
-        // Actualizar reservas para mantener referencia histórica pero anonimizar
-        $update_reservas_sql = "UPDATE reservas SET 
-                               nombre_cliente = 'Usuario eliminado',
-                               email_cliente = 'eliminado@sistema.com',
-                               telefono_cliente = NULL,
-                               notas_admin = CONCAT(COALESCE(notas_admin, ''), 
-                                   '\n[SISTEMA] Usuario original eliminado el ', NOW(), 
-                                   ' por admin ID ', ?, 
-                                   CASE WHEN ? != '' THEN CONCAT(' - Motivo: ', ?) ELSE '' END)
-                               WHERE id_usuario = ?";
-        $connection->prepare($update_reservas_sql)->execute([
-            $admin['id_admin'], 
-            $motivo, 
-            $motivo, 
-            $id_usuario
-        ]);
-        
-        // Eliminar tokens de verificación y recuperación
-        $delete_tokens_sql = "DELETE FROM tokens_verificacion WHERE id_usuario = ?";
-        $connection->prepare($delete_tokens_sql)->execute([$id_usuario]);
-        
-        $delete_recovery_sql = "DELETE FROM tokens_recuperacion WHERE id_usuario = ?";
-        $connection->prepare($delete_recovery_sql)->execute([$id_usuario]);
-        
-        // Eliminar sesiones activas del usuario
-        $delete_sesiones_sql = "DELETE FROM sesiones_usuario WHERE id_usuario = ?";
-        $connection->prepare($delete_sesiones_sql)->execute([$id_usuario]);
-        
-        // Finalmente eliminar el usuario
-        $delete_usuario_sql = "DELETE FROM usuarios WHERE id_usuario = ?";
-        $delete_stmt = $connection->prepare($delete_usuario_sql);
-        $delete_stmt->execute([$id_usuario]);
-        
-        if ($delete_stmt->rowCount() === 0) {
-            throw new Exception("No se pudo eliminar el usuario");
+        // 1. Eliminar registros relacionados primero
+        foreach ($tablas_relacionadas as $tabla) {
+            try {
+                $delete_sql = "DELETE FROM $tabla WHERE id_usuario = ?";
+                $delete_stmt = $connection->prepare($delete_sql);
+                $delete_stmt->execute([$id_usuario]);
+                $rows_deleted = $delete_stmt->rowCount();
+                if ($rows_deleted > 0) {
+                    error_log("Eliminados $rows_deleted registros de $tabla para usuario ID: $id_usuario");
+                }
+            } catch (Exception $e) {
+                error_log("No se pudieron eliminar registros de $tabla (tabla podría no existir o no tener datos): " . $e->getMessage());
+                // Continuar con las demás tablas
+            }
         }
         
-        // Confirmar transacción
+        // 2. Manejar reservas especialmente (actualizar estado en lugar de eliminar)
+        try {
+            $update_reservas_sql = "UPDATE reservas 
+                                   SET estado = 'cancelada_por_eliminacion', 
+                                       fecha_actualizacion = NOW() 
+                                   WHERE id_usuario = ? 
+                                   AND estado NOT IN ('cancelada', 'completada')";
+            $update_reservas_stmt = $connection->prepare($update_reservas_sql);
+            $update_reservas_stmt->execute([$id_usuario]);
+            $reservas_updated = $update_reservas_stmt->rowCount();
+            if ($reservas_updated > 0) {
+                error_log("Actualizadas $reservas_updated reservas a estado 'cancelada_por_eliminacion' para usuario ID: $id_usuario");
+            }
+        } catch (Exception $e) {
+            error_log("No se pudieron actualizar reservas: " . $e->getMessage());
+            // Si no se pueden actualizar, intentar eliminar
+            try {
+                $delete_reservas_sql = "DELETE FROM reservas WHERE id_usuario = ?";
+                $delete_reservas_stmt = $connection->prepare($delete_reservas_sql);
+                $delete_reservas_stmt->execute([$id_usuario]);
+                $reservas_deleted = $delete_reservas_stmt->rowCount();
+                if ($reservas_deleted > 0) {
+                    error_log("Eliminadas $reservas_deleted reservas para usuario ID: $id_usuario");
+                }
+            } catch (Exception $e2) {
+                error_log("Tampoco se pudieron eliminar reservas: " . $e2->getMessage());
+            }
+        }
+        
+        // 2. Finalmente eliminar el usuario
+        $delete_usuario_sql = "DELETE FROM usuarios WHERE id_usuario = ?";
+        $delete_stmt = $connection->prepare($delete_usuario_sql);
+        
+        error_log("Ejecutando eliminación del usuario ID: $id_usuario");
+        $delete_stmt->execute([$id_usuario]);
+        
+        $rows_affected = $delete_stmt->rowCount();
+        error_log("Filas afectadas al eliminar usuario: $rows_affected");
+        
+        if ($rows_affected === 0) {
+            // Verificar si el usuario aún existe
+            $check_sql = "SELECT COUNT(*) as count FROM usuarios WHERE id_usuario = ?";
+            $check_stmt = $connection->prepare($check_sql);
+            $check_stmt->execute([$id_usuario]);
+            $user_exists = $check_stmt->fetch()['count'];
+            
+            if ($user_exists > 0) {
+                throw new Exception("El usuario existe pero no se pudo eliminar. Puede haber restricciones de foreign key no identificadas. Contacte al administrador del sistema.");
+            } else {
+                throw new Exception("El usuario con ID $id_usuario no existe en la base de datos.");
+            }
+        }
+        
+        // Confirmar la transacción
         $connection->commit();
+        error_log("Transacción de eliminación completada exitosamente para usuario ID: $id_usuario");
         
         // Enviar notificación de eliminación si es necesario
-        if ($usuario['email'] && $usuario['email_verificado']) {
-            enviarNotificacionEliminacion($usuario['email'], $usuario['nombre'], $motivo);
+        try {
+            if ($usuario['email'] && $usuario['email_verificado']) {
+                enviarNotificacionEliminacion($usuario['email'], $usuario['nombre'], $motivo);
+            }
+        } catch (Exception $e) {
+            error_log("Error enviando notificación de eliminación: " . $e->getMessage());
         }
         
         // Redirigir con mensaje de éxito
-        $mensaje_exito = "Usuario eliminado exitosamente";
+        $mensaje_exito = "Usuario '{$usuario['nombre']}' eliminado exitosamente";
         if ($motivo) {
             $mensaje_exito .= " (Motivo: $motivo)";
         }
@@ -112,12 +156,18 @@ try {
         exit;
         
     } catch (Exception $e) {
-        $connection->rollback();
+        // Rollback en caso de error
+        if ($connection->inTransaction()) {
+            $connection->rollBack();
+            error_log("Transacción rollback realizada para usuario ID: $id_usuario");
+        }
+        error_log("Error eliminando usuario ID $id_usuario: " . $e->getMessage());
         throw $e;
     }
     
 } catch (Exception $e) {
-    $error_message = $e->getMessage();
+    $error_message = "Error al eliminar usuario: " . $e->getMessage();
+    error_log("Error completo en eliminación: " . $error_message);
     header('Location: index.php?error=' . urlencode($error_message));
     exit;
 }

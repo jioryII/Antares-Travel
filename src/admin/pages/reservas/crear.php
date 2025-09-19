@@ -77,13 +77,116 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Calcular monto total basado en número de pasajeros
         $pasajeros = $_POST['pasajeros'] ?? [];
         $num_pasajeros = count($pasajeros);
-        $monto_total = $tour['precio'] * $num_pasajeros;
+        $monto_subtotal = $tour['precio'] * $num_pasajeros;
+        $monto_total = $monto_subtotal; // Por defecto sin descuento
+        
+        // Variables para el descuento de ofertas
+        $descuento_aplicado = 0;
+        $codigo_promocional = $_POST['codigo_promocional'] ?? null;
+        $id_oferta_aplicada = null;
+        
+        // Aplicar ofertas si existe código promocional o selección de oferta
+        if (!empty($codigo_promocional)) {
+            // Validar código promocional directamente (sin cURL)
+            try {
+                // Buscar la oferta por código
+                $stmt = $connection->prepare("
+                    SELECT o.*, 
+                           (SELECT COUNT(*) FROM historial_uso_ofertas h WHERE h.id_oferta = o.id_oferta) as usos_actuales_calc
+                    FROM ofertas o 
+                    WHERE o.codigo_promocional = ? 
+                    AND o.estado = 'Activa' 
+                    AND o.fecha_inicio <= NOW() 
+                    AND o.fecha_fin >= NOW()
+                ");
+                $stmt->execute([$codigo_promocional]);
+                $oferta = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                if ($oferta) {
+                    // Verificar límite de usos
+                    $usos_totales = $oferta['usos_actuales_calc'] ?? $oferta['usos_actuales'] ?? 0;
+                    $limite_alcanzado = ($oferta['limite_usos'] > 0 && $usos_totales >= $oferta['limite_usos']);
+                    
+                    if (!$limite_alcanzado) {
+                        // Calcular descuento según tipo de oferta
+                        switch(strtolower($oferta['tipo_oferta'])) {
+                            case 'porcentaje':
+                                $descuento_aplicado = $monto_subtotal * ($oferta['valor_descuento'] / 100);
+                                $monto_total = $monto_subtotal - $descuento_aplicado;
+                                break;
+                                
+                            case 'monto_fijo':
+                                $descuento_aplicado = min($oferta['valor_descuento'], $monto_subtotal);
+                                $monto_total = $monto_subtotal - $descuento_aplicado;
+                                break;
+                                
+                            case 'precio_especial':
+                                $monto_total = $oferta['precio_especial'] * $num_pasajeros;
+                                $descuento_aplicado = $monto_subtotal - $monto_total;
+                                break;
+                        }
+                        
+                        $monto_total = max(0, $monto_total); // No permitir valores negativos
+                        $id_oferta_aplicada = $oferta['id_oferta'];
+                    }
+                }
+            } catch (Exception $e) {
+                error_log("Error validando oferta: " . $e->getMessage());
+            }
+        }
+        
+        // Si existe oferta directa seleccionada (dropdown)
+        $id_oferta_seleccionada = $_POST['id_oferta'] ?? null;
+        if (!empty($id_oferta_seleccionada) && empty($codigo_promocional)) {
+            // Obtener datos de la oferta seleccionada
+            $oferta_stmt = $connection->prepare("SELECT * FROM ofertas WHERE id_oferta = ? AND estado = 'Activa' AND fecha_inicio <= NOW() AND fecha_fin >= NOW()");
+            $oferta_stmt->execute([$id_oferta_seleccionada]);
+            $oferta = $oferta_stmt->fetch();
+            
+            if ($oferta) {
+                // Calcular descuento según el tipo de oferta
+                switch ($oferta['tipo_oferta']) {
+                    case 'Porcentaje':
+                        $descuento_aplicado = $monto_subtotal * ($oferta['valor_descuento'] / 100);
+                        $monto_total = $monto_subtotal - $descuento_aplicado;
+                        break;
+                    case 'Monto_Fijo':
+                        $descuento_aplicado = $oferta['valor_descuento'];
+                        $monto_total = max(0, $monto_subtotal - $descuento_aplicado);
+                        break;
+                    case 'Precio_Especial':
+                        $monto_total = $oferta['precio_especial'] * $num_pasajeros;
+                        $descuento_aplicado = $monto_subtotal - $monto_total;
+                        break;
+                    case '2x1':
+                        $pasajeros_a_pagar = ceil($num_pasajeros / 2);
+                        $monto_total = $tour['precio'] * $pasajeros_a_pagar;
+                        $descuento_aplicado = $monto_subtotal - $monto_total;
+                        break;
+                }
+                $id_oferta_aplicada = $id_oferta_seleccionada;
+            }
+        }
         
         // Insertar reserva
         $reserva_sql = "INSERT INTO reservas (id_usuario, id_administrador, id_tour, fecha_tour, monto_total, observaciones, origen_reserva, estado) 
                         VALUES (?, ?, ?, ?, ?, ?, ?, 'Pendiente')";
         $reserva_stmt = $connection->prepare($reserva_sql);
-        $reserva_stmt->execute([$id_usuario_admin, $admin['id_admin'], $id_tour, $fecha_tour, $monto_total, $observaciones, $origen_reserva]);
+        $observaciones_con_oferta = $observaciones;
+        
+        // Agregar información de la oferta a las observaciones si existe
+        if ($id_oferta_aplicada && $descuento_aplicado > 0) {
+            $observaciones_con_oferta .= "\n\n--- OFERTA APLICADA ---\n";
+            if ($codigo_promocional) {
+                $observaciones_con_oferta .= "Código promocional: $codigo_promocional\n";
+            }
+            $observaciones_con_oferta .= "ID Oferta: $id_oferta_aplicada\n";
+            $observaciones_con_oferta .= "Subtotal: S/ " . number_format($monto_subtotal, 2) . "\n";
+            $observaciones_con_oferta .= "Descuento aplicado: S/ " . number_format($descuento_aplicado, 2) . "\n";
+            $observaciones_con_oferta .= "Total con descuento: S/ " . number_format($monto_total, 2);
+        }
+        
+        $reserva_stmt->execute([$id_usuario_admin, $admin['id_admin'], $id_tour, $fecha_tour, $monto_total, $observaciones_con_oferta, $origen_reserva]);
         
         $id_reserva = $connection->lastInsertId();
         
@@ -113,6 +216,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pago_stmt->execute([$id_reserva, $monto_pago, $metodo_pago, $estado_pago]);
         }
         
+        // Registrar uso de la oferta si se aplicó una
+        if ($id_oferta_aplicada && $descuento_aplicado > 0) {
+            $historial_sql = "INSERT INTO historial_uso_ofertas (id_oferta, id_usuario, id_reserva, fecha_uso, monto_descuento) VALUES (?, ?, ?, NOW(), ?)";
+            $historial_stmt = $connection->prepare($historial_sql);
+            $historial_stmt->execute([$id_oferta_aplicada, $id_usuario_admin, $id_reserva, $descuento_aplicado]);
+            
+            // Actualizar contador de usos en la tabla ofertas
+            $update_usos_sql = "UPDATE ofertas SET usos_actuales = usos_actuales + 1 WHERE id_oferta = ?";
+            $update_usos_stmt = $connection->prepare($update_usos_sql);
+            $update_usos_stmt->execute([$id_oferta_aplicada]);
+        }
+        
         $connection->commit();
         
         // Redireccionar a la página de la reserva creada
@@ -135,6 +250,14 @@ try {
                   LEFT JOIN regiones r ON t.id_region = r.id_region 
                   ORDER BY t.titulo ASC";
     $tours = $connection->query($tours_sql)->fetchAll();
+    
+    // Obtener ofertas activas
+    $ofertas_sql = "SELECT id_oferta, nombre, descripcion, tipo_oferta, valor_descuento, precio_especial, 
+                           codigo_promocional, fecha_inicio, fecha_fin, limite_usos, usos_actuales as total_usos
+                    FROM ofertas 
+                    WHERE estado = 'Activa' AND fecha_inicio <= NOW() AND fecha_fin >= NOW()
+                    ORDER BY nombre ASC";
+    $ofertas = $connection->query($ofertas_sql)->fetchAll();
     
     // Obtener opciones de ENUM para métodos de pago
     $metodos_pago_sql = "SHOW COLUMNS FROM pagos LIKE 'metodo_pago'";
@@ -161,6 +284,7 @@ try {
 } catch (Exception $e) {
     $error = "Error al cargar datos: " . $e->getMessage();
     $tours = [];
+    $ofertas = [];
     $metodos_pago = ['Efectivo', 'Tarjeta', 'Transferencia']; // Fallback
     $estados_pago = ['Pagado', 'Pendiente', 'Fallido']; // Fallback
 }// Función para obtener icono de método de pago
@@ -460,6 +584,97 @@ function getEstadoPagoIcon($estado) {
                                 </div>
                             </div>
 
+                            <!-- Ofertas y Descuentos -->
+                            <div id="ofertasSection" class="form-section bg-white rounded-lg shadow-lg overflow-hidden hidden">
+                                <div class="bg-gradient-to-r from-pink-600 to-pink-700 px-6 py-4">
+                                    <h3 class="text-lg font-semibold text-white flex items-center">
+                                        <i class="fas fa-tag mr-3"></i>Ofertas y Descuentos
+                                    </h3>
+                                </div>
+                                <div class="p-6">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                <i class="fas fa-percentage text-pink-600 mr-2"></i>Seleccionar Oferta
+                                            </label>
+                                            <select name="id_oferta" id="ofertaSelect" 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                                                <option value="">Seleccione una oferta...</option>
+                                                <?php foreach ($ofertas as $oferta): ?>
+                                                    <option value="<?php echo $oferta['id_oferta']; ?>" 
+                                                            data-tipo="<?php echo htmlspecialchars($oferta['tipo_oferta']); ?>"
+                                                            data-descuento="<?php echo $oferta['valor_descuento'] ?? $oferta['precio_especial']; ?>"
+                                                            data-descripcion="<?php echo htmlspecialchars($oferta['descripcion']); ?>"
+                                                            data-codigo="<?php echo htmlspecialchars($oferta['codigo_promocional'] ?? ''); ?>"
+                                                            data-limite="<?php echo $oferta['limite_usos']; ?>"
+                                                            data-usado="<?php echo $oferta['total_usos']; ?>">
+                                                        <?php echo htmlspecialchars($oferta['nombre']); ?>
+                                                        (<?php echo ucfirst($oferta['tipo_oferta']); ?>
+                                                        <?php 
+                                                        switch($oferta['tipo_oferta']) {
+                                                            case 'Porcentaje':
+                                                                echo ' - ' . $oferta['valor_descuento'] . '%';
+                                                                break;
+                                                            case 'Monto_Fijo':
+                                                                echo ' - S/ ' . number_format($oferta['valor_descuento'], 2);
+                                                                break;
+                                                            case 'Precio_Especial':
+                                                                echo ' - S/ ' . number_format($oferta['precio_especial'], 2);
+                                                                break;
+                                                            case '2x1':
+                                                                echo ' - Paga 1 lleva 2';
+                                                                break;
+                                                        }
+                                                        ?>)
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                            <p class="text-xs text-gray-500 mt-1">Ofertas activas disponibles para aplicar</p>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                <i class="fas fa-ticket-alt text-pink-600 mr-2"></i>Código Promocional
+                                            </label>
+                                            <div class="flex">
+                                                <input type="text" name="codigo_promocional" id="codigoPromocional" 
+                                                       placeholder="Ingrese código promocional"
+                                                       class="flex-1 px-3 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                                                <button type="button" onclick="validarCodigoPromocional()" 
+                                                        class="px-4 py-2 bg-pink-600 text-white rounded-r-lg hover:bg-pink-700 transition-colors">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </div>
+                                            <p class="text-xs text-gray-500 mt-1">El código promocional tiene prioridad sobre la selección de oferta</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Información de la oferta seleccionada -->
+                                    <div id="ofertaInfo" class="mt-4 p-3 bg-pink-50 border border-pink-200 rounded-lg hidden">
+                                        <div class="flex items-start">
+                                            <i class="fas fa-info-circle text-pink-600 mr-2 mt-0.5"></i>
+                                            <div class="text-sm text-pink-700">
+                                                <p id="ofertaNombre" class="font-medium"></p>
+                                                <p id="ofertaDescripcion" class="mt-1"></p>
+                                                <div id="ofertaDetalles" class="mt-2 text-xs"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Estado de validación del código promocional -->
+                                    <div id="codigoValidacion" class="mt-4 hidden">
+                                        <div id="codigoExito" class="p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700 hidden">
+                                            <i class="fas fa-check-circle mr-2"></i>
+                                            <span id="codigoExitoTexto"></span>
+                                        </div>
+                                        <div id="codigoError" class="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 hidden">
+                                            <i class="fas fa-times-circle mr-2"></i>
+                                            <span id="codigoErrorTexto"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Pasajeros -->
                             <div class="form-section bg-white rounded-lg shadow-lg overflow-hidden">
                                 <div class="bg-gradient-to-r from-purple-600 to-purple-700 px-6 py-4">
@@ -507,6 +722,25 @@ function getEstadoPagoIcon($estado) {
                                             <span class="text-gray-600">Número de Pasajeros:</span>
                                             <span id="resumenPasajeros" class="font-medium">0</span>
                                         </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-600">Subtotal:</span>
+                                            <span id="resumenSubtotal" class="font-medium">S/ 0.00</span>
+                                        </div>
+                                        
+                                        <!-- Información de descuentos -->
+                                        <div id="resumenDescuento" class="border-t pt-4 hidden">
+                                            <div class="flex justify-between items-center text-pink-600">
+                                                <span class="font-medium">
+                                                    <i class="fas fa-tag mr-1"></i>Descuento Aplicado:
+                                                </span>
+                                                <span id="resumenDescuentoMonto" class="font-medium">- S/ 0.00</span>
+                                            </div>
+                                            <div class="flex justify-between items-center text-xs text-pink-500 mt-1">
+                                                <span id="resumenOfertaNombre">Oferta aplicada</span>
+                                                <span id="resumenDescuentoPorcentaje"></span>
+                                            </div>
+                                        </div>
+                                        
                                         <div class="border-t pt-4">
                                             <div class="flex justify-between items-center">
                                                 <span class="text-lg font-semibold text-gray-900">Total:</span>
@@ -553,6 +787,8 @@ function getEstadoPagoIcon($estado) {
                                             <li>• La reserva se registrará a nombre del administrador</li>
                                             <li>• El pago es opcional al crear la reserva</li>
                                             <li>• Puede registrar pagos parciales o el total</li>
+                                            <li>• <strong>Ofertas:</strong> Puede aplicar ofertas por selección o código promocional</li>
+                                            <li>• Los códigos promocionales tienen prioridad sobre las ofertas seleccionadas</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -585,10 +821,15 @@ function getEstadoPagoIcon($estado) {
             console.log('Iconos para estados:', iconosEstadosPago);
         });
 
-        // Manejar selección de tour
+        // Variables para ofertas
+        let ofertaActual = null;
+        let descuentoAplicado = 0;
+
+        // Mostrar sección de ofertas cuando se seleccione un tour
         document.getElementById('tourSelect').addEventListener('change', function() {
             const selectedOption = this.options[this.selectedIndex];
             const tourInfo = document.getElementById('tourInfo');
+            const ofertasSection = document.getElementById('ofertasSection');
             
             if (selectedOption.value) {
                 precioPorPersona = parseFloat(selectedOption.dataset.precio);
@@ -597,13 +838,311 @@ function getEstadoPagoIcon($estado) {
                 document.getElementById('tourDuracion').textContent = selectedOption.dataset.duracion || '-';
                 
                 tourInfo.classList.remove('hidden');
+                ofertasSection.classList.remove('hidden'); // Mostrar ofertas
             } else {
                 tourInfo.classList.add('hidden');
+                ofertasSection.classList.add('hidden'); // Ocultar ofertas
                 precioPorPersona = 0;
+                limpiarOferta();
             }
             
             actualizarResumen();
         });
+
+        // Manejar selección de oferta
+        document.getElementById('ofertaSelect').addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const codigoPromocional = document.getElementById('codigoPromocional');
+            
+            // Limpiar código promocional si se selecciona una oferta
+            if (selectedOption.value) {
+                codigoPromocional.value = '';
+                limpiarValidacionCodigo();
+                mostrarInfoOferta(selectedOption);
+                aplicarOferta(selectedOption);
+            } else {
+                limpiarOferta();
+            }
+        });
+
+        // Función para mostrar información de la oferta seleccionada
+        function mostrarInfoOferta(option) {
+            const ofertaInfo = document.getElementById('ofertaInfo');
+            const nombre = option.textContent;
+            const descripcion = option.dataset.descripcion;
+            const tipo = option.dataset.tipo;
+            const descuento = option.dataset.descuento;
+            const limite = option.dataset.limite;
+            const usado = option.dataset.usado;
+            
+            document.getElementById('ofertaNombre').textContent = nombre;
+            document.getElementById('ofertaDescripcion').textContent = descripcion;
+            
+            let detalles = `<strong>Tipo:</strong> ${tipo.replace('_', ' ')}<br>`;
+            
+            switch(tipo) {
+                case 'Porcentaje':
+                    detalles += `<strong>Descuento:</strong> ${descuento}%`;
+                    break;
+                case 'Monto_Fijo':
+                    detalles += `<strong>Descuento:</strong> S/ ${parseFloat(descuento).toFixed(2)}`;
+                    break;
+                case 'Precio_Especial':
+                    detalles += `<strong>Precio especial:</strong> S/ ${parseFloat(descuento).toFixed(2)} por persona`;
+                    break;
+                case '2x1':
+                    detalles += `<strong>Promoción:</strong> Paga 1 lleva 2`;
+                    break;
+            }
+            
+            if (limite > 0) {
+                detalles += `<br><strong>Usos disponibles:</strong> ${limite - usado} de ${limite}`;
+            }
+            
+            document.getElementById('ofertaDetalles').innerHTML = detalles;
+            ofertaInfo.classList.remove('hidden');
+        }
+
+        // Función para aplicar la oferta seleccionada
+        function aplicarOferta(option) {
+            const tipo = option.dataset.tipo;
+            const descuento = parseFloat(option.dataset.descuento);
+            const numPasajeros = document.querySelectorAll('#pasajerosContainer .pasajero-card').length;
+            const subtotal = precioPorPersona * numPasajeros;
+            
+            if (subtotal <= 0) return;
+            
+            let total = subtotal;
+            descuentoAplicado = 0;
+            
+            switch(tipo) {
+                case 'Porcentaje':
+                    descuentoAplicado = subtotal * (descuento / 100);
+                    total = subtotal - descuentoAplicado;
+                    break;
+                case 'Monto_Fijo':
+                    descuentoAplicado = Math.min(descuento, subtotal);
+                    total = Math.max(0, subtotal - descuentoAplicado);
+                    break;
+                case 'Precio_Especial':
+                    total = descuento * numPasajeros;
+                    descuentoAplicado = subtotal - total;
+                    break;
+                case '2x1':
+                    const pasajerosAPagar = Math.ceil(numPasajeros / 2);
+                    total = precioPorPersona * pasajerosAPagar;
+                    descuentoAplicado = subtotal - total;
+                    break;
+            }
+            
+            ofertaActual = {
+                id: option.value,
+                nombre: option.textContent,
+                tipo: tipo,
+                descuento: descuentoAplicado
+            };
+            
+            actualizarResumen();
+        }
+
+        // Función para validar código promocional
+        function validarCodigoPromocional() {
+            const codigo = document.getElementById('codigoPromocional').value.trim();
+            const tourId = document.getElementById('tourSelect').value;
+            const numPasajeros = document.querySelectorAll('#pasajerosContainer .pasajero-card').length;
+            
+            if (!codigo) {
+                alert('Por favor ingrese un código promocional');
+                return;
+            }
+            
+            if (!tourId) {
+                alert('Por favor seleccione un tour primero');
+                return;
+            }
+            
+            if (numPasajeros === 0) {
+                alert('Por favor agregue al menos un pasajero');
+                return;
+            }
+            
+            // Limpiar selección de oferta
+            document.getElementById('ofertaSelect').value = '';
+            document.getElementById('ofertaInfo').classList.add('hidden');
+            
+            // Mostrar loading
+            const boton = event.target;
+            const iconoOriginal = boton.innerHTML;
+            boton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            boton.disabled = true;
+            
+            // Llamar a la API
+            const postData = {
+                codigo_promocional: codigo,
+                tour_id: tourId,
+                precio_original: precioPorPersona,
+                num_pasajeros: numPasajeros,
+                user_id: 1 // ID del admin (puedes ajustarlo)
+            };
+            
+            fetch('./validar_ofertas.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(postData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Restaurar botón
+                boton.innerHTML = iconoOriginal;
+                boton.disabled = false;
+                
+                if (data.valida) {
+                    // Código válido
+                    mostrarExitoCodigo(data.mensaje, data.descuento_aplicado);
+                    aplicarDescuentoCodigo(data.precio_final, data.descuento_aplicado, data.oferta_nombre);
+                } else {
+                    // Código inválido
+                    mostrarErrorCodigo(data.mensaje);
+                    limpiarOferta();
+                }
+            })
+            .catch(error => {
+                // Restaurar botón
+                boton.innerHTML = iconoOriginal;
+                boton.disabled = false;
+                
+                console.error('Error:', error);
+                mostrarErrorCodigo('Error al validar el código promocional');
+                limpiarOferta();
+            });
+        }
+
+        // Función para mostrar éxito en validación de código
+        function mostrarExitoCodigo(mensaje, descuento) {
+            const validacion = document.getElementById('codigoValidacion');
+            const exito = document.getElementById('codigoExito');
+            const error = document.getElementById('codigoError');
+            
+            document.getElementById('codigoExitoTexto').textContent = `${mensaje} (Descuento: S/ ${descuento.toFixed(2)})`;
+            
+            exito.classList.remove('hidden');
+            error.classList.add('hidden');
+            validacion.classList.remove('hidden');
+        }
+
+        // Función para mostrar error en validación de código
+        function mostrarErrorCodigo(mensaje) {
+            const validacion = document.getElementById('codigoValidacion');
+            const exito = document.getElementById('codigoExito');
+            const error = document.getElementById('codigoError');
+            
+            document.getElementById('codigoErrorTexto').textContent = mensaje;
+            
+            error.classList.remove('hidden');
+            exito.classList.add('hidden');
+            validacion.classList.remove('hidden');
+        }
+
+        // Función para limpiar validación de código
+        function limpiarValidacionCodigo() {
+            document.getElementById('codigoValidacion').classList.add('hidden');
+        }
+
+        // Función para aplicar descuento de código promocional
+        function aplicarDescuentoCodigo(precioFinal, descuento, nombreOferta) {
+            const numPasajeros = document.querySelectorAll('#pasajerosContainer .pasajero-card').length;
+            
+            descuentoAplicado = descuento;
+            ofertaActual = {
+                nombre: nombreOferta || 'Código promocional',
+                tipo: 'Código',
+                descuento: descuento
+            };
+            
+            actualizarResumen();
+        }
+
+        // Función para limpiar oferta aplicada
+        function limpiarOferta() {
+            ofertaActual = null;
+            descuentoAplicado = 0;
+            document.getElementById('ofertaInfo').classList.add('hidden');
+            limpiarValidacionCodigo();
+            actualizarResumen();
+        }
+
+        // Función actualizada para el resumen
+        function actualizarResumen() {
+            const numPasajeros = document.querySelectorAll('#pasajerosContainer .pasajero-card').length;
+            const subtotal = precioPorPersona * numPasajeros;
+            const total = subtotal - descuentoAplicado;
+            
+            document.getElementById('resumenPrecio').textContent = formatCurrency(precioPorPersona);
+            document.getElementById('resumenPasajeros').textContent = numPasajeros;
+            document.getElementById('resumenSubtotal').textContent = formatCurrency(subtotal);
+            document.getElementById('resumenTotal').textContent = formatCurrency(Math.max(0, total));
+            
+            // Mostrar u ocultar sección de descuento
+            const resumenDescuento = document.getElementById('resumenDescuento');
+            if (descuentoAplicado > 0 && ofertaActual) {
+                document.getElementById('resumenDescuentoMonto').textContent = `- ${formatCurrency(descuentoAplicado)}`;
+                document.getElementById('resumenOfertaNombre').textContent = ofertaActual.nombre;
+                
+                // Mostrar porcentaje si aplica
+                const porcentaje = subtotal > 0 ? ((descuentoAplicado / subtotal) * 100).toFixed(1) : 0;
+                document.getElementById('resumenDescuentoPorcentaje').textContent = `${porcentaje}%`;
+                
+                resumenDescuento.classList.remove('hidden');
+            } else {
+                resumenDescuento.classList.add('hidden');
+            }
+        }
+
+        // Event listeners para limpiar ofertas cuando se cambian datos
+        document.getElementById('codigoPromocional').addEventListener('input', function() {
+            if (!this.value.trim()) {
+                limpiarValidacionCodigo();
+                // No limpiar la oferta seleccionada automáticamente
+            }
+        });
+
+        // Limpiar ofertas cuando se cambia el número de pasajeros
+        const originalAgregarPasajero = agregarPasajero;
+        const originalEliminarPasajero = eliminarPasajero;
+        
+        agregarPasajero = function() {
+            originalAgregarPasajero();
+            if (ofertaActual) {
+                // Recalcular oferta con nuevo número de pasajeros
+                const ofertaSelect = document.getElementById('ofertaSelect');
+                const codigoPromocional = document.getElementById('codigoPromocional');
+                
+                if (ofertaSelect.value) {
+                    aplicarOferta(ofertaSelect.options[ofertaSelect.selectedIndex]);
+                } else if (codigoPromocional.value.trim()) {
+                    // Nota: Para códigos promocionales sería ideal revalidar, 
+                    // pero por simplicidad mantenemos el descuento actual
+                    actualizarResumen();
+                }
+            }
+        };
+        
+        eliminarPasajero = function(id) {
+            originalEliminarPasajero(id);
+            if (ofertaActual) {
+                // Recalcular oferta con nuevo número de pasajeros
+                const ofertaSelect = document.getElementById('ofertaSelect');
+                const codigoPromocional = document.getElementById('codigoPromocional');
+                
+                if (ofertaSelect.value) {
+                    aplicarOferta(ofertaSelect.options[ofertaSelect.selectedIndex]);
+                } else if (codigoPromocional.value.trim()) {
+                    actualizarResumen();
+                }
+            }
+        };
 
         function agregarPasajero() {
             pasajeroCount++;
@@ -694,7 +1233,7 @@ function getEstadoPagoIcon($estado) {
             }
         }
 
-        function actualizarResumen() {
+        function actualizarResumenOriginal() {
             const numPasajeros = document.querySelectorAll('#pasajerosContainer .pasajero-card').length;
             const total = precioPorPersona * numPasajeros;
             

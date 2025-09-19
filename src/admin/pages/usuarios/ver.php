@@ -136,6 +136,23 @@ function getEstadoIcon($estado) {
     ];
     return $icons[$estado_lower] ?? 'fas fa-question';
 }
+
+// Función local para mostrar tiempo transcurrido
+function mostrarTiempoTranscurrido($datetime) {
+    if (empty($datetime) || $datetime === '0000-00-00 00:00:00') {
+        return 'Nunca';
+    }
+    
+    $time = time() - strtotime($datetime);
+    
+    if ($time < 60) return 'hace unos segundos';
+    if ($time < 3600) return 'hace ' . round($time/60) . ' minutos';
+    if ($time < 86400) return 'hace ' . round($time/3600) . ' horas';
+    if ($time < 2592000) return 'hace ' . round($time/86400) . ' días';
+    if ($time < 31536000) return 'hace ' . round($time/2592000) . ' meses';
+    
+    return 'hace ' . round($time/31536000) . ' años';
+}
 ?>
 
 <!DOCTYPE html>
@@ -234,9 +251,19 @@ function getEstadoIcon($estado) {
                         <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
                             <div class="text-center mb-6">
                                 <?php if ($usuario['avatar_url']): ?>
-                                    <img class="h-24 w-24 rounded-full mx-auto mb-4" src="<?php echo htmlspecialchars($usuario['avatar_url']); ?>" alt="">
+                                    <?php 
+                                    // Función para mostrar avatar con ruta correcta
+                                    $avatar_url = $usuario['avatar_url'];
+                                    if (!preg_match('/^https?:\/\//i', $avatar_url)) {
+                                        // Si es una ruta local, ajustar la ruta relativa
+                                        $avatar_url = '../../../../' . ltrim($avatar_url, '/');
+                                    }
+                                    ?>
+                                    <img class="h-24 w-24 rounded-full mx-auto mb-4 object-cover border-4 border-gray-200" 
+                                         src="<?php echo htmlspecialchars($avatar_url); ?>" 
+                                         alt="Avatar de <?php echo htmlspecialchars($usuario['nombre'] ?? $usuario['email']); ?>">
                                 <?php else: ?>
-                                    <div class="h-24 w-24 rounded-full bg-blue-600 flex items-center justify-center mx-auto mb-4">
+                                    <div class="h-24 w-24 rounded-full bg-blue-600 flex items-center justify-center mx-auto mb-4 border-4 border-gray-200">
                                         <span class="text-white font-bold text-2xl">
                                             <?php echo strtoupper(substr($usuario['nombre'] ?? $usuario['email'], 0, 1)); ?>
                                         </span>
@@ -264,7 +291,7 @@ function getEstadoIcon($estado) {
                                 <div class="flex items-center justify-between">
                                     <span class="text-sm font-medium text-gray-500">Fecha de Nacimiento:</span>
                                     <span class="text-sm text-gray-900">
-                                        <?php echo isset($usuario['fecha_nacimiento']) && $usuario['fecha_nacimiento'] ? formatDate($usuario['fecha_nacimiento'], 'd/m/Y') : 'No registrada'; ?>
+                                        <?php echo isset($usuario['fecha_nacimiento']) && $usuario['fecha_nacimiento'] && $usuario['fecha_nacimiento'] !== '0000-00-00' ? formatDate($usuario['fecha_nacimiento'], 'd/m/Y') : 'No registrada'; ?>
                                     </span>
                                 </div>
 
@@ -301,6 +328,19 @@ function getEstadoIcon($estado) {
                                             <i class="fas fa-clock mr-1"></i>Pendiente
                                         </span>
                                     <?php endif; ?>
+                                </div>
+
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-gray-500">Tipo de avatar:</span>
+                                    <span class="text-sm text-gray-600">
+                                        <?php if ($usuario['avatar_url'] && preg_match('/^https?:\/\//i', $usuario['avatar_url'])): ?>
+                                            <i class="fas fa-external-link-alt text-blue-500 mr-1"></i>OAuth (<?php echo ucfirst($usuario['proveedor_oauth']); ?>)
+                                        <?php elseif ($usuario['avatar_url']): ?>
+                                            <i class="fas fa-upload text-green-500 mr-1"></i>Personalizado
+                                        <?php else: ?>
+                                            <i class="fas fa-user-circle text-gray-400 mr-1"></i>Por defecto
+                                        <?php endif; ?>
+                                    </span>
                                 </div>
 
                                 <div class="flex items-center justify-between">

@@ -5,13 +5,122 @@ require_once __DIR__ . '/../src/config/conexion.php';
 $min_price = isset($_GET['min_price']) && is_numeric($_GET['min_price']) ? $_GET['min_price'] : 0;
 $max_price = isset($_GET['max_price']) && is_numeric($_GET['max_price']) ? $_GET['max_price'] : 99999;
 
-$sql = "SELECT id_tour, titulo, descripcion, precio, imagen_principal, duracion FROM tours WHERE precio BETWEEN ? AND ?";
+// Consulta para obtener tours con información de ofertas activas
+$sql = "SELECT DISTINCT 
+            t.id_tour, 
+            t.titulo, 
+            t.descripcion, 
+            t.precio, 
+            t.imagen_principal, 
+            t.duracion,
+            o.id_oferta,
+            o.nombre as oferta_nombre,
+            o.tipo_oferta,
+            o.valor_descuento,
+            o.precio_especial,
+            o.descripcion as oferta_descripcion,
+            o.destacada
+        FROM tours t 
+        LEFT JOIN ofertas_tours ot ON t.id_tour = ot.id_tour
+        LEFT JOIN ofertas o ON ot.id_oferta = o.id_oferta 
+            AND o.activa = 1 
+            AND (o.fecha_inicio <= CURDATE() OR o.fecha_inicio IS NULL)
+            AND (o.fecha_fin >= CURDATE() OR o.fecha_fin IS NULL)
+            AND (o.limite_usos IS NULL OR o.limite_usos > o.usos_actuales)
+        WHERE t.precio BETWEEN ? AND ?
+        ORDER BY t.id_tour, o.destacada DESC";
+
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("dd", $min_price, $max_price);
 $stmt->execute();
 $result = $stmt->get_result();
-$tours = $result->fetch_all(MYSQLI_ASSOC);
+$tours_data = $result->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
+
+// Procesar datos para agrupar ofertas por tour
+$tours = [];
+foreach ($tours_data as $row) {
+    $tour_id = $row['id_tour'];
+    
+    if (!isset($tours[$tour_id])) {
+        $tours[$tour_id] = [
+            'id_tour' => $row['id_tour'],
+            'titulo' => $row['titulo'],
+            'descripcion' => $row['descripcion'],
+            'precio' => $row['precio'],
+            'imagen_principal' => $row['imagen_principal'],
+            'duracion' => $row['duracion'],
+            'ofertas' => []
+        ];
+    }
+    
+    // Agregar oferta si existe
+    if ($row['id_oferta']) {
+        $tours[$tour_id]['ofertas'][] = [
+            'id_oferta' => $row['id_oferta'],
+            'nombre' => $row['oferta_nombre'],
+            'tipo_oferta' => $row['tipo_oferta'],
+            'valor_descuento' => $row['valor_descuento'],
+            'precio_especial' => $row['precio_especial'],
+            'descripcion' => $row['oferta_descripcion'],
+            'destacada' => $row['destacada']
+        ];
+    }
+}
+
+// Función para calcular precio final con ofertas
+function calcularPrecioConOfertas($precio_original, $ofertas) {
+    if (empty($ofertas)) {
+        return $precio_original;
+    }
+    
+    $mejor_precio = $precio_original;
+    
+    foreach ($ofertas as $oferta) {
+        switch ($oferta['tipo_oferta']) {
+            case 'Porcentaje':
+                $precio_con_descuento = $precio_original * (1 - $oferta['valor_descuento'] / 100);
+                break;
+            case 'Monto_Fijo':
+                $precio_con_descuento = max(0, $precio_original - $oferta['valor_descuento']);
+                break;
+            case 'Precio_Especial':
+                $precio_con_descuento = $oferta['precio_especial'];
+                break;
+            case '2x1':
+                $precio_con_descuento = $precio_original; // Se maneja en el carrito
+                break;
+            case 'Combo':
+                $precio_con_descuento = $precio_original; // Se maneja en el carrito
+                break;
+            default:
+                $precio_con_descuento = $precio_original;
+        }
+        
+        $mejor_precio = min($mejor_precio, $precio_con_descuento);
+    }
+    
+    return $mejor_precio;
+}
+
+// Función para obtener la mejor oferta
+function obtenerMejorOferta($ofertas) {
+    if (empty($ofertas)) {
+        return null;
+    }
+    
+    // Priorizar ofertas destacadas
+    foreach ($ofertas as $oferta) {
+        if ($oferta['destacada']) {
+            return $oferta;
+        }
+    }
+    
+    // Si no hay destacadas, devolver la primera
+    return $ofertas[0];
+}
+
+$tours = array_values($tours); // Reindexar array
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -108,6 +217,54 @@ $stmt->close();
             border-radius: 50px;
             font-weight: 600;
             font-size: 1rem;
+        }
+        .tour-price.with-offer {
+            background: #10b981;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        .tour-price .original-price {
+            text-decoration: line-through;
+            font-size: 0.8rem;
+            opacity: 0.8;
+            display: block;
+        }
+        .tour-offer-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 3px 10px rgba(245, 158, 11, 0.3);
+            animation: pulse 2s infinite;
+            z-index: 2;
+        }
+        .tour-offer-badge.destacada {
+            background: linear-gradient(135deg, #dc2626, #991b1b);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        .tour-offer-badge.porcentaje {
+            background: linear-gradient(135deg, #7c3aed, #5b21b6);
+        }
+        .tour-offer-badge.precio-especial {
+            background: linear-gradient(135deg, #059669, #047857);
+        }
+        .tour-offer-badge.combo {
+            background: linear-gradient(135deg, #0891b2, #0e7490);
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        @keyframes glow {
+            from { box-shadow: 0 3px 15px rgba(220, 38, 38, 0.4); }
+            to { box-shadow: 0 3px 25px rgba(220, 38, 38, 0.8), 0 0 30px rgba(220, 38, 38, 0.3); }
         }
         .tour-content {
             padding: 25px;
@@ -221,9 +378,50 @@ $stmt->close();
             <div class="tours-grid">
                 <?php if (count($tours) > 0): ?>
                     <?php foreach ($tours as $tour): ?>
+                        <?php 
+                        $mejor_oferta = obtenerMejorOferta($tour['ofertas']);
+                        $precio_original = $tour['precio'];
+                        $precio_final = calcularPrecioConOfertas($precio_original, $tour['ofertas']);
+                        $tiene_descuento = $precio_final < $precio_original;
+                        ?>
                         <div class="tour-card">
                             <div class="tour-image" style="background-image: url('<?php echo htmlspecialchars($tour['imagen_principal']); ?>');">
-                                <div class="tour-price">$<?php echo number_format($tour['precio'], 2); ?></div>
+                                
+                                <?php if ($mejor_oferta): ?>
+                                    <div class="tour-offer-badge <?php 
+                                        echo strtolower(str_replace('_', '-', $mejor_oferta['tipo_oferta']));
+                                        echo $mejor_oferta['destacada'] ? ' destacada' : '';
+                                    ?>">
+                                        <?php 
+                                        switch ($mejor_oferta['tipo_oferta']) {
+                                            case 'Porcentaje':
+                                                echo '-' . $mejor_oferta['valor_descuento'] . '%';
+                                                break;
+                                            case 'Monto_Fijo':
+                                                echo '-$' . number_format($mejor_oferta['valor_descuento']);
+                                                break;
+                                            case 'Precio_Especial':
+                                                echo 'ESPECIAL';
+                                                break;
+                                            case '2x1':
+                                                echo '2x1';
+                                                break;
+                                            case 'Combo':
+                                                echo 'COMBO';
+                                                break;
+                                            default:
+                                                echo 'OFERTA';
+                                        }
+                                        ?>
+                                    </div>
+                                <?php endif; ?>
+
+                                <div class="tour-price<?php echo $tiene_descuento ? ' with-offer' : ''; ?>">
+                                    <?php if ($tiene_descuento): ?>
+                                        <span class="original-price">$<?php echo number_format($precio_original, 2); ?></span>
+                                    <?php endif; ?>
+                                    $<?php echo number_format($precio_final, 2); ?>
+                                </div>
                             </div>
                             <div class="tour-content">
                                 <h3 class="tour-title"><?php echo htmlspecialchars($tour['titulo']); ?></h3>
@@ -231,8 +429,16 @@ $stmt->close();
                                     <i class="fas fa-clock"></i>
                                     <span data-es="Duración:" data-en="Duration:">Duración:</span> <?php echo htmlspecialchars($tour['duracion']); ?>
                                 </div>
+                                
+                                <?php if ($mejor_oferta && !empty($mejor_oferta['descripcion'])): ?>
+                                    <div class="tour-offer-description" style="background: #fef3c7; color: #92400e; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; margin-bottom: 15px; border-left: 3px solid #f59e0b;">
+                                        <i class="fas fa-tag" style="margin-right: 5px;"></i>
+                                        <?php echo htmlspecialchars($mejor_oferta['descripcion']); ?>
+                                    </div>
+                                <?php endif; ?>
+
                                 <p class="tour-description"><?php echo htmlspecialchars($tour['descripcion']); ?></p>
-                                <a href="#" class="btn btn-secondary" data-es="Ver Detalles" data-en="View Details">
+                                <a href="../src/detalles.php?id=<?php echo $tour['id_tour']; ?>" class="btn btn-secondary" data-es="Ver Detalles" data-en="View Details">
                                     <i class="fas fa-info-circle"></i>
                                     <span>Ver Detalles</span>
                                 </a>

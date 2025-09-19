@@ -31,6 +31,65 @@ if (!$tour) {
     exit;
 }
 
+// Obtener ofertas aplicables para este tour
+$ofertas_disponibles = [];
+$user_id = $_SESSION['user_id'] ?? null;
+
+if ($tour['precio'] && $tour['precio'] > 0) {
+    $ofertas_sql = "SELECT o.*, 
+                           CASE 
+                               WHEN o.limite_usos IS NOT NULL AND o.usos_actuales >= o.limite_usos THEN 0
+                               ELSE 1 
+                           END as disponible
+                    FROM ofertas o 
+                    WHERE o.estado = 'Activa' 
+                    AND o.visible_publica = 1
+                    AND NOW() BETWEEN o.fecha_inicio AND o.fecha_fin
+                    AND (o.monto_minimo IS NULL OR ? >= o.monto_minimo)
+                    AND (o.aplicable_a = 'Todos' 
+                         OR (o.aplicable_a = 'Tours_Especificos' AND EXISTS(SELECT 1 FROM ofertas_tours WHERE id_oferta = o.id_oferta AND id_tour = ?))
+                         OR (o.aplicable_a = 'Usuarios_Especificos' AND ? IS NOT NULL AND EXISTS(SELECT 1 FROM ofertas_usuarios WHERE id_oferta = o.id_oferta AND id_usuario = ?))
+                         OR (o.aplicable_a = 'Nuevos_Usuarios' AND ? IS NOT NULL AND (SELECT COUNT(*) FROM reservas WHERE id_usuario = ?) = 0))
+                    ORDER BY o.destacada DESC, o.valor_descuento DESC";
+    
+    $stmt_ofertas = $conn->prepare($ofertas_sql);
+    $stmt_ofertas->bind_param("diiiiii", $tour['precio'], $id_tour, $user_id, $user_id, $user_id, $user_id);
+    $stmt_ofertas->execute();
+    $result_ofertas = $stmt_ofertas->get_result();
+    
+    while ($oferta = $result_ofertas->fetch_assoc()) {
+        if (!$oferta['disponible']) continue;
+        
+        // Calcular descuento para preview
+        $descuento_preview = 0;
+        switch ($oferta['tipo_oferta']) {
+            case 'Porcentaje':
+                $descuento_preview = ($tour['precio'] * $oferta['valor_descuento']) / 100;
+                break;
+            case 'Monto_Fijo':
+                $descuento_preview = min($oferta['valor_descuento'], $tour['precio']);
+                break;
+            case 'Precio_Especial':
+                $descuento_preview = max(0, $tour['precio'] - $oferta['precio_especial']);
+                break;
+            case '2x1':
+                $descuento_preview = $tour['precio'] * 0.5;
+                break;
+            case 'Combo':
+                $descuento_preview = ($tour['precio'] * ($oferta['valor_descuento'] ?: 15)) / 100;
+                break;
+        }
+        
+        if ($descuento_preview > 0) {
+            $oferta['descuento_preview'] = $descuento_preview;
+            $oferta['precio_final'] = max(0, $tour['precio'] - $descuento_preview);
+            $ofertas_disponibles[] = $oferta;
+        }
+    }
+    
+    $stmt_ofertas->close();
+}
+
 function getImagePath($imagePath) {
     $fallbackImage = 'https://images.unsplash.com/photo-1587595431973-160d0d94add1?w=1200&h=600&fit=crop&crop=center';
     
@@ -713,6 +772,176 @@ if (!isset($_SESSION['cart'])) {
             box-shadow: var(--shadow-hover);
         }
 
+        /* Estilos para Ofertas Disponibles */
+        .ofertas-disponibles-section {
+            background: var(--white);
+            padding: 3rem 2rem;
+            margin: 3rem 0;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .ofertas-disponibles-section h2 {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            font-size: 2.2rem;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .ofertas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .oferta-card {
+            background: linear-gradient(135deg, #fff, #f8f9fa);
+            border: 2px solid transparent;
+            border-radius: 16px;
+            padding: 2rem;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .oferta-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+            transition: var(--transition);
+        }
+
+        .oferta-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .oferta-card:hover::before {
+            left: 100%;
+        }
+
+        .oferta-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .oferta-header h3 {
+            font-size: 1.4rem;
+            color: var(--text-dark);
+            margin: 0;
+            flex: 1;
+            margin-right: 1rem;
+        }
+
+        .oferta-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .oferta-badge.porcentaje {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .oferta-badge.monto_fijo {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .oferta-badge.precio_especial {
+            background: #e8f5e8;
+            color: #388e3c;
+        }
+
+        .oferta-badge.combo {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .oferta-content p {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .precio-oferta {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+        }
+
+        .precio-original {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            text-decoration: line-through;
+            margin-bottom: 0.5rem;
+        }
+
+        .precio-oferta-final {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .ahorro {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 0.5rem 1.2rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .codigo-promo {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            text-align: center;
+            font-size: 0.95rem;
+        }
+
+        .codigo-promo strong {
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+        }
+
+        .mensaje-promo {
+            background: #e3f2fd;
+            color: #1565c0;
+            padding: 1rem;
+            border-radius: 8px;
+            font-style: italic;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            border-left: 4px solid #1976d2;
+        }
+
         .footer {
             background: var(--primary-dark);
             color: var(--white);
@@ -1259,6 +1488,45 @@ if (!isset($_SESSION['cart'])) {
                 <h2><?php echo $lang['detail_description'] ?? 'Descripción'; ?></h2>
                 <p><?php echo nl2br(htmlspecialchars($tour['descripcion'] ?? ($lang['detail_tbd'] ?? 'Por determinar'))); ?></p>
             </div>
+            
+            <!-- Sección de Ofertas Disponibles -->
+            <?php if (!empty($ofertas_disponibles)): ?>
+            <div class="ofertas-disponibles-section">
+                <h2><i class="fas fa-tags"></i> <?php echo $current_lang == 'es' ? 'Ofertas Especiales' : 'Special Offers'; ?></h2>
+                <div class="ofertas-grid">
+                    <?php foreach ($ofertas_disponibles as $oferta): ?>
+                    <div class="oferta-card" data-oferta-id="<?php echo $oferta['id_oferta']; ?>">
+                        <div class="oferta-header">
+                            <h3><?php echo htmlspecialchars($oferta['nombre']); ?></h3>
+                            <span class="oferta-badge <?php echo strtolower($oferta['tipo_oferta']); ?>">
+                                <?php echo $oferta['tipo_oferta']; ?>
+                            </span>
+                        </div>
+                        <div class="oferta-content">
+                            <?php if ($oferta['descripcion']): ?>
+                            <p><?php echo htmlspecialchars($oferta['descripcion']); ?></p>
+                            <?php endif; ?>
+                            <div class="precio-oferta">
+                                <span class="precio-original">$<?php echo number_format($tour['precio'], 2); ?></span>
+                                <span class="precio-oferta-final">$<?php echo number_format($oferta['precio_final'], 2); ?></span>
+                                <span class="ahorro">¡Ahorra $<?php echo number_format($oferta['descuento_preview'], 2); ?>!</span>
+                            </div>
+                            <?php if ($oferta['codigo_promocional']): ?>
+                            <div class="codigo-promo">
+                                <span>Código: <strong><?php echo $oferta['codigo_promocional']; ?></strong></span>
+                            </div>
+                            <?php endif; ?>
+                            <?php if ($oferta['mensaje_promocional']): ?>
+                            <div class="mensaje-promo">
+                                <?php echo htmlspecialchars($oferta['mensaje_promocional']); ?>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php endif; ?>
             <div class="detail-description">
                 <h2><?php echo $lang['detail_schedule'] ?? 'Itinerario'; ?></h2>
                 <div class="schedule-grid">

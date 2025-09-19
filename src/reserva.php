@@ -82,6 +82,9 @@ if (isset($_POST['remove_item'])) {
 // Get tour details
 $tour_details = [];
 $total_price = 0;
+$total_original_price = 0;
+$ofertas_aplicadas = [];
+
 foreach ($cart['paquetes'] as $item) {
     $query_tour = "SELECT id_tour, titulo, descripcion, precio, hora_salida, hora_llegada, lugar_salida FROM tours WHERE id_tour = ?";
     $stmt_tour = $conn->prepare($query_tour);
@@ -90,13 +93,121 @@ foreach ($cart['paquetes'] as $item) {
     $result = $stmt_tour->get_result();
     if ($tour_detail = $result->fetch_assoc()) {
         $tour_detail['total_price'] = $tour_detail['precio'] * ($item['adultos'] + $item['ninos']);
-        $total_price += $tour_detail['total_price'];
+        $total_original_price += $tour_detail['total_price'];
+        
+        // Verificar ofertas aplicables para este tour
+        $ofertas_tour = verificarOfertasAplicables($item['id_tour'], $tour_detail['total_price'], $id_usuario);
+        $tour_detail['ofertas'] = $ofertas_tour;
+        
+        if (!empty($ofertas_tour)) {
+            $mejor_oferta = $ofertas_tour[0]; // La mejor oferta ya viene ordenada
+            $tour_detail['descuento'] = $mejor_oferta['descuento'];
+            $tour_detail['precio_final'] = $mejor_oferta['precio_final'];
+            $ofertas_aplicadas[] = $mejor_oferta;
+        } else {
+            $tour_detail['descuento'] = 0;
+            $tour_detail['precio_final'] = $tour_detail['total_price'];
+        }
+        
+        $total_price += $tour_detail['precio_final'];
         $tour_details[$item['id_tour']] = $tour_detail;
     } else {
         error_log("Tour not found for id_tour: {$item['id_tour']}");
         die("Error: Tour ID {$item['id_tour']} not found.");
     }
     $stmt_tour->close();
+}
+
+// Función para verificar ofertas aplicables
+function verificarOfertasAplicables($id_tour, $monto_base, $id_usuario) {
+    global $conn;
+    
+    $ofertas_sql = "SELECT o.*, 
+                           CASE 
+                               WHEN o.limite_usos IS NOT NULL AND o.usos_actuales >= o.limite_usos THEN 0
+                               ELSE 1 
+                           END as disponible
+                    FROM ofertas o 
+                    WHERE o.estado = 'Activa' 
+                    AND NOW() BETWEEN o.fecha_inicio AND o.fecha_fin
+                    AND (o.monto_minimo IS NULL OR ? >= o.monto_minimo)
+                    AND (o.aplicable_a = 'Todos' 
+                         OR (o.aplicable_a = 'Tours_Especificos' AND EXISTS(SELECT 1 FROM ofertas_tours WHERE id_oferta = o.id_oferta AND id_tour = ?))
+                         OR (o.aplicable_a = 'Usuarios_Especificos' AND EXISTS(SELECT 1 FROM ofertas_usuarios WHERE id_oferta = o.id_oferta AND id_usuario = ?))
+                         OR (o.aplicable_a = 'Nuevos_Usuarios' AND (SELECT COUNT(*) FROM reservas WHERE id_usuario = ?) = 0))
+                    ORDER BY 
+                        CASE o.tipo_oferta 
+                            WHEN 'Precio_Especial' THEN 1
+                            WHEN 'Porcentaje' THEN 2
+                            WHEN 'Monto_Fijo' THEN 3
+                            WHEN '2x1' THEN 4
+                            WHEN 'Combo' THEN 5
+                        END";
+    
+    $stmt = $conn->prepare($ofertas_sql);
+    $stmt->bind_param("diii", $monto_base, $id_tour, $id_usuario, $id_usuario);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    $ofertas_aplicables = [];
+    
+    while ($oferta = $result->fetch_assoc()) {
+        if (!$oferta['disponible']) continue;
+        
+        // Verificar límite por usuario
+        if ($oferta['limite_por_usuario']) {
+            $usage_check = "SELECT COUNT(*) as usos FROM historial_uso_ofertas WHERE id_oferta = ? AND id_usuario = ?";
+            $usage_stmt = $conn->prepare($usage_check);
+            $usage_stmt->bind_param("ii", $oferta['id_oferta'], $id_usuario);
+            $usage_stmt->execute();
+            $usage_result = $usage_stmt->get_result()->fetch_assoc();
+            if ($usage_result['usos'] >= $oferta['limite_por_usuario']) {
+                $usage_stmt->close();
+                continue;
+            }
+            $usage_stmt->close();
+        }
+        
+        // Calcular descuento
+        $descuento = 0;
+        switch ($oferta['tipo_oferta']) {
+            case 'Porcentaje':
+                $descuento = ($monto_base * $oferta['valor_descuento']) / 100;
+                break;
+            case 'Monto_Fijo':
+                $descuento = min($oferta['valor_descuento'], $monto_base);
+                break;
+            case 'Precio_Especial':
+                $descuento = max(0, $monto_base - $oferta['precio_especial']);
+                break;
+            case '2x1':
+                $descuento = $monto_base * 0.5;
+                break;
+            case 'Combo':
+                $descuento = ($monto_base * ($oferta['valor_descuento'] ?: 15)) / 100;
+                break;
+        }
+        
+        if ($descuento > 0) {
+            $ofertas_aplicables[] = [
+                'id_oferta' => $oferta['id_oferta'],
+                'nombre' => $oferta['nombre'],
+                'tipo_oferta' => $oferta['tipo_oferta'],
+                'descuento' => $descuento,
+                'precio_final' => max(0, $monto_base - $descuento),
+                'mensaje' => $oferta['mensaje_promocional'] ?: "Descuento aplicado: $" . number_format($descuento, 2),
+                'codigo' => $oferta['codigo_promocional']
+            ];
+        }
+    }
+    
+    // Ordenar por mayor descuento
+    usort($ofertas_aplicables, function($a, $b) {
+        return $b['descuento'] <=> $a['descuento'];
+    });
+    
+    $stmt->close();
+    return $ofertas_aplicables;
 }
 
 $contacto = [
@@ -468,6 +579,209 @@ function getImagePath($imagePath) {
 
         .price-info { font-weight: 600; color: var(--primary-color); margin-top: 0.5rem; }
 
+        /* Estilos para Ofertas */
+        .ofertas-section {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow);
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .ofertas-aplicadas {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(162, 119, 65, 0.2);
+        }
+
+        .ofertas-aplicadas h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .oferta-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .oferta-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .oferta-nombre {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .oferta-tipo {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            background: var(--primary-color);
+            color: var(--white);
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            display: inline-block;
+            width: fit-content;
+        }
+
+        .oferta-descuento {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #28a745;
+        }
+
+        .codigo-promocional h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .promo-input-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .promo-input-group input {
+            flex: 1;
+            text-transform: uppercase;
+        }
+
+        .btn-aplicar {
+            background: var(--primary-color);
+            color: var(--white);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .btn-aplicar:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .promo-message {
+            padding: 0.8rem;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+            font-weight: 500;
+            display: none;
+        }
+
+        .promo-message.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            display: block;
+        }
+
+        .promo-message.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            display: block;
+        }
+
+        .price-summary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            color: var(--white);
+            box-shadow: var(--shadow);
+        }
+
+        .price-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.8rem;
+            font-size: 1.1rem;
+        }
+
+        .original-price {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: line-through;
+        }
+
+        .discount-line {
+            color: #90EE90;
+            font-weight: 600;
+        }
+
+        .total-price {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0;
+            padding-top: 1rem;
+            border-top: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .discount-amount {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        /* Estilos para ofertas en tours individuales */
+        .tour-ofertas {
+            margin: 0.8rem 0;
+        }
+
+        .oferta-tour-aplicada {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.6rem 1rem;
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            border-left: 4px solid #28a745;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .oferta-tour-aplicada i {
+            color: #28a745;
+        }
+
+        .oferta-label {
+            flex: 1;
+            font-weight: 600;
+            color: #155724;
+        }
+
+        .descuento-tour {
+            font-weight: 700;
+            color: #28a745;
+            background: rgba(40, 167, 69, 0.1);
+            padding: 0.3rem 0.6rem;
+            border-radius: 12px;
+        }
+
+        .precio-original {
+            text-decoration: line-through;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .precio-con-descuento {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
         .custom-admin-btn2 {
         padding: 12px 24px;
         color: #A27741; 
@@ -730,8 +1044,25 @@ function getImagePath($imagePath) {
                             <span><i class="fas fa-child"></i> Children: <?php echo $item['ninos']; ?> x $<?php echo number_format($detail['precio'] ?? 0, 2); ?></span>
                             <span><i class="fas fa-baby"></i> Infants: <?php echo $item['infantes']; ?> x $0.00</span>
                         </div>
+                        
+                        <!-- Mostrar ofertas aplicables a este tour -->
+                        <?php if (!empty($detail['ofertas'])): ?>
+                        <div class="tour-ofertas">
+                            <div class="oferta-tour-aplicada">
+                                <i class="fas fa-tag"></i>
+                                <span class="oferta-label">Oferta Aplicada: <?php echo htmlspecialchars($detail['ofertas'][0]['nombre']); ?></span>
+                                <span class="descuento-tour">-$<?php echo number_format($detail['descuento'], 2); ?></span>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+                        
                         <div class="price-info">
-                            Total for this tour: $<?php echo number_format($detail['total_price'] ?? 0, 2); ?>
+                            <?php if ($detail['descuento'] > 0): ?>
+                                <div class="precio-original">Original: $<?php echo number_format($detail['total_price'], 2); ?></div>
+                                <div class="precio-con-descuento">Final: $<?php echo number_format($detail['precio_final'], 2); ?></div>
+                            <?php else: ?>
+                                Total for this tour: $<?php echo number_format($detail['total_price'] ?? 0, 2); ?>
+                            <?php endif; ?>
                         </div>
                     </div>
                     <form method="POST" action="reserva.php">
@@ -743,8 +1074,53 @@ function getImagePath($imagePath) {
                     </form>
                 </div>
             <?php endforeach; ?>
-            <div class="price-info" style="text-align: right; font-size: 1.2rem;">
-                Total Price: $<?php echo number_format($total_price, 2); ?>
+            
+            <!-- Sección de Ofertas y Códigos Promocionales -->
+            <div class="ofertas-section">
+                <!-- Ofertas Aplicadas Automáticamente -->
+                <?php if (!empty($ofertas_aplicadas)): ?>
+                <div class="ofertas-aplicadas">
+                    <h3><i class="fas fa-tags"></i> Ofertas Aplicadas</h3>
+                    <?php foreach ($ofertas_aplicadas as $oferta): ?>
+                    <div class="oferta-item">
+                        <div class="oferta-info">
+                            <span class="oferta-nombre"><?php echo htmlspecialchars($oferta['nombre']); ?></span>
+                            <span class="oferta-tipo"><?php echo htmlspecialchars($oferta['tipo_oferta']); ?></span>
+                        </div>
+                        <div class="oferta-descuento">
+                            -$<?php echo number_format($oferta['descuento'], 2); ?>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+                <?php endif; ?>
+                
+                <!-- Campo para Código Promocional -->
+                <div class="codigo-promocional">
+                    <h3><i class="fas fa-percent"></i> ¿Tienes un código promocional?</h3>
+                    <div class="promo-input-group">
+                        <input type="text" id="codigoPromo" placeholder="Ingresa tu código" class="form-input">
+                        <button type="button" onclick="aplicarCodigo()" class="btn-aplicar">Aplicar</button>
+                    </div>
+                    <div id="promoMessage" class="promo-message"></div>
+                </div>
+            </div>
+            
+            <div class="price-summary">
+                <?php if ($total_original_price > $total_price): ?>
+                <div class="price-line original-price">
+                    <span>Precio Original:</span>
+                    <span>$<?php echo number_format($total_original_price, 2); ?></span>
+                </div>
+                <div class="price-line discount-line">
+                    <span>Descuento Total:</span>
+                    <span class="discount-amount">-$<?php echo number_format($total_original_price - $total_price, 2); ?></span>
+                </div>
+                <?php endif; ?>
+                <div class="price-line total-price">
+                    <span>Total Final:</span>
+                    <span id="totalFinal">$<?php echo number_format($total_price, 2); ?></span>
+                </div>
             </div>
         </form>
 
@@ -939,7 +1315,116 @@ function getImagePath($imagePath) {
                 const navbar = document.querySelector('.navbar');
                 navbar.classList.toggle('scrolled', window.scrollY > 50);
             });
+            
+            // Auto-uppercase código promocional
+            document.getElementById('codigoPromo').addEventListener('input', function(e) {
+                e.target.value = e.target.value.toUpperCase();
+            });
         });
+        
+        // Función para aplicar código promocional
+        async function aplicarCodigo() {
+            const codigo = document.getElementById('codigoPromo').value.trim();
+            const messageDiv = document.getElementById('promoMessage');
+            
+            if (!codigo) {
+                showPromoMessage('Por favor ingresa un código promocional', 'error');
+                return;
+            }
+            
+            // Calcular monto total actual
+            const montoTotal = <?php echo $total_original_price; ?>;
+            
+            try {
+                const response = await fetch('../api/validar_ofertas.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        codigo: codigo,
+                        monto: montoTotal,
+                        id_usuario: <?php echo $id_usuario; ?>
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.oferta) {
+                    showPromoMessage(`¡Código aplicado! Descuento: $${data.oferta.descuento.toFixed(2)}`, 'success');
+                    actualizarPrecioConDescuento(data.oferta);
+                } else {
+                    showPromoMessage(data.message || 'Código promocional no válido', 'error');
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showPromoMessage('Error al validar el código. Inténtalo de nuevo.', 'error');
+            }
+        }
+        
+        function showPromoMessage(message, type) {
+            const messageDiv = document.getElementById('promoMessage');
+            messageDiv.textContent = message;
+            messageDiv.className = `promo-message ${type}`;
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    messageDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+        
+        function actualizarPrecioConDescuento(oferta) {
+            // Crear elemento de oferta aplicada si no existe la sección
+            let ofertasSection = document.querySelector('.ofertas-aplicadas');
+            if (!ofertasSection) {
+                ofertasSection = document.createElement('div');
+                ofertasSection.className = 'ofertas-aplicadas';
+                ofertasSection.innerHTML = '<h3><i class="fas fa-tags"></i> Ofertas Aplicadas</h3>';
+                document.querySelector('.ofertas-section').insertBefore(ofertasSection, document.querySelector('.codigo-promocional'));
+            }
+            
+            // Agregar la nueva oferta
+            const ofertaItem = document.createElement('div');
+            ofertaItem.className = 'oferta-item';
+            ofertaItem.innerHTML = `
+                <div class="oferta-info">
+                    <span class="oferta-nombre">${oferta.nombre}</span>
+                    <span class="oferta-tipo">${oferta.tipo_oferta}</span>
+                </div>
+                <div class="oferta-descuento">-$${oferta.descuento.toFixed(2)}</div>
+            `;
+            
+            ofertasSection.appendChild(ofertaItem);
+            
+            // Actualizar resumen de precios
+            const totalOriginal = <?php echo $total_original_price; ?>;
+            const nuevoTotal = oferta.precio_final;
+            
+            // Actualizar el total final
+            document.getElementById('totalFinal').textContent = `$${nuevoTotal.toFixed(2)}`;
+            
+            // Mostrar líneas de descuento si no existen
+            const priceSummary = document.querySelector('.price-summary');
+            if (!priceSummary.querySelector('.original-price')) {
+                const totalPriceLine = priceSummary.querySelector('.total-price');
+                
+                const originalLine = document.createElement('div');
+                originalLine.className = 'price-line original-price';
+                originalLine.innerHTML = `<span>Precio Original:</span><span>$${totalOriginal.toFixed(2)}</span>`;
+                
+                const discountLine = document.createElement('div');
+                discountLine.className = 'price-line discount-line';
+                discountLine.innerHTML = `<span>Descuento Total:</span><span class="discount-amount">-$${oferta.descuento.toFixed(2)}</span>`;
+                
+                priceSummary.insertBefore(originalLine, totalPriceLine);
+                priceSummary.insertBefore(discountLine, totalPriceLine);
+            }
+            
+            // Limpiar el campo de código
+            document.getElementById('codigoPromo').value = '';
+        }
     </script>
 </body>
 </html>

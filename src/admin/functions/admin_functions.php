@@ -139,6 +139,18 @@ function getDashboardStats() {
         ");
         $stats['ingresos_mensuales'] = $stmt->fetchAll();
         
+        // Calcular promedio de ingresos mensuales (últimos 6 meses con datos)
+        $stmt = $connection->query("
+            SELECT COALESCE(AVG(ingresos_mensuales), 0) as promedio
+            FROM (
+                SELECT COALESCE(SUM(CASE WHEN estado IN ('Confirmada', 'Finalizada') THEN monto_total ELSE 0 END), 0) as ingresos_mensuales
+                FROM reservas 
+                WHERE fecha_reserva >= DATE_SUB(CURRENT_DATE(), INTERVAL 6 MONTH)
+                GROUP BY DATE_FORMAT(fecha_reserva, '%Y-%m')
+            ) as ingresos_por_mes
+        ");
+        $stats['promedio_ingresos'] = $stmt->fetch()['promedio'];
+        
         // Reservas por estado para gráfico
         $stmt = $connection->query("
             SELECT estado, COUNT(*) as cantidad
@@ -199,18 +211,68 @@ function getDashboardStats() {
             SELECT 
                 r.id_region,
                 r.nombre_region,
-                COUNT(t.id_tour) as total_tours,
                 COUNT(res.id_reserva) as total_reservas,
-                COALESCE(SUM(CASE WHEN res.estado IN ('Confirmada', 'Finalizada') THEN res.monto_total ELSE 0 END), 0) as ingresos_region
+                SUM(res.monto_total) as ingresos_totales,
+                COUNT(DISTINCT t.id_tour) as tours_disponibles
             FROM regiones r
             LEFT JOIN tours t ON r.id_region = t.id_region
-            LEFT JOIN reservas res ON t.id_tour = res.id_tour
+            LEFT JOIN reservas res ON t.id_tour = res.id_tour AND res.estado IN ('Confirmada', 'Finalizada')
             GROUP BY r.id_region, r.nombre_region
-            HAVING total_reservas > 0
-            ORDER BY total_reservas DESC, ingresos_region DESC
+            ORDER BY total_reservas DESC
             LIMIT 8
         ");
         $stats['regiones_populares'] = $stmt->fetchAll();
+        
+        // Estadísticas de ofertas
+        $stmt = $connection->query("
+            SELECT 
+                COUNT(*) as total_ofertas,
+                COUNT(CASE WHEN estado = 'Activa' THEN 1 END) as ofertas_activas,
+                COUNT(CASE WHEN estado = 'Pausada' THEN 1 END) as ofertas_pausadas,
+                COUNT(CASE WHEN estado = 'Finalizada' THEN 1 END) as ofertas_finalizadas,
+                COUNT(CASE WHEN destacada = 1 AND estado = 'Activa' THEN 1 END) as ofertas_destacadas
+            FROM ofertas
+        ");
+        $stats['stats_ofertas'] = $stmt->fetch();
+        
+        // Ofertas próximas a vencer (próximos 7 días)
+        $stmt = $connection->query("
+            SELECT 
+                id_oferta,
+                nombre,
+                tipo_oferta,
+                fecha_fin,
+                usos_actuales,
+                limite_usos,
+                codigo_promocional,
+                DATEDIFF(fecha_fin, NOW()) as dias_restantes
+            FROM ofertas 
+            WHERE estado = 'Activa' 
+            AND fecha_fin BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 7 DAY)
+            ORDER BY fecha_fin ASC
+            LIMIT 10
+        ");
+        $stats['ofertas_por_vencer'] = $stmt->fetchAll();
+        
+        // Ofertas más utilizadas
+        $stmt = $connection->query("
+            SELECT 
+                o.id_oferta,
+                o.nombre,
+                o.tipo_oferta,
+                o.usos_actuales,
+                o.limite_usos,
+                COUNT(h.id_uso) as usos_mes_actual,
+                SUM(h.monto_descuento) as descuento_total_mes
+            FROM ofertas o
+            LEFT JOIN historial_uso_ofertas h ON o.id_oferta = h.id_oferta 
+                AND h.fecha_uso >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
+            WHERE o.estado IN ('Activa', 'Pausada')
+            GROUP BY o.id_oferta, o.nombre, o.tipo_oferta, o.usos_actuales, o.limite_usos
+            ORDER BY usos_mes_actual DESC
+            LIMIT 5
+        ");
+        $stats['ofertas_mas_usadas'] = $stmt->fetchAll();
         
         // Usuarios más activos (con más reservas)
         $stmt = $connection->query("

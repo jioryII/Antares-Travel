@@ -11,7 +11,7 @@ define('DB_CHARSET', 'utf8mb4');
 
 // Configuración de la aplicación
 define('SITE_NAME', 'Antares Travel Admin');
-define('BASE_URL', 'http://localhost/Antares-Travel/');
+define('BASE_URL', 'http://localhost:/Antares-Travel/');
 define('ADMIN_URL', BASE_URL . 'src/admin/');
 
 // Configuración de archivos
@@ -181,7 +181,8 @@ function createUploadDirectories() {
         UPLOAD_DIR . 'tours/',
         UPLOAD_DIR . 'guias/',
         UPLOAD_DIR . 'experiencias/',
-        UPLOAD_DIR . 'vehiculos/'
+        UPLOAD_DIR . 'vehiculos/',
+        UPLOAD_DIR . 'ofertas/'
     ];
     
     foreach ($directories as $dir) {

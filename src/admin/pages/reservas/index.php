@@ -8,13 +8,10 @@ verificarSesionAdmin();
 $admin = obtenerAdminActual();
 $page_title = "Gestión de Reservas";
 
-// Parámetros de filtrado y paginación
+// Parámetros de filtrado (eliminamos paginación)
 $filtro_estado = $_GET['estado'] ?? '';
 $filtro_fecha = $_GET['fecha'] ?? '';
 $busqueda = $_GET['buscar'] ?? '';
-$pagina = max(1, intval($_GET['pagina'] ?? 1));
-$registros_por_pagina = 10;
-$offset = ($pagina - 1) * $registros_por_pagina;
 
 // Construcción de la consulta SQL con filtros
 $where_conditions = [];
@@ -39,22 +36,11 @@ if (!empty($busqueda)) {
 
 $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
 
-// Obtener total de registros para paginación
+// Obtener todas las reservas sin paginación
 try {
     $connection = getConnection();
     
-    $count_sql = "SELECT COUNT(*) as total 
-                  FROM reservas r
-                  INNER JOIN usuarios u ON r.id_usuario = u.id_usuario
-                  INNER JOIN tours t ON r.id_tour = t.id_tour
-                  $where_clause";
-    
-    $count_stmt = $connection->prepare($count_sql);
-    $count_stmt->execute($params);
-    $total_registros = $count_stmt->fetch()['total'];
-    $total_paginas = ceil($total_registros / $registros_por_pagina);
-    
-    // Obtener reservas con paginación
+    // Obtener reservas ordenadas por fecha de reserva más reciente
     $sql = "SELECT 
                 r.id_reserva,
                 r.fecha_reserva,
@@ -74,8 +60,7 @@ try {
             INNER JOIN usuarios u ON r.id_usuario = u.id_usuario
             INNER JOIN tours t ON r.id_tour = t.id_tour
             $where_clause
-            ORDER BY r.fecha_reserva DESC
-            LIMIT $registros_por_pagina OFFSET $offset";
+            ORDER BY r.fecha_reserva DESC";
     
     $stmt = $connection->prepare($sql);
     $stmt->execute($params);
@@ -93,8 +78,6 @@ try {
 } catch (Exception $e) {
     error_log("Error al obtener reservas: " . $e->getMessage());
     $reservas = [];
-    $total_registros = 0;
-    $total_paginas = 0;
     $estadisticas = [];
 }
 
@@ -122,12 +105,69 @@ function getEstadoClass($estado) {
         .table-container {
             overflow-x: auto;
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            max-height: 600px;
+            overflow-y: auto;
         }
+        
+        .table-container table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .table-container thead th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background-color: #f9fafb;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
         .status-filter:hover {
             transform: translateY(-1px);
         }
+        
         .reservation-card:hover {
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        /* Scroll personalizado */
+        .table-container::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        .table-container::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        
+        .table-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* Estilos para scroll en móvil */
+        .mobile-cards {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .mobile-cards::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .mobile-cards::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+        
+        .mobile-cards::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
         }
         
         /* Estilos para móviles */
@@ -195,6 +235,130 @@ function getEstadoClass($estado) {
             text-transform: uppercase;
             letter-spacing: 0.025em;
         }
+        
+        /* Animación de carga para el scroll */
+        .table-container.loading {
+            position: relative;
+        }
+        
+        .table-container.loading::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 20;
+        }
+
+        /* Responsividad */
+        @media (max-width: 768px) {
+            .mobile-grid {
+                display: block;
+            }
+            
+            .desktop-table {
+                display: none;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .mobile-grid {
+                display: none;
+            }
+            
+            .desktop-table {
+                display: block;
+            }
+            
+            /* Configuración de scroll horizontal para desktop */
+            .desktop-table {
+                border: 2px solid #d1d5db;
+                border-radius: 0.5rem;
+                background: white;
+            }
+            
+            .desktop-table .table-scroll-container {
+                overflow-x: auto;
+                overflow-y: auto;
+                max-height: 600px; /* Altura máxima para activar scroll vertical */
+                position: relative;
+            }
+            
+            /* Scroll personalizado para ambos ejes */
+            .desktop-table .table-scroll-container::-webkit-scrollbar {
+                height: 8px;
+                width: 8px;
+            }
+            
+            .desktop-table .table-scroll-container::-webkit-scrollbar-track {
+                background: #f1f5f9;
+                border-radius: 4px;
+            }
+            
+            .desktop-table .table-scroll-container::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 4px;
+            }
+            
+            .desktop-table .table-scroll-container::-webkit-scrollbar-thumb:hover {
+                background: #94a3b8;
+            }
+            
+            .desktop-table table {
+                width: 100%;
+                table-layout: auto;
+            }
+            
+            /* Header sticky */
+            .desktop-table thead {
+                position: sticky;
+                top: 0;
+                z-index: 10;
+                background: #f9fafb;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            
+            .desktop-table thead th {
+                background: #f9fafb;
+                position: sticky;
+                top: 0;
+            }
+            
+            /* Solo aplicar anchos mínimos para evitar distorsión */
+            .desktop-table th,
+            .desktop-table td {
+                white-space: nowrap;
+                padding: 12px 16px;
+            }
+            
+            /* Mejorar separación visual en scroll */
+            .desktop-table tbody tr {
+                border-bottom: 1px solid #e5e7eb;
+            }
+            
+            .desktop-table tbody tr:hover {
+                background-color: #f8fafc;
+            }
+            
+            /* Anchos mínimos solo donde sea crítico */
+            .desktop-table th:nth-child(2),
+            .desktop-table td:nth-child(2) { 
+                min-width: 200px;
+                max-width: 200px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            
+            .desktop-table th:nth-child(3),
+            .desktop-table td:nth-child(3) { 
+                min-width: 220px;
+                max-width: 220px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -204,7 +368,7 @@ function getEstadoClass($estado) {
         <?php include '../../components/sidebar.php'; ?>
         
         <!-- Contenido principal -->
-        <div class="flex-1 lg:ml-64 pt-16 lg:pt-0 min-h-screen">
+        <div class="flex-1 lg:ml-64 pt-16 lg:pt-0 min-h-screen"><br>
             <div class="p-4 lg:p-8">
                 <!-- Encabezado -->
                 <div class="mb-6 lg:mb-8">
@@ -265,250 +429,174 @@ function getEstadoClass($estado) {
                     <?php endforeach; ?>
                 </div>
 
-                <!-- Filtros y Búsqueda -->
+                <!-- Filtros y Búsqueda - Tiempo Real -->
                 <div class="bg-white rounded-lg shadow mb-6 p-4">
-                    <form method="GET" class="filter-form flex gap-4">
-                        <div class="flex-1">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
-                            <div class="relative">
-                                <input type="text" name="buscar" value="<?php echo htmlspecialchars($busqueda); ?>" 
-                                       placeholder="Cliente, email o tour..." 
-                                       class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center">
-                                    <i class="fas fa-search text-gray-400"></i>
+                    <div class="flex flex-col lg:flex-row items-center gap-4">
+                        <!-- Título de filtros -->
+                        
+                        
+                        <!-- Filtros -->
+                        <div class="flex flex-col lg:flex-row items-center gap-3 flex-1">
+                            <!-- Búsqueda en tiempo real -->
+                            <div class="flex items-center space-x-2 w-full lg:w-auto">
+                                <label class="text-sm text-gray-600 whitespace-nowrap"></label>
+                                <div class="relative flex-1 lg:w-64">
+                                    <input type="text" id="filtro-busqueda" placeholder="Cliente, email o tour..."
+                                           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center">
+                                        <i class="fas fa-search text-gray-400"></i>
+                                    </div>
+                                    <button id="limpiar-busqueda" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 hidden">
+                                        <i class="fas fa-times"></i>
+                                    </button>
                                 </div>
+                            </div>
+                            
+                            <!-- Filtro por estado -->
+                            <div class="flex items-center space-x-2">
+                                <label class="text-sm text-gray-600 whitespace-nowrap"></label>
+                                <select id="filtro-estado" class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="">Todos los estados</option>
+                                    <option value="Pendiente">Pendiente</option>
+                                    <option value="Confirmada">Confirmada</option>
+                                    <option value="Cancelada">Cancelada</option>
+                                    <option value="Finalizada">Finalizada</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Filtro por fecha -->
+                            <div class="flex items-center space-x-2">
+                                <label class="text-sm text-gray-600 whitespace-nowrap">Fecha:</label>
+                                <input type="date" id="filtro-fecha" 
+                                       class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            
+                            <!-- Filtro por tour -->
+                            <div class="flex items-center space-x-2">
+                                <label class="text-sm text-gray-600 whitespace-nowrap"></label>
+                                <select id="filtro-tour" class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="">Todos los tours</option>
+                                    <?php 
+                                    $tours_utilizados = [];
+                                    foreach ($reservas as $reserva) {
+                                        if (!in_array($reserva['tour_titulo'], $tours_utilizados)) {
+                                            $tours_utilizados[] = $reserva['tour_titulo'];
+                                            echo "<option value='" . htmlspecialchars($reserva['tour_titulo']) . "'>" . htmlspecialchars($reserva['tour_titulo']) . "</option>";
+                                        }
+                                    }
+                                    ?>
+                                </select>
                             </div>
                         </div>
                         
-                        <div class="lg:min-w-0 lg:w-auto w-full">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-                            <select name="estado" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
-                                <option value="">Todos</option>
-                                <option value="Pendiente" <?php echo $filtro_estado === 'Pendiente' ? 'selected' : ''; ?>>Pendiente</option>
-                                <option value="Confirmada" <?php echo $filtro_estado === 'Confirmada' ? 'selected' : ''; ?>>Confirmada</option>
-                                <option value="Cancelada" <?php echo $filtro_estado === 'Cancelada' ? 'selected' : ''; ?>>Cancelada</option>
-                                <option value="Finalizada" <?php echo $filtro_estado === 'Finalizada' ? 'selected' : ''; ?>>Finalizada</option>
-                            </select>
-                        </div>
-                        
-                        <div class="lg:min-w-0 lg:w-auto w-full">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
-                            <input type="date" name="fecha" value="<?php echo htmlspecialchars($filtro_fecha); ?>"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
-                        </div>
-                        
-                        <div class="filter-actions flex items-end gap-2">
-                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
-                                <i class="fas fa-filter mr-1"></i>Filtrar
+                        <!-- Botón limpiar filtros y contador de resultados -->
+                        <div class="flex items-center gap-3">
+                            <span id="contador-resultados" class="text-sm text-gray-600">
+                                <i class="fas fa-list mr-1"></i>
+                                <span id="total-resultados"><?php echo count($reservas); ?></span> 
+                            </span>
+                            <button onclick="limpiarFiltros()" 
+                                    class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm border border-gray-300 transition-colors">
+                                <i class="fas fa-eraser mr-1"></i>Limpiar
                             </button>
-                            <a href="index.php" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors text-sm">
-                                <i class="fas fa-times mr-1"></i>Limpiar
-                            </a>
                         </div>
-                    </form>
-                </div>
-
-                <!-- Tabla de Reservas - Vista Desktop -->
-                <div class="desktop-table bg-white rounded-lg shadow overflow-hidden">
-                    <div class="table-container">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tour</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Tour</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pasajeros</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto Pagado</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                <?php if (empty($reservas)): ?>
-                                    <tr>
-                                        <td colspan="8" class="px-6 py-12 text-center text-gray-500">
-                                            <i class="fas fa-calendar-times text-4xl text-gray-300 mb-4"></i>
-                                            <p class="text-lg font-medium">No se encontraron reservas</p>
-                                            <p class="text-sm">Intenta ajustar los filtros de búsqueda</p>
-                                        </td>
-                                    </tr>
-                                <?php else: ?>
-                                    <?php foreach ($reservas as $reserva): ?>
-                                        <tr class="hover:bg-gray-50 transition-colors">
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                #<?php echo $reserva['id_reserva']; ?>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="flex items-center">
-                                                    <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center mr-3">
-                                                        <i class="fas fa-user text-white text-xs"></i>
-                                                    </div>
-                                                    <div>
-                                                        <div class="text-sm font-medium text-gray-900">
-                                                            <?php echo htmlspecialchars($reserva['usuario_nombre']); ?>
-                                                        </div>
-                                                        <div class="text-sm text-gray-500">
-                                                            <?php echo htmlspecialchars($reserva['usuario_email']); ?>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="px-6 py-4">
-                                                <div class="text-sm font-medium text-gray-900">
-                                                    <?php echo htmlspecialchars($reserva['tour_titulo']); ?>
-                                                </div>
-                                                <div class="text-sm text-gray-500">
-                                                    Precio base: <?php echo formatCurrency($reserva['tour_precio']); ?>
-                                                </div>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                <?php echo formatDate($reserva['fecha_tour']); ?>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                                    <i class="fas fa-users mr-1"></i>
-                                                    <?php echo $reserva['num_pasajeros']; ?>
-                                                </span>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                <div class="flex flex-col">
-                                                    <span class="text-green-600 font-semibold">
-                                                        <?php echo formatCurrency($reserva['monto_pagado']); ?>
-                                                    </span>
-                                                    <?php if ($reserva['monto_pagado'] > 0 && $reserva['monto_pagado'] < $reserva['monto_total']): ?>
-                                                        <span class="text-xs text-orange-500">
-                                                            Pendiente: <?php echo formatCurrency($reserva['monto_total'] - $reserva['monto_pagado']); ?>
-                                                        </span>
-                                                    <?php elseif ($reserva['monto_pagado'] >= $reserva['monto_total'] && $reserva['monto_total'] > 0): ?>
-                                                        <span class="text-xs text-green-500">
-                                                            ✓ Completo
-                                                        </span>
-                                                    <?php elseif ($reserva['monto_pagado'] == 0): ?>
-                                                        <span class="text-xs text-red-500">
-                                                            Sin pagos
-                                                        </span>
-                                                    <?php endif; ?>
-                                                </div>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?php echo getEstadoClass($reserva['estado']); ?>">
-                                                    <?php echo $reserva['estado']; ?>
-                                                </span>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                <div class="flex items-center space-x-2">
-                                                    <a href="ver.php?id=<?php echo $reserva['id_reserva']; ?>" 
-                                                       class="text-blue-600 hover:text-blue-900" title="Ver detalles">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                    <a href="editar.php?id=<?php echo $reserva['id_reserva']; ?>" 
-                                                       class="text-green-600 hover:text-green-900" title="Editar">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
-                                                    <button onclick="eliminarReserva(<?php echo $reserva['id_reserva']; ?>)" 
-                                                            class="text-red-600 hover:text-red-900" title="Eliminar">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
                     </div>
                 </div>
 
-                <!-- Vista Mobile - Tarjetas -->
-                <div class="mobile-cards space-y-4">
-                    <?php if (empty($reservas)): ?>
-                        <div class="bg-white rounded-lg shadow p-6 text-center">
-                            <i class="fas fa-calendar-times text-4xl text-gray-300 mb-4"></i>
-                            <p class="text-lg font-medium text-gray-900 mb-2">No se encontraron reservas</p>
-                            <p class="text-sm text-gray-500">Intenta ajustar los filtros de búsqueda</p>
-                        </div>
-                    <?php else: ?>
+                <!-- Tabla de Reservas Responsiva -->
+                <?php if (empty($reservas)): ?>
+                    <div class="bg-white rounded-lg shadow p-6 text-center">
+                        <i class="fas fa-calendar-times text-4xl text-gray-300 mb-4"></i>
+                        <p class="text-lg font-medium text-gray-900 mb-2">No se encontraron reservas</p>
+                        <p class="text-sm text-gray-500">Intenta ajustar los filtros de búsqueda</p>
+                    </div>
+                <?php else: ?>
+                    <!-- Vista móvil - Cards con scroll -->
+                    <div class="mobile-grid space-y-4 max-h-96 overflow-y-auto">
                         <?php foreach ($reservas as $reserva): ?>
-                            <div class="mobile-card bg-white p-4 border border-gray-200">
-                                <!-- Header de la tarjeta -->
-                                <div class="flex items-center justify-between mb-3">
-                                    <div class="flex items-center">
-                                        <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center mr-3">
-                                            <i class="fas fa-user text-white text-sm"></i>
-                                        </div>
-                                        <div>
-                                            <h3 class="font-semibold text-gray-900 text-sm">
-                                                <?php echo htmlspecialchars($reserva['usuario_nombre']); ?>
-                                            </h3>
-                                            <p class="text-xs text-gray-500">#<?php echo $reserva['id_reserva']; ?></p>
-                                        </div>
-                                    </div>
-                                    <span class="status-badge <?php echo getEstadoClass($reserva['estado']); ?>">
+                            <div class="mobile-card bg-white border-2 border-gray-300 rounded-lg p-4 hover:shadow-lg transition-all duration-300">
+                                <div class="flex justify-between items-start mb-3">
+                                    <h3 class="font-semibold text-gray-900 text-sm">
+                                        <?php echo htmlspecialchars($reserva['usuario_nombre']); ?>
+                                    </h3>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?php echo getEstadoClass($reserva['estado']); ?>">
                                         <?php echo $reserva['estado']; ?>
                                     </span>
                                 </div>
-
-                                <!-- Información del tour -->
-                                <div class="mb-3">
-                                    <p class="font-medium text-gray-900 text-sm mb-1">
-                                        <?php echo htmlspecialchars($reserva['tour_titulo']); ?>
-                                    </p>
-                                    <p class="text-xs text-gray-500">
-                                        Fecha: <?php echo formatDate($reserva['fecha_tour']); ?>
-                                    </p>
-                                </div>
-
-                                <!-- Grid de información -->
-                                <div class="grid grid-cols-2 gap-3 mb-4 text-xs">
-                                    <div>
-                                        <span class="text-gray-500">Pasajeros:</span>
-                                        <div class="font-medium text-gray-900 mt-1">
-                                            <i class="fas fa-users text-gray-400 mr-1"></i>
-                                            <?php echo $reserva['num_pasajeros']; ?>
-                                        </div>
+                                
+                                <div class="space-y-2 text-xs text-gray-600">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-envelope w-4 text-blue-500 mr-2"></i>
+                                        <span class="truncate"><?php echo htmlspecialchars($reserva['usuario_email']); ?></span>
                                     </div>
-                                    <div>
-                                        <span class="text-gray-500">Monto Pagado:</span>
-                                        <div class="font-medium text-green-600 mt-1">
-                                            <?php echo formatCurrency($reserva['monto_pagado']); ?>
-                                        </div>
-                                        <?php if ($reserva['monto_pagado'] > 0 && $reserva['monto_pagado'] < $reserva['monto_total']): ?>
-                                            <div class="text-orange-500 text-xs">
-                                                Pendiente: <?php echo formatCurrency($reserva['monto_total'] - $reserva['monto_pagado']); ?>
-                                            </div>
-                                        <?php elseif ($reserva['monto_pagado'] >= $reserva['monto_total'] && $reserva['monto_total'] > 0): ?>
-                                            <div class="text-green-500 text-xs">✓ Completo</div>
-                                        <?php elseif ($reserva['monto_pagado'] == 0): ?>
-                                            <div class="text-red-500 text-xs">Sin pagos</div>
-                                        <?php endif; ?>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-map-marked-alt w-4 text-green-500 mr-2"></i>
+                                        <span class="font-medium"><?php echo htmlspecialchars($reserva['tour_titulo']); ?></span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-calendar w-4 text-purple-500 mr-2"></i>
+                                        <span class="font-medium text-xs text-gray-500"><?php echo formatDate($reserva['fecha_tour']); ?></span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-users w-4 text-orange-500 mr-2"></i>
+                                        <span><?php echo $reserva['num_pasajeros']; ?> pasajeros</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-dollar-sign w-4 text-green-600 mr-2"></i>
+                                        <span><?php echo formatCurrency($reserva['monto_pagado']); ?> / <?php echo formatCurrency($reserva['monto_total']); ?></span>
                                     </div>
                                 </div>
 
-                                <!-- Contacto -->
-                                <div class="mb-4 p-2 bg-gray-50 rounded-lg">
-                                    <p class="text-xs text-gray-500 mb-1">Contacto:</p>
-                                    <p class="text-xs text-gray-700"><?php echo htmlspecialchars($reserva['usuario_email']); ?></p>
-                                    <?php if (!empty($reserva['usuario_telefono'])): ?>
-                                        <p class="text-xs text-gray-700"><?php echo htmlspecialchars($reserva['usuario_telefono']); ?></p>
-                                    <?php endif; ?>
-                                </div>
-
-                                <!-- Acciones -->
-                                <div class="flex justify-between items-center pt-3 border-t border-gray-100">
-                                    <div class="flex space-x-4">
+                                <!-- Acciones móvil -->
+                                <div class="flex justify-between items-center pt-3 border-t border-gray-100 mt-3">
+                                    <div class="flex flex-wrap gap-2">
                                         <a href="ver.php?id=<?php echo $reserva['id_reserva']; ?>" 
-                                           class="text-blue-600 hover:text-blue-800 transition-colors">
+                                           class="text-blue-600 hover:text-blue-800 transition-colors flex items-center">
                                             <i class="fas fa-eye text-sm"></i>
                                             <span class="ml-1 text-xs">Ver</span>
                                         </a>
                                         <a href="editar.php?id=<?php echo $reserva['id_reserva']; ?>" 
-                                           class="text-green-600 hover:text-green-800 transition-colors">
+                                           class="text-green-600 hover:text-green-800 transition-colors flex items-center">
                                             <i class="fas fa-edit text-sm"></i>
                                             <span class="ml-1 text-xs">Editar</span>
                                         </a>
+                                        
+                                        <!-- Separador visual para acciones de estado -->
+                                        <?php if ($reserva['estado'] === 'Pendiente' || $reserva['estado'] === 'Confirmada'): ?>
+                                            <span class="text-gray-300">|</span>
+                                        <?php endif; ?>
+                                        
+                                        <!-- Botones de cambio de estado móvil -->
+                                        <?php if ($reserva['estado'] === 'Pendiente'): ?>
+                                            <button onclick="cambiarEstado(<?php echo $reserva['id_reserva']; ?>, 'Confirmada')" 
+                                                    class="text-green-600 hover:text-green-800 transition-colors flex items-center bg-green-50 px-2 py-1 rounded">
+                                                <i class="fas fa-check text-sm"></i>
+                                                <span class="ml-1 text-xs font-medium">Confirmar</span>
+                                            </button>
+                                            <button onclick="cambiarEstado(<?php echo $reserva['id_reserva']; ?>, 'Cancelada')" 
+                                                    class="text-red-600 hover:text-red-800 transition-colors flex items-center bg-red-50 px-2 py-1 rounded">
+                                                <i class="fas fa-times text-sm"></i>
+                                                <span class="ml-1 text-xs font-medium">Cancelar</span>
+                                            </button>
+                                        <?php elseif ($reserva['estado'] === 'Confirmada'): ?>
+                                            <button onclick="cambiarEstado(<?php echo $reserva['id_reserva']; ?>, 'Finalizada')" 
+                                                    class="text-blue-600 hover:text-blue-800 transition-colors flex items-center bg-blue-50 px-2 py-1 rounded">
+                                                <i class="fas fa-flag-checkered text-sm"></i>
+                                                <span class="ml-1 text-xs font-medium">Finalizar</span>
+                                            </button>
+                                            <button onclick="cambiarEstado(<?php echo $reserva['id_reserva']; ?>, 'Cancelada')" 
+                                                    class="text-red-600 hover:text-red-800 transition-colors flex items-center bg-red-50 px-2 py-1 rounded">
+                                                <i class="fas fa-times text-sm"></i>
+                                                <span class="ml-1 text-xs font-medium">Cancelar</span>
+                                            </button>
+                                        <?php endif; ?>
+                                        
+                                        <?php if ($reserva['estado'] === 'Pendiente' || $reserva['estado'] === 'Confirmada'): ?>
+                                            <span class="text-gray-300">|</span>
+                                        <?php endif; ?>
+                                        
                                         <button onclick="eliminarReserva(<?php echo $reserva['id_reserva']; ?>)" 
-                                                class="text-red-600 hover:text-red-800 transition-colors">
+                                                class="text-red-600 hover:text-red-800 transition-colors flex items-center">
                                             <i class="fas fa-trash text-sm"></i>
                                             <span class="ml-1 text-xs">Eliminar</span>
                                         </button>
@@ -519,90 +607,140 @@ function getEstadoClass($estado) {
                                 </div>
                             </div>
                         <?php endforeach; ?>
-                    <?php endif; ?>
-                </div>
+                    </div>
 
-                    <!-- Paginación -->
-                    <?php if ($total_paginas > 1): ?>
-                        <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6 rounded-b-lg">
-                            <div class="flex items-center justify-between">
-                                <!-- Paginación móvil -->
-                                <div class="flex-1 flex justify-between sm:hidden">
-                                    <?php if ($pagina > 1): ?>
-                                        <a href="?pagina=<?php echo $pagina - 1; ?><?php echo $filtro_estado ? "&estado=$filtro_estado" : ''; ?><?php echo $busqueda ? "&buscar=$busqueda" : ''; ?><?php echo $filtro_fecha ? "&fecha=$filtro_fecha" : ''; ?>" 
-                                           class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                                            <i class="fas fa-chevron-left mr-2"></i>Anterior
-                                        </a>
-                                    <?php else: ?>
-                                        <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-400 bg-gray-100 cursor-not-allowed">
-                                            <i class="fas fa-chevron-left mr-2"></i>Anterior
-                                        </span>
-                                    <?php endif; ?>
-                                    
-                                    <?php if ($pagina < $total_paginas): ?>
-                                        <a href="?pagina=<?php echo $pagina + 1; ?><?php echo $filtro_estado ? "&estado=$filtro_estado" : ''; ?><?php echo $busqueda ? "&buscar=$busqueda" : ''; ?><?php echo $filtro_fecha ? "&fecha=$filtro_fecha" : ''; ?>" 
-                                           class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                                            Siguiente<i class="fas fa-chevron-right ml-2"></i>
-                                        </a>
-                                    <?php else: ?>
-                                        <span class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-400 bg-gray-100 cursor-not-allowed">
-                                            Siguiente<i class="fas fa-chevron-right ml-2"></i>
-                                        </span>
-                                    <?php endif; ?>
-                                </div>
-                                
-                                <!-- Paginación desktop -->
-                                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                                    <div>
-                                        <p class="text-sm text-gray-700">
-                                            Mostrando <span class="font-medium"><?php echo ($offset + 1); ?></span> a 
-                                            <span class="font-medium"><?php echo min($offset + $registros_por_pagina, $total_registros); ?></span> de 
-                                            <span class="font-medium"><?php echo $total_registros; ?></span> resultados
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                                            <?php
-                                            // Calcular rango de páginas a mostrar
-                                            $rango_inicio = max(1, $pagina - 2);
-                                            $rango_fin = min($total_paginas, $pagina + 2);
-                                            
-                                            // Botón primera página
-                                            if ($rango_inicio > 1): ?>
-                                                <a href="?pagina=1<?php echo $filtro_estado ? "&estado=$filtro_estado" : ''; ?><?php echo $busqueda ? "&buscar=$busqueda" : ''; ?><?php echo $filtro_fecha ? "&fecha=$filtro_fecha" : ''; ?>" 
-                                                   class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                                    <i class="fas fa-angle-double-left"></i>
-                                                </a>
-                                                <?php if ($rango_inicio > 2): ?>
-                                                    <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">...</span>
-                                                <?php endif;
-                                            endif;
-                                            
-                                            // Páginas en el rango
-                                            for ($i = $rango_inicio; $i <= $rango_fin; $i++): ?>
-                                                <a href="?pagina=<?php echo $i; ?><?php echo $filtro_estado ? "&estado=$filtro_estado" : ''; ?><?php echo $busqueda ? "&buscar=$busqueda" : ''; ?><?php echo $filtro_fecha ? "&fecha=$filtro_fecha" : ''; ?>" 
-                                                   class="relative inline-flex items-center px-4 py-2 border text-sm font-medium <?php echo $i === $pagina ? 'z-10 bg-blue-50 border-blue-500 text-blue-600' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'; ?>">
-                                                    <?php echo $i; ?>
-                                                </a>
-                                            <?php endfor;
-                                            
-                                            // Botón última página
-                                            if ($rango_fin < $total_paginas): 
-                                                if ($rango_fin < $total_paginas - 1): ?>
-                                                    <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">...</span>
+                    <!-- Vista desktop - Tabla -->
+                    <div class="desktop-table">
+                        <div class="table-scroll-container">
+                            <table>
+                                <thead class="sticky-header bg-gray-100 border-b-2 border-gray-300">
+                                    <tr>
+                                        <th class="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">ID</th>
+                                        <th class="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Cliente</th>
+                                        <th class="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Tour</th>
+                                        <th class="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Fecha Tour</th>
+                                        <th class="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Pasajeros</th>
+                                        <th class="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Monto Pagado</th>
+                                        <th class="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Estado</th>
+                                        <th class="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                <?php foreach ($reservas as $reserva): ?>
+                                    <tr class="hover:bg-gray-50 transition-colors duration-200 border-b border-gray-200">
+                                        <td class="px-4 py-4 text-sm font-medium text-gray-900">
+                                            #<?php echo $reserva['id_reserva']; ?>
+                                        </td>
+                                        <td class="px-4 py-4">
+                                            <div class="flex items-center">
+                                                <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                                                    <i class="fas fa-user text-white text-xs"></i>
+                                                </div>
+                                                <div class="min-w-0 flex-1">
+                                                    <div class="text-sm font-medium text-gray-900" title="<?php echo htmlspecialchars($reserva['usuario_nombre']); ?>">
+                                                        <?php echo htmlspecialchars($reserva['usuario_nombre']); ?>
+                                                    </div>
+                                                    <div class="text-sm text-gray-500" title="<?php echo htmlspecialchars($reserva['usuario_email']); ?>">
+                                                        <?php echo htmlspecialchars($reserva['usuario_email']); ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-4">
+                                            <div>
+                                                <div class="text-sm font-medium text-gray-900" title="<?php echo htmlspecialchars($reserva['tour_titulo']); ?>">
+                                                    <?php echo htmlspecialchars($reserva['tour_titulo']); ?>
+                                                </div>
+                                                <div class="text-sm text-gray-500">
+                                                    <?php echo formatCurrency($reserva['tour_precio']); ?>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-4 text-center">
+                                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium">
+                                                <?php echo formatDate($reserva['fecha_tour'], 'd/m/Y'); ?>
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-4 text-center">
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                                <i class="fas fa-users mr-1"></i>
+                                                <?php echo $reserva['num_pasajeros']; ?>
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-4">
+                                            <div class="text-sm font-medium text-gray-900">
+                                                <?php echo formatCurrency($reserva['monto_pagado']); ?>
+                                            </div>
+                                            <div class="text-xs text-gray-500">
+                                                de <?php echo formatCurrency($reserva['monto_total']); ?>
+                                                <?php
+                                                $porcentaje_pagado = $reserva['monto_total'] > 0 ? ($reserva['monto_pagado'] / $reserva['monto_total']) * 100 : 0;
+                                                ?>
+                                                <?php if ($porcentaje_pagado > 0 && $porcentaje_pagado < 100): ?>
+                                                    <span class="text-xs text-orange-500">
+                                                        (<?php echo round($porcentaje_pagado); ?>%)
+                                                    </span>
+                                                <?php elseif ($reserva['monto_pagado'] >= $reserva['monto_total'] && $reserva['monto_total'] > 0): ?>
+                                                    <span class="text-xs text-green-500">
+                                                        ✓ Completo
+                                                    </span>
+                                                <?php elseif ($reserva['monto_pagado'] == 0): ?>
+                                                    <span class="text-xs text-red-500">
+                                                        Sin pagos
+                                                    </span>
                                                 <?php endif; ?>
-                                                <a href="?pagina=<?php echo $total_paginas; ?><?php echo $filtro_estado ? "&estado=$filtro_estado" : ''; ?><?php echo $busqueda ? "&buscar=$busqueda" : ''; ?><?php echo $filtro_fecha ? "&fecha=$filtro_fecha" : ''; ?>" 
-                                                   class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                                    <i class="fas fa-angle-double-right"></i>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-4 text-center">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?php echo getEstadoClass($reserva['estado']); ?>">
+                                                <?php echo $reserva['estado']; ?>
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-4">
+                                            <div class="flex items-center justify-center space-x-2">
+                                                <a href="ver.php?id=<?php echo $reserva['id_reserva']; ?>" 
+                                                   class="text-blue-600 hover:text-blue-900" title="Ver detalles">
+                                                    <i class="fas fa-eye"></i>
                                                 </a>
-                                            <?php endif; ?>
-                                        </nav>
-                                    </div>
-                                </div>
-                            </div>
+                                                <a href="editar.php?id=<?php echo $reserva['id_reserva']; ?>" 
+                                                   class="text-green-600 hover:text-green-900" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                
+                                                <!-- Botones de cambio de estado -->
+                                                <?php if ($reserva['estado'] === 'Pendiente'): ?>
+                                                    <button onclick="cambiarEstado(<?php echo $reserva['id_reserva']; ?>, 'Confirmada')" 
+                                                            class="text-green-600 hover:text-green-900" title="Confirmar reserva">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                    <button onclick="cambiarEstado(<?php echo $reserva['id_reserva']; ?>, 'Cancelada')" 
+                                                            class="text-red-600 hover:text-red-900" title="Cancelar reserva">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                <?php elseif ($reserva['estado'] === 'Confirmada'): ?>
+                                                    <button onclick="cambiarEstado(<?php echo $reserva['id_reserva']; ?>, 'Finalizada')" 
+                                                            class="text-blue-600 hover:text-blue-900" title="Finalizar reserva">
+                                                        <i class="fas fa-flag-checkered"></i>
+                                                    </button>
+                                                    <button onclick="cambiarEstado(<?php echo $reserva['id_reserva']; ?>, 'Cancelada')" 
+                                                            class="text-red-600 hover:text-red-900" title="Cancelar reserva">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                <?php endif; ?>
+                                                
+                                                <button onclick="eliminarReserva(<?php echo $reserva['id_reserva']; ?>)" 
+                                                        class="text-red-600 hover:text-red-900" title="Eliminar">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
                         </div>
-                    <?php endif; ?>
-                </div>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -655,35 +793,339 @@ function getEstadoClass($estado) {
             if (reservaAEliminar) {
                 const motivo = document.querySelector('textarea[name="motivo"]')?.value || '';
                 
-                // Crear formulario para enviar los datos
+                // Crear formulario para enviar la eliminación
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = 'eliminar.php';
                 
-                const inputId = document.createElement('input');
-                inputId.type = 'hidden';
-                inputId.name = 'id_reserva';
-                inputId.value = reservaAEliminar;
-                form.appendChild(inputId);
+                const idInput = document.createElement('input');
+                idInput.type = 'hidden';
+                idInput.name = 'id_reserva';
+                idInput.value = reservaAEliminar;
                 
-                const inputMotivo = document.createElement('input');
-                inputMotivo.type = 'hidden';
-                inputMotivo.name = 'motivo';
-                inputMotivo.value = motivo;
-                form.appendChild(inputMotivo);
+                const motivoInput = document.createElement('input');
+                motivoInput.type = 'hidden';
+                motivoInput.name = 'motivo';
+                motivoInput.value = motivo;
                 
+                form.appendChild(idInput);
+                form.appendChild(motivoInput);
                 document.body.appendChild(form);
                 form.submit();
             }
-            cerrarModalEliminar();
         });
 
-        // Auto-submit del formulario de filtros cuando cambian los selects
-        document.querySelectorAll('select[name="estado"]').forEach(select => {
-            select.addEventListener('change', function() {
-                this.form.submit();
+        // Filtros en tiempo real
+        function aplicarFiltros() {
+            const busquedaFiltro = document.getElementById('filtro-busqueda').value.toLowerCase();
+            const estadoFiltro = document.getElementById('filtro-estado').value;
+            const fechaFiltro = document.getElementById('filtro-fecha').value;
+            const tourFiltro = document.getElementById('filtro-tour').value;
+            
+            // Debug: mostrar valores de filtros
+            if (fechaFiltro) {
+                console.log('Filtro por fecha:', fechaFiltro);
+            }
+            
+            // Obtener todas las filas de la tabla (desktop)
+            const filasTabla = document.querySelectorAll('.desktop-table tbody tr:not(.no-results)');
+            // Obtener todas las cards (mobile)
+            const cardsMobile = document.querySelectorAll('.mobile-grid > div');
+            
+            let filasVisibles = 0;
+            let cardsVisibles = 0;
+            
+            // Filtrar filas de tabla (desktop)
+            filasTabla.forEach((fila) => {
+                let mostrar = true;
+                
+                // Obtener datos de la fila
+                const cliente = fila.querySelector('td:nth-child(2) .text-sm.font-medium').textContent.toLowerCase();
+                const email = fila.querySelector('td:nth-child(2) .text-sm.text-gray-500').textContent.toLowerCase();
+                const tour = fila.querySelector('td:nth-child(3) .text-sm.font-medium').textContent.toLowerCase();
+                const fechaTour = fila.querySelector('td:nth-child(4)').textContent.trim();
+                const estado = fila.querySelector('td:nth-child(7) span').textContent.trim();
+                
+                // Debug: mostrar formato de fecha encontrado
+                if (fechaFiltro) {
+                    console.log('Fecha en tabla:', fechaTour);
+                }
+                
+                // Aplicar filtros
+                if (busquedaFiltro && !(cliente.includes(busquedaFiltro) || email.includes(busquedaFiltro) || tour.includes(busquedaFiltro))) {
+                    mostrar = false;
+                }
+                
+                if (estadoFiltro && estado !== estadoFiltro) {
+                    mostrar = false;
+                }
+                
+                if (fechaFiltro) {
+                    // La fecha en la tabla tiene formato "dd/mm/yyyy hh:mm"
+                    const fechaTexto = fechaTour.trim();
+                    let fechaEncontrada = false;
+                    
+                    // Extraer solo la parte de fecha (sin hora) en formato dd/mm/yyyy
+                    const fechaRegex = /(\d{1,2})\/(\d{1,2})\/(\d{4})/;
+                    const match = fechaTexto.match(fechaRegex);
+                    
+                    if (match) {
+                        const [, dia, mes, año] = match;
+                        const fechaTabla = new Date(año, mes - 1, dia);
+                        const fechaFiltroDate = new Date(fechaFiltro);
+                        
+                        fechaEncontrada = (
+                            fechaTabla.getFullYear() === fechaFiltroDate.getFullYear() &&
+                            fechaTabla.getMonth() === fechaFiltroDate.getMonth() &&
+                            fechaTabla.getDate() === fechaFiltroDate.getDate()
+                        );
+                        
+                        // Debug
+                        console.log(`Comparando: ${dia}/${mes}/${año} con filtro ${fechaFiltro} = ${fechaEncontrada}`);
+                    }
+                    
+                    if (!fechaEncontrada) {
+                        mostrar = false;
+                    }
+                }
+                
+                if (tourFiltro && !tour.includes(tourFiltro.toLowerCase())) {
+                    mostrar = false;
+                }
+                
+                // Mostrar/ocultar fila
+                if (mostrar) {
+                    fila.style.display = '';
+                    filasVisibles++;
+                } else {
+                    fila.style.display = 'none';
+                }
             });
+            
+            // Filtrar cards móviles
+            cardsMobile.forEach((card) => {
+                let mostrar = true;
+                
+                // Obtener datos de la card
+                const cliente = card.querySelector('h3').textContent.toLowerCase();
+                const email = card.querySelector('.text-xs.text-gray-700').textContent.toLowerCase();
+                const tour = card.querySelector('.font-medium.text-gray-900.text-sm.mb-1').textContent.toLowerCase();
+                const fechaTour = card.querySelector('.text-xs.text-gray-500').textContent;
+                const estadoElement = card.querySelector('.status-badge');
+                const estado = estadoElement ? estadoElement.textContent.trim() : '';
+                
+                // Aplicar filtros
+                if (busquedaFiltro && !(cliente.includes(busquedaFiltro) || email.includes(busquedaFiltro) || tour.includes(busquedaFiltro))) {
+                    mostrar = false;
+                }
+                
+                if (estadoFiltro && estado !== estadoFiltro) {
+                    mostrar = false;
+                }
+                
+                if (fechaFiltro) {
+                    // La fecha en la tabla móvil también tiene formato "dd/mm/yyyy hh:mm" o "Fecha: dd/mm/yyyy hh:mm"
+                    const fechaTexto = fechaTour.trim();
+                    let fechaEncontrada = false;
+                    
+                    // Extraer solo la parte de fecha (sin hora) en formato dd/mm/yyyy
+                    const fechaRegex = /(\d{1,2})\/(\d{1,2})\/(\d{4})/;
+                    const match = fechaTexto.match(fechaRegex);
+                    
+                    if (match) {
+                        const [, dia, mes, año] = match;
+                        const fechaCard = new Date(año, mes - 1, dia);
+                        const fechaFiltroDate = new Date(fechaFiltro);
+                        
+                        fechaEncontrada = (
+                            fechaCard.getFullYear() === fechaFiltroDate.getFullYear() &&
+                            fechaCard.getMonth() === fechaFiltroDate.getMonth() &&
+                            fechaCard.getDate() === fechaFiltroDate.getDate()
+                        );
+                        
+                        // Debug móvil
+                        console.log(`Móvil - Comparando: ${dia}/${mes}/${año} con filtro ${fechaFiltro} = ${fechaEncontrada}`);
+                    } else {
+                        console.log('Móvil - No se pudo extraer fecha de:', fechaTexto);
+                    }
+                    
+                    if (!fechaEncontrada) {
+                        mostrar = false;
+                    }
+                }
+                
+                if (tourFiltro && !tour.includes(tourFiltro.toLowerCase())) {
+                    mostrar = false;
+                }
+                
+                // Mostrar/ocultar card
+                if (mostrar) {
+                    card.style.display = '';
+                    cardsVisibles++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // Actualizar contador de resultados
+            const totalResultados = Math.max(filasVisibles, cardsVisibles);
+            document.getElementById('total-resultados').textContent = totalResultados;
+            
+            // Mostrar/ocultar botón limpiar búsqueda
+            const btnLimpiarBusqueda = document.getElementById('limpiar-busqueda');
+            if (busquedaFiltro) {
+                btnLimpiarBusqueda.classList.remove('hidden');
+            } else {
+                btnLimpiarBusqueda.classList.add('hidden');
+            }
+            
+            // Manejar mensaje "no se encontraron resultados"
+            manejarMensajeVacio(totalResultados);
+        }
+        
+        function limpiarFiltros() {
+            document.getElementById('filtro-busqueda').value = '';
+            document.getElementById('filtro-estado').value = '';
+            document.getElementById('filtro-fecha').value = '';
+            document.getElementById('filtro-tour').value = '';
+            aplicarFiltros();
+        }
+        
+        function manejarMensajeVacio(totalResultados) {
+            const filaVacia = document.querySelector('.desktop-table tbody .no-results');
+            const cardVacia = document.querySelector('.mobile-grid .no-results');
+            
+            if (totalResultados === 0) {
+                // Crear mensaje para tabla si no existe
+                if (!filaVacia) {
+                    const tbody = document.querySelector('.desktop-table tbody');
+                    const tr = document.createElement('tr');
+                    tr.className = 'no-results';
+                    tr.innerHTML = `
+                        <td colspan="8" class="px-6 py-12 text-center text-gray-500">
+                            <i class="fas fa-search text-4xl text-gray-300 mb-4"></i>
+                            <p class="text-lg font-medium">No se encontraron reservas</p>
+                            <p class="text-sm">Intenta ajustar los filtros de búsqueda</p>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+                
+                // Crear mensaje para móvil si no existe
+                if (!cardVacia) {
+                    const container = document.querySelector('.mobile-grid');
+                    const div = document.createElement('div');
+                    div.className = 'no-results bg-white rounded-lg shadow p-6 text-center';
+                    div.innerHTML = `
+                        <i class="fas fa-search text-4xl text-gray-300 mb-4"></i>
+                        <p class="text-lg font-medium text-gray-900 mb-2">No se encontraron reservas</p>
+                        <p class="text-sm text-gray-500">Intenta ajustar los filtros de búsqueda</p>
+                    `;
+                    container.appendChild(div);
+                }
+            } else {
+                // Remover mensajes de "no encontrado" si existen
+                if (filaVacia) filaVacia.remove();
+                if (cardVacia) cardVacia.remove();
+            }
+        }
+        
+        // Event listeners para los filtros
+        document.addEventListener('DOMContentLoaded', function() {
+            const filtroBusqueda = document.getElementById('filtro-busqueda');
+            const filtroEstado = document.getElementById('filtro-estado');
+            const filtroFecha = document.getElementById('filtro-fecha');
+            const filtroTour = document.getElementById('filtro-tour');
+            const btnLimpiarBusqueda = document.getElementById('limpiar-busqueda');
+            
+            // Búsqueda en tiempo real con debounce
+            let timeoutBusqueda;
+            if (filtroBusqueda) {
+                filtroBusqueda.addEventListener('input', function() {
+                    clearTimeout(timeoutBusqueda);
+                    timeoutBusqueda = setTimeout(aplicarFiltros, 300);
+                });
+            }
+            
+            if (filtroEstado) filtroEstado.addEventListener('change', aplicarFiltros);
+            if (filtroFecha) filtroFecha.addEventListener('change', aplicarFiltros);
+            if (filtroTour) filtroTour.addEventListener('change', aplicarFiltros);
+            
+            // Botón limpiar búsqueda
+            if (btnLimpiarBusqueda) {
+                btnLimpiarBusqueda.addEventListener('click', function() {
+                    filtroBusqueda.value = '';
+                    aplicarFiltros();
+                    filtroBusqueda.focus();
+                });
+            }
         });
+
+        // Función para cambiar el estado de una reserva
+        function cambiarEstado(idReserva, nuevoEstado) {
+            // Confirmación del usuario
+            const estadoTextos = {
+                'Confirmada': 'confirmar',
+                'Cancelada': 'cancelar',
+                'Finalizada': 'finalizar'
+            };
+            
+            const accion = estadoTextos[nuevoEstado] || 'cambiar';
+            const mensaje = `¿Estás seguro de que deseas ${accion} esta reserva?`;
+            
+            if (!confirm(mensaje)) {
+                return;
+            }
+            
+            // Mostrar indicador de carga
+            const botones = document.querySelectorAll(`button[onclick*="${idReserva}"]`);
+            botones.forEach(btn => {
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+            });
+            
+            // Realizar petición AJAX
+            fetch('cambiar_estado.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id_reserva: idReserva,
+                    nuevo_estado: nuevoEstado,
+                    observaciones: `Estado cambiado a ${nuevoEstado} desde el panel administrativo`
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Mostrar mensaje de éxito
+                    alert(data.message || `Reserva ${accion}da exitosamente`);
+                    
+                    // Recargar la página para mostrar los cambios
+                    window.location.reload();
+                } else {
+                    // Mostrar mensaje de error
+                    alert('Error: ' + (data.message || 'No se pudo cambiar el estado'));
+                    
+                    // Rehabilitar botones
+                    botones.forEach(btn => {
+                        btn.disabled = false;
+                        btn.style.opacity = '1';
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error de conexión. Por favor intenta nuevamente.');
+                
+                // Rehabilitar botones
+                botones.forEach(btn => {
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                });
+            });
+        }
     </script>
 </body>
 </html>

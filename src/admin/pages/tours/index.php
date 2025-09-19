@@ -26,20 +26,16 @@ function convertirHora12($hora24) {
     return $horas . ':' . $minutos . ' ' . $periodo;
 }
 
-// Parámetros de búsqueda y paginación
-$pagina = isset($_GET['pagina']) ? max(1, intval($_GET['pagina'])) : 1;
-$por_pagina = 10;
-
+// Parámetros de búsqueda - sin paginación
 // Recopilar filtros (solo búsqueda)
 $filtros = [];
 if (!empty($_GET['busqueda'])) {
     $filtros['busqueda'] = trim($_GET['busqueda']);
 }
 
-// Obtener tours con filtros
-$resultado = obtenerTours($pagina, $por_pagina, $filtros);
+// Obtener todos los tours sin paginación (usando página 1 y un límite muy alto)
+$resultado = obtenerTours(1, 9999, $filtros);
 $tours = $resultado['success'] ? $resultado['data'] : [];
-$total_paginas = $resultado['success'] ? $resultado['total_paginas'] : 1;
 $total_tours = $resultado['success'] ? $resultado['total'] : 0;
 ?>
 
@@ -80,6 +76,40 @@ $total_tours = $resultado['success'] ? $resultado['total'] : 0;
                 display: none;
             }
         }
+        
+        /* Estilos para tabla con scroll y header fijo - Mejor contraste */
+        .table-scroll-container {
+            max-height: calc(100vh - 250px);
+            overflow-y: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background-color: #f3f4f6;
+            box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+        }
+        
+        .sticky-header th {
+            background-color: #f3f4f6 !important;
+        }
+        
+        /* Mejoras de contraste adicionales */
+        .tour-card {
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+        
+        .tour-card:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .tour-row:hover {
+            box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.5);
+        }
+    </style>
     </style>
 </head>
 <body class="bg-gray-50">
@@ -89,7 +119,7 @@ $total_tours = $resultado['success'] ? $resultado['total'] : 0;
         <?php include __DIR__ . '/../../components/sidebar.php'; ?>
         
         <!-- Contenido principal -->
-        <div class="flex-1 lg:ml-64 pt-16 lg:pt-0 min-h-screen">
+        <div class="flex-1 lg:ml-64 pt-16 lg:pt-0 min-h-screen"><br>
             <div class="p-4 lg:p-8">
                 <!-- Encabezado -->
                 <div class="mb-6 lg:mb-8">
@@ -101,135 +131,63 @@ $total_tours = $resultado['success'] ? $resultado['total'] : 0;
                             </h1>
                             <p class="text-sm lg:text-base text-gray-600">Administra todos los tours disponibles</p>
                         </div>
-                        <div class="flex flex-col sm:flex-row gap-2">
-                            <button onclick="abrirModalCrear()" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    </div>
+                </div>
+
+                <!-- Barra de control compacta -->
+                <div class="bg-white rounded-lg shadow-lg border-2 border-gray-300 mb-6 p-4">
+                    <div class="flex flex-col lg:flex-row items-center justify-between gap-4">
+                        <!-- Estadística compacta - IZQUIERDA -->
+                        <div class="flex items-center space-x-3">
+                            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg p-3 text-white shadow-md">
+                                <i class="fas fa-map-marked-alt text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold text-gray-600">Tours Registrados</p>
+                                <p class="text-2xl font-bold text-gray-900"><?php echo number_format($total_tours); ?></p>
+                            </div>
+                        </div>
+                        
+                        <!-- Controles - DERECHA -->
+                        <div class="flex items-center gap-3 flex-wrap justify-center lg:justify-end">
+                            <!-- Búsqueda -->
+                            <div class="flex-1 min-w-80 max-w-md">
+                                <div class="relative">
+                                    <input type="text" 
+                                           id="busquedaInput"
+                                           placeholder=" Buscar tours..."
+                                           class="w-full pl-10 pr-10 py-2.5 border-2 border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all shadow-sm"
+                                           autocomplete="off">
+                                    <i class="fas fa-search absolute left-3 top-3.5 text-gray-400"></i>
+                                    <!-- Botón X para limpiar -->
+                                    <button type="button" 
+                                            id="limpiarBusqueda"
+                                            class="absolute right-3 top-2.5 w-6 h-6 bg-gray-400 hover:bg-red-500 text-white rounded-full flex items-center justify-center transition-colors duration-200 opacity-0 invisible"
+                                            title="Limpiar búsqueda">
+                                        <i class="fas fa-times text-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Contador -->
+                            <div class="bg-blue-50 text-blue-700 px-3 py-2 rounded-lg border border-blue-300 font-medium text-sm whitespace-nowrap">
+                                <i class="fas fa-list-ul mr-1"></i>
+                                <span id="numeroResultados"><?php echo $total_tours; ?></span> tours
+                            </div>
+                            
+                            <!-- Botón nuevo -->
+                            <button onclick="abrirModalCrear()" 
+                                    class="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-4 py-2.5 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-200 text-sm whitespace-nowrap">
                                 <i class="fas fa-plus mr-2"></i>Nuevo Tour
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Barra de búsqueda mejorada -->
-                <div class="bg-gray-50 border border-gray-200 rounded-lg shadow mb-6 p-4">
-                    <form method="GET" class="space-y-4">
-                        <!-- Búsqueda principal con diseño mejorado -->
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="flex-1 relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-search text-gray-500"></i>
-                                </div>
-                                <input type="text" name="busqueda" value="<?php echo htmlspecialchars($filtros['busqueda'] ?? ''); ?>" 
-                                       placeholder="Buscar tours por título o descripción..."
-                                       class="w-full pl-10 pr-4 py-3 border border-gray-400 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors shadow-sm"
-                                       autocomplete="off">
-
-                                <?php if (!empty($filtros['busqueda'])): ?>
-                                    <div class="mt-2 flex items-center text-xs">
-                                        <div class="flex items-center bg-blue-100 text-blue-800 px-2 py-1 rounded-md border border-blue-200">
-                                            <i class="fas fa-filter mr-1"></i>
-                                            Filtrando por: "<strong><?php echo htmlspecialchars($filtros['busqueda']); ?></strong>"
-                                            <span class="ml-2 text-blue-600">(<?php echo $total_tours; ?> resultado<?php echo $total_tours != 1 ? 's' : ''; ?>)</span>
-                                        </div>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                            
-                            <div class="flex space-x-2">
-                                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center justify-center transition-colors shadow-md hover:shadow-lg">
-                                    <i class="fas fa-search mr-2"></i>
-                                    Buscar
-                                </button>
-                                <?php if (!empty($filtros)): ?>
-                                    <a href="index.php" class="bg-gray-400 hover:bg-gray-500 text-white px-6 py-3 rounded-lg flex items-center justify-center transition-colors shadow-md hover:shadow-lg">
-                                        <i class="fas fa-times mr-2"></i>
-                                        Limpiar
-                                    </a>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Header con estadística y status integrados -->
-                <div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6">
-                    <div class="p-6 border-b border-gray-200">
-                        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                            <!-- Estadística principal -->
-                            <div class="flex items-center space-x-4">
-                                <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-3 text-white">
-                                    <i class="fas fa-map-marked-alt text-xl"></i>
-                                </div>
-                                <div>
-                                    <p class="text-sm font-medium text-gray-600">Total Tours Registrados</p>
-                                    <p class="text-2xl font-bold text-gray-900"><?php echo number_format($total_tours); ?></p>
-                                    <?php if (!empty($filtros['busqueda'])): ?>
-                                        <p class="text-xs text-blue-600">
-                                            <i class="fas fa-filter mr-1"></i>Resultados filtrados
-                                        </p>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                            
-                            <!-- Estado del sistema -->
-                            <div class="flex items-center space-x-6">
-                                <div class="text-center">
-                                    <p class="text-xs font-medium text-gray-500 uppercase">Estado</p>
-                                    <div class="flex items-center mt-1">
-                                        <div class="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
-                                        <span class="text-sm text-gray-700">Sistema Activo</span>
-                                    </div>
-                                </div>
-                                
-                                <?php if (!empty($tours)): ?>
-                                <div class="text-center">
-                                    <p class="text-xs font-medium text-gray-500 uppercase">Esta Página</p>
-                                    <p class="text-lg font-semibold text-gray-900"><?php echo count($tours); ?> tours</p>
-                                </div>
-                                <?php endif; ?>
-                                
-                                <?php if ($total_paginas > 1): ?>
-                                <div class="text-center">
-                                    <p class="text-xs font-medium text-gray-500 uppercase">Paginación</p>
-                                    <p class="text-sm text-gray-700">Página <?php echo $pagina; ?> de <?php echo $total_paginas; ?></p>
-                                </div>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Barra de acciones rápidas -->
-                    <div class="px-6 py-3 bg-gray-100 border-t border-gray-200">
-                        <div class="flex flex-wrap items-center justify-between gap-2">
-                            <div class="flex items-center space-x-2 text-sm text-gray-600">
-                                <i class="fas fa-info-circle"></i>
-                                <span id="contador-filtros">
-                                    <?php if (empty($tours)): ?>
-                                        No hay tours para mostrar
-                                    <?php else: ?>
-                                        Sistema de gestión de tours
-                                    <?php endif; ?>
-                                </span>
-                            </div>
-                            
-                            <div class="flex items-center space-x-2">
-                                <?php if (!empty($filtros['busqueda'])): ?>
-                                    <a href="index.php" class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-md hover:bg-blue-200 transition-colors">
-                                        <i class="fas fa-times mr-1"></i>Limpiar filtro
-                                    </a>
-                                <?php endif; ?>
-                                
-                                <button onclick="location.reload()" class="text-xs text-gray-500 hover:text-gray-700 transition-colors">
-                                    <i class="fas fa-sync-alt mr-1"></i>Actualizar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tabla de tours -->
-                <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-                    <!-- Vista móvil - Cards -->
-                    <div class="block lg:hidden">
+                <!-- Tabla de tours con mejor contraste -->
+                <div class="bg-white rounded-lg shadow-lg border-2 border-gray-300 overflow-hidden">
+                    <!-- Vista móvil - Cards con scroll -->
+                    <div class="block lg:hidden max-h-screen overflow-y-auto">
                         <?php if (empty($tours)): ?>
                             <div class="p-6 text-center text-gray-500">
                                 <i class="fas fa-search text-4xl text-gray-300 mb-4"></i>
@@ -255,17 +213,17 @@ $total_tours = $resultado['success'] ? $resultado['total'] : 0;
                                 <?php endif; ?>
                             </div>
                         <?php else: ?>
-                            <div class="divide-y divide-gray-200">
+                            <div class="divide-y divide-gray-300">
                                 <?php foreach ($tours as $tour): ?>
-                                    <div class="tour-card p-4 cursor-pointer hover:bg-blue-100 transition-colors duration-200 border-b border-gray-100" onclick="verTour(<?php echo $tour['id_tour']; ?>)">
+                                    <div class="tour-card p-5 cursor-pointer hover:bg-blue-50 transition-all duration-200 border-b-2 border-gray-200 hover:border-blue-300" onclick="verTour(<?php echo $tour['id_tour']; ?>)">
                                         <div class="flex items-start space-x-3">
                                             <div class="flex-shrink-0">
                                                 <?php if (!empty($tour['imagen_principal'])): ?>
-                                                    <img src="/Antares-Travel/<?php echo htmlspecialchars($tour['imagen_principal']); ?>" 
-                                                         alt="Tour" class="h-16 w-16 rounded-lg object-cover">
+                                                    <img src="../../../../<?php echo htmlspecialchars($tour['imagen_principal']); ?>" 
+                                                         alt="Tour" class="h-16 w-16 rounded-lg object-cover border-2 border-gray-200">
                                                 <?php else: ?>
-                                                    <div class="h-16 w-16 rounded-lg bg-gray-200 flex items-center justify-center">
-                                                        <i class="fas fa-image text-gray-400"></i>
+                                                    <div class="h-16 w-16 rounded-lg bg-gray-100 border-2 border-gray-300 flex items-center justify-center">
+                                                        <i class="fas fa-image text-gray-500"></i>
                                                     </div>
                                                 <?php endif; ?>
                                             </div>
@@ -314,32 +272,33 @@ $total_tours = $resultado['success'] ? $resultado['total'] : 0;
                         <?php endif; ?>
                     </div>
 
-                    <!-- Vista desktop - Tabla -->
-                    <div class="hidden lg:block overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-300">
-                            <thead class="bg-gray-100 border-b-2 border-gray-300">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                                        Tour
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                                        Descripción
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                                        Precio
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                                        Duración
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                                        Horarios
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                                        Acciones
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-300">
+                    <!-- Vista desktop - Tabla con scroll y header fijo -->
+                    <div class="hidden lg:block">
+                        <div class="table-scroll-container border-2 border-gray-300 rounded-lg">
+                            <table class="min-w-full divide-y divide-gray-400">
+                                <thead class="sticky-header border-b-2 border-gray-400 bg-gray-100">
+                                    <tr>
+                                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider bg-gray-100">
+                                            Tour
+                                        </th>
+                                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider bg-gray-100">
+                                            Descripción
+                                        </th>
+                                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider bg-gray-100">
+                                            Precio
+                                        </th>
+                                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider bg-gray-100">
+                                            Duración
+                                        </th>
+                                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider bg-gray-100">
+                                            Horarios
+                                        </th>
+                                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider bg-gray-100">
+                                            Acciones
+                                        </th>
+                                    </tr>
+                                </thead>
+                            <tbody class="bg-white divide-y divide-gray-400">
                                 <?php if (empty($tours)): ?>
                                     <tr>
                                         <td colspan="6" class="px-6 py-8 text-center text-gray-500">
@@ -369,15 +328,15 @@ $total_tours = $resultado['success'] ? $resultado['total'] : 0;
                                     </tr>
                                 <?php else: ?>
                                     <?php foreach ($tours as $tour): ?>
-                                        <tr class="tour-row hover:bg-blue-100 cursor-pointer transition-colors duration-200 border-b border-gray-200" onclick="verTour(<?php echo $tour['id_tour']; ?>)">
+                                        <tr class="tour-row hover:bg-blue-50 cursor-pointer transition-all duration-200 border-b-2 border-gray-300 hover:border-blue-300" onclick="verTour(<?php echo $tour['id_tour']; ?>)">
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="flex items-center">
                                                     <div class="flex-shrink-0 h-12 w-12">
                                                         <?php if (!empty($tour['imagen_principal'])): ?>
-                                                            <img src="/Antares-Travel/<?php echo htmlspecialchars($tour['imagen_principal']); ?>" 
-                                                                 alt="Tour" class="h-12 w-12 rounded-lg object-cover">
+                                                            <img src="../../../../<?php echo htmlspecialchars($tour['imagen_principal']); ?>" 
+                                                                 alt="Tour" class="h-12 w-12 rounded-lg object-cover border-2 border-gray-300">
                                                         <?php else: ?>
-                                                            <div class="h-12 w-12 rounded-lg bg-gray-200 flex items-center justify-center">
+                                                            <div class="h-12 w-12 rounded-lg bg-gray-100 border-2 border-gray-300 flex items-center justify-center">
                                                                 <i class="fas fa-image text-gray-400"></i>
                                                             </div>
                                                         <?php endif; ?>
@@ -440,84 +399,8 @@ $total_tours = $resultado['success'] ? $resultado['total'] : 0;
                                 <?php endif; ?>
                             </tbody>
                         </table>
-                    </div>
-                </div>
-
-                <!-- Paginación -->
-                    <?php if ($total_paginas > 1): ?>
-                        <?php
-                        // Construir query string para mantener filtro de búsqueda
-                        $query_params = [];
-                        if (!empty($filtros['busqueda'])) $query_params['busqueda'] = $filtros['busqueda'];
-                        
-                        function buildUrl($pagina, $params) {
-                            $params['pagina'] = $pagina;
-                            return '?' . http_build_query($params);
-                        }
-                        ?>
-                        
-                        <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
-                            <div class="flex items-center justify-between">
-                                <div class="flex-1 flex justify-between sm:hidden">
-                                    <?php if ($pagina > 1): ?>
-                                        <a href="<?php echo buildUrl($pagina - 1, $query_params); ?>" 
-                                           class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                                            Anterior
-                                        </a>
-                                    <?php endif; ?>
-                                    <?php if ($pagina < $total_paginas): ?>
-                                        <a href="<?php echo buildUrl($pagina + 1, $query_params); ?>" 
-                                           class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                                            Siguiente
-                                        </a>
-                                    <?php endif; ?>
-                                </div>
-                                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                                    <div>
-                                        <p class="text-sm text-gray-700">
-                                            Mostrando página <span class="font-medium"><?php echo $pagina; ?></span> de <span class="font-medium"><?php echo $total_paginas; ?></span>
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                                            <?php if ($pagina > 1): ?>
-                                                <a href="<?php echo buildUrl(1, $query_params); ?>" 
-                                                   class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                                    <i class="fas fa-angle-double-left"></i>
-                                                </a>
-                                                <a href="<?php echo buildUrl($pagina - 1, $query_params); ?>" 
-                                                   class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                                    <i class="fas fa-angle-left"></i>
-                                                </a>
-                                            <?php endif; ?>
-                                            
-                                            <?php
-                                            $inicio = max(1, $pagina - 2);
-                                            $fin = min($total_paginas, $pagina + 2);
-                                            
-                                            for ($i = $inicio; $i <= $fin; $i++): ?>
-                                                <a href="<?php echo buildUrl($i, $query_params); ?>" 
-                                                   class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 <?php echo $i == $pagina ? 'bg-blue-50 border-blue-500 text-blue-600' : ''; ?>">
-                                                    <?php echo $i; ?>
-                                                </a>
-                                            <?php endfor; ?>
-                                            
-                                            <?php if ($pagina < $total_paginas): ?>
-                                                <a href="<?php echo buildUrl($pagina + 1, $query_params); ?>" 
-                                                   class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                                    <i class="fas fa-angle-right"></i>
-                                                </a>
-                                                <a href="<?php echo buildUrl($total_paginas, $query_params); ?>" 
-                                                   class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                                    <i class="fas fa-angle-double-right"></i>
-                                                </a>
-                                            <?php endif; ?>
-                                        </nav>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
-                    <?php endif; ?>
+                    </div>
                 </div>
             </div>
         </div>
@@ -812,7 +695,7 @@ $total_tours = $resultado['success'] ? $resultado['total'] : 0;
                     <!-- Imagen del tour -->
                     <div class="text-center">
                         ${tour.imagen_principal 
-                            ? `<img src="/Antares-Travel/${tour.imagen_principal}" alt="Tour" class="w-full h-64 object-cover rounded-lg mx-auto">`
+                            ? `<img src="../../../../${tour.imagen_principal}" alt="Tour" class="w-full h-64 object-cover rounded-lg mx-auto">`
                             : `<div class="w-full h-64 bg-gray-200 rounded-lg flex items-center justify-center mx-auto">
                                  <i class="fas fa-image text-gray-400 text-4xl"></i>
                                </div>`
@@ -870,6 +753,27 @@ $total_tours = $resultado['success'] ? $resultado['total'] : 0;
             
             document.getElementById('detallesTour').innerHTML = html;
             document.getElementById('modalVerTour').classList.remove('hidden');
+        }
+        
+        // Función para cargar datos en el formulario
+        function cargarDatosFormulario(tour) {
+            document.getElementById('tour_id').value = tour.id_tour || '';
+            document.getElementById('titulo').value = tour.titulo || '';
+            document.getElementById('descripcion').value = tour.descripcion || '';
+            document.getElementById('precio').value = tour.precio || '';
+            document.getElementById('duracion').value = tour.duracion || '';
+            document.getElementById('hora_salida').value = tour.hora_salida || '';
+            document.getElementById('hora_llegada').value = tour.hora_llegada || '';
+            
+            // Si hay imagen, mostrar preview
+            if (tour.imagen_principal) {
+                const preview = document.getElementById('imagenPreview');
+                const img = document.getElementById('imagenPreviewImg');
+                img.src = '../../../../' + tour.imagen_principal;
+                preview.classList.remove('hidden');
+            } else {
+                document.getElementById('imagenPreview').classList.add('hidden');
+            }
         }
         
         // Función para editar tour
@@ -1005,6 +909,9 @@ $total_tours = $resultado['success'] ? $resultado['total'] : 0;
             // Inicializar filtro en tiempo real
             filtrarToursEnTiempoReal();
             
+            // Configurar funcionalidad del botón limpiar
+            configurarBotonLimpiar();
+            
             // Configurar eventos del formulario
             const formTour = document.getElementById('formTour');
             if (formTour) {
@@ -1031,12 +938,42 @@ $total_tours = $resultado['success'] ? $resultado['total'] : 0;
             // La responsividad del sidebar se maneja automáticamente por las clases de Tailwind
         });
         
+        // Función para configurar el botón limpiar búsqueda
+        function configurarBotonLimpiar() {
+            const inputBusqueda = document.getElementById('busquedaInput');
+            const botonLimpiar = document.getElementById('limpiarBusqueda');
+            
+            if (!inputBusqueda || !botonLimpiar) return;
+            
+            // Mostrar/ocultar botón según contenido
+            inputBusqueda.addEventListener('input', function() {
+                if (this.value.trim() !== '') {
+                    botonLimpiar.classList.remove('opacity-0', 'invisible');
+                    botonLimpiar.classList.add('opacity-100', 'visible');
+                } else {
+                    botonLimpiar.classList.add('opacity-0', 'invisible');
+                    botonLimpiar.classList.remove('opacity-100', 'visible');
+                }
+            });
+            
+            // Limpiar búsqueda al hacer clic
+            botonLimpiar.addEventListener('click', function() {
+                inputBusqueda.value = '';
+                inputBusqueda.dispatchEvent(new Event('input')); // Trigger filtro
+                inputBusqueda.focus(); // Mantener foco en el input
+                
+                // Ocultar botón
+                this.classList.add('opacity-0', 'invisible');
+                this.classList.remove('opacity-100', 'visible');
+            });
+        }
+        
         // Función de filtro en tiempo real (lado cliente)
         function filtrarToursEnTiempoReal() {
-            const inputBusqueda = document.querySelector('input[name="busqueda"]');
+            const inputBusqueda = document.getElementById('busquedaInput');
             const tourCards = document.querySelectorAll('.tour-card');
             const tourRows = document.querySelectorAll('.tour-row');
-            const contadorResultados = document.getElementById('contador-filtros');
+            const contadorResultados = document.getElementById('numeroResultados');
             
             if (!inputBusqueda) return;
             
@@ -1054,13 +991,13 @@ $total_tours = $resultado['success'] ? $resultado['total'] : 0;
                     
                     if (coincide || termino === '') {
                         card.style.display = 'block';
-                        contadorVisible++;
+                        contadorVisible++; // Solo contar aquí para evitar duplicados
                     } else {
                         card.style.display = 'none';
                     }
                 });
                 
-                // Filtrar filas (vista desktop)
+                // Filtrar filas (vista desktop) - SIN CONTAR
                 tourRows.forEach(row => {
                     const titulo = row.querySelector('.tour-titulo')?.textContent.toLowerCase() || '';
                     const descripcion = row.querySelector('.tour-descripcion')?.textContent.toLowerCase() || '';
@@ -1069,7 +1006,7 @@ $total_tours = $resultado['success'] ? $resultado['total'] : 0;
                     
                     if (coincide || termino === '') {
                         row.style.display = 'table-row';
-                        contadorVisible++;
+                        // NO incrementar contadorVisible aquí - evita duplicados
                     } else {
                         row.style.display = 'none';
                     }
@@ -1077,13 +1014,7 @@ $total_tours = $resultado['success'] ? $resultado['total'] : 0;
                 
                 // Actualizar contador si existe
                 if (contadorResultados) {
-                    if (termino === '') {
-                        contadorResultados.textContent = 'Todos los tours mostrados';
-                        contadorResultados.className = 'text-sm text-gray-600';
-                    } else {
-                        contadorResultados.textContent = `${contadorVisible} tour${contadorVisible !== 1 ? 's' : ''} encontrado${contadorVisible !== 1 ? 's' : ''}`;
-                        contadorResultados.className = contadorVisible > 0 ? 'text-sm text-green-600' : 'text-sm text-red-600';
-                    }
+                    contadorResultados.textContent = contadorVisible;
                 }
                 
                 // Mostrar/ocultar mensaje de "no encontrados"
@@ -1105,7 +1036,7 @@ $total_tours = $resultado['success'] ? $resultado['total'] : 0;
                     <h3 class="text-lg font-medium text-gray-700 mb-2">No se encontraron tours</h3>
                     <p class="text-sm text-gray-500">
                         No hay tours que coincidan con tu búsqueda. 
-                        <button onclick="document.querySelector('input[name=\\'busqueda\\']').value=''; document.querySelector('input[name=\\'busqueda\\']').dispatchEvent(new Event('input'));" 
+                        <button onclick="document.getElementById('busquedaInput').value=''; document.getElementById('busquedaInput').dispatchEvent(new Event('input'));" 
                                 class="text-blue-600 hover:text-blue-800 underline ml-1">
                             Limpiar filtro
                         </button>

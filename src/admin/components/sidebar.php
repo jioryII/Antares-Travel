@@ -1,4 +1,9 @@
 <?php
+// Iniciar sesión si no está iniciada
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 $current_page = basename($_SERVER['PHP_SELF'], '.php');
 $current_path = $_SERVER['REQUEST_URI'];
 
@@ -85,7 +90,7 @@ function getAdminUrl($path) {
             <div class="<?php echo isActiveRoute('dashboard') ? 'bg-white/20' : 'bg-gray-700/50 group-hover:bg-blue-600/50'; ?> p-2 lg:p-2 rounded-lg mr-4 lg:mr-3 transition-all duration-300 flex-shrink-0">
                 <i class="fas fa-tachometer-alt w-4 h-4 lg:w-4 lg:h-4 text-center"></i>
             </div>
-            <span class="font-medium text-base lg:text-sm">Dashboard</span>
+            <span class="font-medium text-base lg:text-sm">Panel de Control</span>
             <?php if (isActiveRoute('dashboard')): ?>
                 <div class="ml-auto">
                     <div class="w-2 h-2 bg-white rounded-full animate-pulse"></div>
@@ -177,6 +182,72 @@ function getAdminUrl($path) {
                 <span class="text-base lg:text-sm font-medium">Vehículos</span>
             </a>
         </div>
+
+        <!-- Divider -->
+        <div class="h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent my-3 lg:my-3"></div>
+
+        <!-- Ofertas Section -->
+        <div class="space-y-2 lg:space-y-1">
+            <div class="flex items-center px-4 lg:px-4 py-2 lg:py-2">
+                <div class="w-6 lg:w-6 h-px bg-gradient-to-r from-yellow-500 to-orange-500 mr-3 lg:mr-2"></div>
+                <div class="text-sm font-bold text-yellow-400 uppercase tracking-wider flex-1 lg:text-xs">Marketing</div>
+                <i class="fas fa-tags text-yellow-400/60 text-sm lg:text-xs"></i>
+            </div>
+            
+            <a href="<?php echo getAdminUrl('pages/ofertas/'); ?>" 
+               class="<?php echo isActiveRoute('ofertas') ? 'bg-gradient-to-r from-yellow-600/80 to-yellow-700/80 text-white shadow-md' : 'text-gray-300 hover:bg-gray-800/50 hover:text-yellow-200'; ?> group flex items-center px-4 lg:px-4 py-3 lg:py-2 rounded-lg transition-all duration-300 hover:translate-x-1">
+                <div class="<?php echo isActiveRoute('ofertas') ? 'bg-white/20' : 'bg-gray-700/50 group-hover:bg-yellow-600/50'; ?> p-2 lg:p-1.5 rounded-lg mr-4 lg:mr-3 transition-all duration-300 flex-shrink-0">
+                    <i class="fas fa-percent text-sm lg:text-sm"></i>
+                </div>
+                <span class="text-base lg:text-sm font-medium">Gestión de Ofertas</span>
+            </a>
+        </div>
+
+        <?php if (isset($_SESSION['admin_rol']) && $_SESSION['admin_rol'] === 'superadmin'): ?>
+        <!-- Divider -->
+        <div class="h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent my-3 lg:my-3"></div>
+
+        <!-- Root Section - Solo para SuperAdmin -->
+        <div class="space-y-2 lg:space-y-1">
+            <div class="flex items-center px-4 lg:px-4 py-2 lg:py-2">
+                <div class="w-6 lg:w-6 h-px bg-gradient-to-r from-red-500 to-red-600 mr-3 lg:mr-2"></div>
+                <div class="text-sm font-bold text-red-400 uppercase tracking-wider flex-1 lg:text-xs">Root</div>
+                <i class="fas fa-crown text-red-400/60 text-sm lg:text-xs"></i>
+            </div>
+            
+            <a href="<?php echo getAdminUrl('pages/root/administradores.php'); ?>" 
+               class="<?php echo isActiveRoute('administradores') ? 'bg-gradient-to-r from-red-600/80 to-red-700/80 text-white shadow-md' : 'text-gray-300 hover:bg-gray-800/50 hover:text-red-200'; ?> group flex items-center px-4 lg:px-4 py-3 lg:py-2 rounded-lg transition-all duration-300 hover:translate-x-1">
+                <div class="<?php echo isActiveRoute('administradores') ? 'bg-white/20' : 'bg-gray-700/50 group-hover:bg-red-600/50'; ?> p-2 lg:p-1.5 rounded-lg mr-4 lg:mr-3 transition-all duration-300 flex-shrink-0">
+                    <i class="fas fa-user-shield text-sm lg:text-sm"></i>
+                </div>
+                <span class="text-base lg:text-sm font-medium">Administradores</span>
+            </a>
+            
+            <a href="<?php echo getAdminUrl('pages/root/configuracion.php'); ?>" 
+               class="<?php echo isActiveRoute('configuracion') ? 'bg-gradient-to-r from-red-600/80 to-red-700/80 text-white shadow-md' : 'text-gray-300 hover:bg-gray-800/50 hover:text-red-200'; ?> group flex items-center px-4 lg:px-4 py-3 lg:py-2 rounded-lg transition-all duration-300 hover:translate-x-1">
+                <div class="<?php echo isActiveRoute('configuracion') ? 'bg-white/20' : 'bg-gray-700/50 group-hover:bg-red-600/50'; ?> p-2 lg:p-1.5 rounded-lg mr-4 lg:mr-3 transition-all duration-300 flex-shrink-0">
+                    <i class="fas fa-cogs text-sm lg:text-sm"></i>
+                </div>
+                <span class="text-base lg:text-sm font-medium">Configuración Sistema</span>
+            </a>
+            
+            <a href="<?php echo getAdminUrl('pages/root/logs.php'); ?>" 
+               class="<?php echo isActiveRoute('logs') ? 'bg-gradient-to-r from-red-600/80 to-red-700/80 text-white shadow-md' : 'text-gray-300 hover:bg-gray-800/50 hover:text-red-200'; ?> group flex items-center px-4 lg:px-4 py-3 lg:py-2 rounded-lg transition-all duration-300 hover:translate-x-1">
+                <div class="<?php echo isActiveRoute('logs') ? 'bg-white/20' : 'bg-gray-700/50 group-hover:bg-red-600/50'; ?> p-2 lg:p-1.5 rounded-lg mr-4 lg:mr-3 transition-all duration-300 flex-shrink-0">
+                    <i class="fas fa-file-alt text-sm lg:text-sm"></i>
+                </div>
+                <span class="text-base lg:text-sm font-medium">Logs del Sistema</span>
+            </a>
+            
+            <a href="<?php echo getAdminUrl('pages/root/base_datos.php'); ?>" 
+               class="<?php echo isActiveRoute('base_datos') ? 'bg-gradient-to-r from-red-600/80 to-red-700/80 text-white shadow-md' : 'text-gray-300 hover:bg-gray-800/50 hover:text-red-200'; ?> group flex items-center px-4 lg:px-4 py-3 lg:py-2 rounded-lg transition-all duration-300 hover:translate-x-1">
+                <div class="<?php echo isActiveRoute('base_datos') ? 'bg-white/20' : 'bg-gray-700/50 group-hover:bg-red-600/50'; ?> p-2 lg:p-1.5 rounded-lg mr-4 lg:mr-3 transition-all duration-300 flex-shrink-0">
+                    <i class="fas fa-database text-sm lg:text-sm"></i>
+                </div>
+                <span class="text-base lg:text-sm font-medium">Base de Datos</span>
+            </a>
+        </div>
+        <?php endif; ?>
 
         <!-- Divider -->
         <!-- <div class="h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent my-3 lg:my-3"></div> -->

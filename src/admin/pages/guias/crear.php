@@ -10,6 +10,16 @@ $admin = obtenerAdminActual();
 $errors = [];
 $success = '';
 
+// Función auxiliar para eliminar archivos antiguos
+function eliminarFotoAnterior($ruta_foto) {
+    if (!empty($ruta_foto) && !preg_match('/^https?:\/\//i', $ruta_foto)) {
+        $ruta_completa = $_SERVER['DOCUMENT_ROOT'] . '/' . ltrim($ruta_foto, '/');
+        if (file_exists($ruta_completa) && is_file($ruta_completa)) {
+            unlink($ruta_completa);
+        }
+    }
+}
+
 try {
     $connection = getConnection();
     
@@ -30,10 +40,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $experiencia = trim($_POST['experiencia'] ?? '');
     $estado = $_POST['estado'] ?? 'Libre';
-    $foto_url = trim($_POST['foto_url'] ?? '');
     $idiomas_seleccionados = $_POST['idiomas'] ?? [];
     
-    // Validaciones
+    // Variables para manejo de foto
+    $foto_url = null;
+    $foto_subida = false;
+    
+    // Validaciones básicas
     if (empty($nombre)) {
         $errors[] = "El nombre es obligatorio";
     }
@@ -50,6 +63,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if (!in_array($estado, ['Libre', 'Ocupado'])) {
         $errors[] = "Estado no válido";
+    }
+    
+    // Validar y procesar archivo de foto
+    if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
+        $archivo = $_FILES['foto'];
+        
+        // Validar tipo de archivo
+        $tipos_permitidos = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        $tipo_archivo = $archivo['type'];
+        
+        if (!in_array($tipo_archivo, $tipos_permitidos)) {
+            $errors[] = "Solo se permiten archivos de imagen (JPG, PNG, GIF, WebP)";
+        }
+        
+        // Validar tamaño (máximo 5MB)
+        $tamano_maximo = 5 * 1024 * 1024; // 5MB en bytes
+        if ($archivo['size'] > $tamano_maximo) {
+            $errors[] = "El archivo es demasiado grande. Máximo permitido: 5MB";
+        }
+        
+        // Si no hay errores hasta ahora, procesar la subida
+        if (empty($errors)) {
+            $extension = strtolower(pathinfo($archivo['name'], PATHINFO_EXTENSION));
+            if (empty($extension)) {
+                // Determinar extensión basada en el tipo MIME
+                $extension = match($tipo_archivo) {
+                    'image/jpeg' => 'jpg',
+                    'image/jpg' => 'jpg',
+                    'image/png' => 'png',
+                    'image/gif' => 'gif',
+                    'image/webp' => 'webp',
+                    default => 'jpg'
+                };
+            }
+            
+            // Crear nombre único para el archivo
+            $nombre_archivo = 'guia_' . time() . '_' . uniqid() . '.' . $extension;
+            
+            // Ruta completa donde guardar el archivo
+            $ruta_destino = $_SERVER['DOCUMENT_ROOT'] . '/storage/uploads/guias/' . $nombre_archivo;
+            
+            // Asegurar que el directorio existe
+            $directorio_destino = dirname($ruta_destino);
+            if (!is_dir($directorio_destino)) {
+                if (!mkdir($directorio_destino, 0755, true)) {
+                    $errors[] = "Error al crear directorio para las fotos";
+                }
+            }
+            
+            // Mover el archivo subido
+            if (empty($errors) && move_uploaded_file($archivo['tmp_name'], $ruta_destino)) {
+                // Guardar la ruta relativa desde la raíz del proyecto
+                $foto_url = 'storage/uploads/guias/' . $nombre_archivo;
+                $foto_subida = true;
+            } else {
+                $errors[] = "Error al subir la foto. Inténtalo nuevamente";
+            }
+        }
     }
     
     // Validar idiomas seleccionados
@@ -208,7 +279,7 @@ $page_title = "Crear Nuevo Guía";
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <!-- Formulario -->
                     <div class="lg:col-span-2">
-                        <form method="POST" class="bg-white rounded-lg shadow-lg p-6">
+                        <form method="POST" enctype="multipart/form-data" class="bg-white rounded-lg shadow-lg p-6">
                             <div class="space-y-6">
                                 <!-- Información Personal -->
                                 <div>
@@ -295,17 +366,17 @@ $page_title = "Crear Nuevo Guía";
                                         </div>
                                         
                                         <div>
-                                            <label for="foto_url" class="block text-sm font-medium text-gray-700 mb-2">
-                                                URL de Foto
+                                            <label for="foto" class="block text-sm font-medium text-gray-700 mb-2">
+                                                Foto del Guía
                                             </label>
                                             <div class="relative">
-                                                <input type="url" name="foto_url" id="foto_url"
-                                                       value="<?php echo htmlspecialchars($_POST['foto_url'] ?? ''); ?>"
-                                                       class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                                       placeholder="https://ejemplo.com/foto.jpg">
-                                                <i class="fas fa-image absolute left-3 top-3 text-gray-400"></i>
+                                                <input type="file" name="foto" id="foto" accept="image/*"
+                                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
                                             </div>
-                                            <p class="text-xs text-gray-500 mt-1">Opcional. URL de la foto del guía</p>
+                                            <p class="text-xs text-gray-500 mt-1">Opcional. Formatos: JPG, PNG, GIF, WebP (máx. 5MB)</p>
+                                            <div id="preview-container" class="mt-2 hidden">
+                                                <img id="foto-preview" class="w-16 h-16 rounded-full object-cover border-2 border-gray-200" alt="Vista previa">
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -399,12 +470,23 @@ $page_title = "Crear Nuevo Guía";
                                 </div>
                                 
                                 <div>
+                                    <h4 class="font-medium text-gray-900 mb-2">Foto del Guía</h4>
+                                    <ul class="text-sm text-gray-600 space-y-1">
+                                        <li>• Formatos permitidos: JPG, PNG, GIF, WebP</li>
+                                        <li>• Tamaño máximo: 5MB</li>
+                                        <li>• Se guardará localmente en el servidor</li>
+                                        <li>• Resolución recomendada: 400x400px</li>
+                                    </ul>
+                                </div>
+                                
+                                <div>
                                     <h4 class="font-medium text-gray-900 mb-2">Consejos</h4>
                                     <ul class="text-sm text-gray-600 space-y-1">
                                         <li>• El email debe ser único</li>
                                         <li>• La experiencia ayuda a los clientes</li>
                                         <li>• La foto mejora la presentación</li>
                                         <li>• Puedes cambiar el estado después</li>
+                                        <li>• Usa fotos cuadradas para mejor visualización</li>
                                     </ul>
                                 </div>
                             </div>
@@ -417,7 +499,7 @@ $page_title = "Crear Nuevo Guía";
                             </h3>
                             
                             <div class="text-center" id="preview">
-                                <div class="h-16 w-16 rounded-full bg-blue-600 flex items-center justify-center mx-auto mb-3">
+                                <div id="preview-avatar" class="h-16 w-16 rounded-full bg-blue-600 flex items-center justify-center mx-auto mb-3">
                                     <span class="text-white font-bold text-lg" id="preview-initials">GN</span>
                                 </div>
                                 <h4 class="font-medium text-gray-900" id="preview-name">Nuevo Guía</h4>
@@ -476,11 +558,58 @@ $page_title = "Crear Nuevo Guía";
             document.getElementById('idiomas-count').textContent = idiomasSeleccionados;
         }
 
+        // Función para previsualizar imagen seleccionada
+        function previewImage() {
+            const fileInput = document.getElementById('foto');
+            const file = fileInput.files[0];
+            const previewContainer = document.getElementById('preview-container');
+            const previewImage = document.getElementById('foto-preview');
+            const avatarContainer = document.getElementById('preview-avatar');
+            
+            if (file) {
+                // Validar tipo de archivo
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('Solo se permiten archivos de imagen (JPG, PNG, GIF, WebP)');
+                    fileInput.value = '';
+                    return;
+                }
+                
+                // Validar tamaño (5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('El archivo es demasiado grande. Máximo permitido: 5MB');
+                    fileInput.value = '';
+                    return;
+                }
+                
+                // Mostrar vista previa
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    previewContainer.classList.remove('hidden');
+                    
+                    // Actualizar avatar en vista previa lateral
+                    avatarContainer.innerHTML = `<img src="${e.target.result}" class="h-16 w-16 rounded-full object-cover" alt="Preview">`;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewContainer.classList.add('hidden');
+                
+                // Restaurar avatar por defecto
+                const nombre = document.getElementById('nombre').value || 'Nuevo';
+                const apellido = document.getElementById('apellido').value || 'Guía';
+                const initials = (nombre.charAt(0) + apellido.charAt(0)).toUpperCase();
+                avatarContainer.innerHTML = `<span class="text-white font-bold text-lg">${initials}</span>`;
+                avatarContainer.className = 'h-16 w-16 rounded-full bg-blue-600 flex items-center justify-center mx-auto mb-3';
+            }
+        }
+
         // Agregar eventos a los campos
         document.getElementById('nombre').addEventListener('input', updatePreview);
         document.getElementById('apellido').addEventListener('input', updatePreview);
         document.getElementById('email').addEventListener('input', updatePreview);
         document.getElementById('estado').addEventListener('change', updatePreview);
+        document.getElementById('foto').addEventListener('change', previewImage);
         
         // Agregar eventos a los checkboxes de idiomas
         document.querySelectorAll('input[name="idiomas[]"]').forEach(checkbox => {
@@ -489,6 +618,27 @@ $page_title = "Crear Nuevo Guía";
         
         // Inicializar vista previa
         updatePreview();
+
+        // Validación del formulario antes de enviar
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const nombre = document.getElementById('nombre').value.trim();
+            const apellido = document.getElementById('apellido').value.trim();
+            const email = document.getElementById('email').value.trim();
+            
+            if (!nombre || !apellido || !email) {
+                e.preventDefault();
+                alert('Por favor completa todos los campos obligatorios (nombre, apellido y email).');
+                return false;
+            }
+            
+            // Validar formato de email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                e.preventDefault();
+                alert('Por favor ingresa un email válido.');
+                return false;
+            }
+        });
     </script>
 </body>
 </html>

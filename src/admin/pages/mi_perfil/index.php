@@ -3,25 +3,28 @@ require_once '../../config/config.php';
 require_once '../../auth/middleware.php';
 require_once '../../functions/admin_functions.php';
 
+// Verificar sesión de administrador
+verificarSesionAdmin();
 $admin = obtenerAdminActual();
 $page_title = "Mi Perfil";
 
-// Obtener estadísticas para debug
+// Obtener estadísticas básicas (sin información sensible)
 $stats = getDashboardStats();
-$reservas_recientes = getReservasRecientes(5);
 
-// Información del sistema
-$system_info = [
-    'php_version' => PHP_VERSION,
-    'server_software' => $_SERVER['SERVER_SOFTWARE'] ?? 'No disponible',
-    'document_root' => $_SERVER['DOCUMENT_ROOT'] ?? 'No disponible',
-    'current_time' => date('Y-m-d H:i:s'),
-    'timezone' => date_default_timezone_get(),
-    'memory_usage' => formatBytes(memory_get_usage(true)),
-    'memory_peak' => formatBytes(memory_get_peak_usage(true)),
-    'session_id' => session_id(),
-    'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'No disponible'
-];
+// Solo mostrar información técnica a SuperAdmin
+$is_superadmin = isset($_SESSION['admin_rol']) && $_SESSION['admin_rol'] === 'superadmin';
+
+// Información básica del sistema (solo para SuperAdmin)
+$system_info = [];
+if ($is_superadmin && DEBUG_MODE) {
+    $system_info = [
+        'php_version' => PHP_VERSION,
+        'current_time' => date('Y-m-d H:i:s'),
+        'timezone' => date_default_timezone_get(),
+        'memory_usage' => formatBytes(memory_get_usage(true)),
+        'session_status' => 'Activa'
+    ];
+}
 
 // Función para formatear bytes
 function formatBytes($bytes, $precision = 2) {
@@ -106,7 +109,7 @@ function formatBytes($bytes, $precision = 2) {
                             </div>
                         </div>
                         <div class="p-8">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-6">Información de la Sesión</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-6">Información de la Cuenta</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div class="space-y-4">
                                     <div class="flex items-center justify-between py-3 border-b border-gray-100">
@@ -122,15 +125,15 @@ function formatBytes($bytes, $precision = 2) {
                                 </div>
                                 <div class="space-y-4">
                                     <div class="flex items-center justify-between py-3 border-b border-gray-100">
-                                        <span class="text-gray-600 font-medium">ID de Sesión</span>
-                                        <span class="font-mono text-sm text-gray-800 bg-gray-50 px-3 py-1 rounded-lg">
-                                            <?php echo substr(session_id(), 0, 12) . '...'; ?>
+                                        <span class="text-gray-600 font-medium">Tipo de cuenta</span>
+                                        <span class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                                            <i class="fas fa-star mr-1"></i><?php echo ucfirst(htmlspecialchars($admin['rol'])); ?>
                                         </span>
                                     </div>
                                     <div class="flex items-center justify-between py-3 border-b border-gray-100">
                                         <span class="text-gray-600 font-medium">Nivel de acceso</span>
                                         <span class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-                                            <i class="fas fa-key mr-1"></i>Completo
+                                            <i class="fas fa-key mr-1"></i>Autorizado
                                         </span>
                                     </div>
                                 </div>
@@ -184,182 +187,133 @@ function formatBytes($bytes, $precision = 2) {
                     </div>
                 </div>
 
-                <!-- Información de Debug (Solo si DEBUG_MODE está activo) -->
-                <?php if (DEBUG_MODE): ?>
+                <!-- Panel de Diagnóstico (Solo SuperAdmin en modo Debug) -->
+                <?php if ($is_superadmin && DEBUG_MODE): ?>
                 <div class="mb-8 lg:mb-12">
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                         <div class="bg-gradient-to-r from-slate-800 to-slate-900 px-8 py-6">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <h3 class="text-xl font-light text-white flex items-center">
-                                        <i class="fas fa-code mr-3"></i>Panel de Desarrollo
+                                        <i class="fas fa-tools mr-3"></i>Panel de Diagnóstico
                                     </h3>
-                                    <p class="text-slate-300 text-sm mt-1">Información técnica y diagnósticos del sistema</p>
+                                    <p class="text-slate-300 text-sm mt-1">Información técnica del sistema (Solo SuperAdmin)</p>
                                 </div>
-                                <span class="px-4 py-2 bg-yellow-500 bg-opacity-20 backdrop-blur-sm rounded-full text-yellow-200 text-sm font-medium">
-                                    <i class="fas fa-exclamation-triangle mr-1"></i>Modo Debug Activo
-                                </span>
+                                <div class="flex items-center space-x-2">
+                                    <span class="px-3 py-1 bg-red-500 bg-opacity-20 backdrop-blur-sm rounded-full text-red-200 text-sm font-medium">
+                                        <i class="fas fa-crown mr-1"></i>SuperAdmin
+                                    </span>
+                                    <span class="px-3 py-1 bg-yellow-500 bg-opacity-20 backdrop-blur-sm rounded-full text-yellow-200 text-sm font-medium">
+                                        <i class="fas fa-bug mr-1"></i>Debug
+                                    </span>
+                                </div>
                             </div>
                         </div>
                         <div class="p-8">
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                <!-- Información del Usuario Admin -->
+                            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-info-circle text-amber-600"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <h4 class="text-sm font-medium text-amber-800">Información de Diagnóstico</h4>
+                                        <p class="mt-1 text-sm text-amber-700">
+                                            Para acceder a información técnica detallada del sistema, visite el 
+                                            <a href="../root/configuracion.php" class="font-semibold underline hover:text-amber-900">
+                                                Panel de Configuración del Sistema
+                                            </a> en la sección Root.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <!-- Información Básica del Sistema -->
                                 <div class="bg-slate-50 rounded-lg p-6 border border-slate-200">
                                     <h4 class="font-semibold text-slate-900 mb-4 flex items-center">
-                                        <i class="fas fa-user-shield text-blue-600 mr-2"></i>Administrador
+                                        <i class="fas fa-server text-blue-600 mr-2"></i>Estado del Sistema
                                     </h4>
                                     <div class="space-y-3 text-sm">
                                         <div class="flex justify-between">
-                                            <span class="text-slate-600">Nombre:</span>
-                                            <span class="font-medium text-slate-900"><?php echo htmlspecialchars($admin['nombre']); ?></span>
+                                            <span class="text-slate-600">PHP Version:</span>
+                                            <span class="font-medium text-slate-900"><?php echo $system_info['php_version']; ?></span>
                                         </div>
                                         <div class="flex justify-between">
-                                            <span class="text-slate-600">Email:</span>
-                                            <span class="font-medium text-slate-900"><?php echo htmlspecialchars($admin['email']); ?></span>
+                                            <span class="text-slate-600">Zona Horaria:</span>
+                                            <span class="font-medium text-slate-900"><?php echo $system_info['timezone']; ?></span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-slate-600">Memoria en Uso:</span>
+                                            <span class="font-medium text-slate-900"><?php echo $system_info['memory_usage']; ?></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Estadísticas de la Aplicación -->
+                                <div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
+                                    <h4 class="font-semibold text-slate-900 mb-4 flex items-center">
+                                        <i class="fas fa-chart-bar text-blue-600 mr-2"></i>Estadísticas
+                                    </h4>
+                                    <div class="space-y-3 text-sm">
+                                        <div class="flex justify-between">
+                                            <span class="text-slate-600">Tours:</span>
+                                            <span class="font-medium text-slate-900"><?php echo number_format($stats['total_tours'] ?? 0); ?></span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-slate-600">Reservas:</span>
+                                            <span class="font-medium text-slate-900"><?php echo number_format($stats['total_reservas'] ?? 0); ?></span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-slate-600">Usuarios:</span>
+                                            <span class="font-medium text-slate-900"><?php echo number_format($stats['total_usuarios'] ?? 0); ?></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Estado de la Sesión -->
+                                <div class="bg-green-50 rounded-lg p-6 border border-green-200">
+                                    <h4 class="font-semibold text-slate-900 mb-4 flex items-center">
+                                        <i class="fas fa-user-shield text-green-600 mr-2"></i>Sesión Actual
+                                    </h4>
+                                    <div class="space-y-3 text-sm">
+                                        <div class="flex justify-between">
+                                            <span class="text-slate-600">Usuario:</span>
+                                            <span class="font-medium text-slate-900"><?php echo htmlspecialchars($admin['nombre']); ?></span>
                                         </div>
                                         <div class="flex justify-between">
                                             <span class="text-slate-600">Rol:</span>
                                             <span class="font-medium text-slate-900"><?php echo htmlspecialchars($admin['rol']); ?></span>
                                         </div>
                                         <div class="flex justify-between">
-                                            <span class="text-slate-600">ID:</span>
-                                            <span class="font-mono text-slate-900"><?php echo htmlspecialchars($admin['id'] ?? 'N/A'); ?></span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Estadísticas de Debug -->
-                                <div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
-                                    <h4 class="font-semibold text-slate-900 mb-4 flex items-center">
-                                        <i class="fas fa-database text-blue-600 mr-2"></i>Base de Datos
-                                    </h4>
-                                    <div class="space-y-3 text-sm">
-                                        <div class="flex justify-between">
-                                            <span class="text-slate-600">Estadísticas:</span>
-                                            <span class="font-medium text-slate-900"><?php echo count($stats); ?> registros</span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span class="text-slate-600">Reservas recientes:</span>
-                                            <span class="font-medium text-slate-900"><?php echo count($reservas_recientes); ?></span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span class="text-slate-600">Debug activo:</span>
-                                            <span class="font-medium text-green-600"><?php echo DEBUG_MODE ? 'Sí' : 'No'; ?></span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span class="text-slate-600">Base de datos:</span>
-                                            <span class="font-mono text-slate-900"><?php echo DB_NAME; ?></span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Información del Sistema -->
-                                <div class="bg-green-50 rounded-lg p-6 border border-green-200">
-                                    <h4 class="font-semibold text-slate-900 mb-4 flex items-center">
-                                        <i class="fas fa-server text-green-600 mr-2"></i>Sistema
-                                    </h4>
-                                    <div class="space-y-3 text-sm">
-                                        <div class="flex justify-between">
-                                            <span class="text-slate-600">PHP:</span>
-                                            <span class="font-medium text-slate-900"><?php echo $system_info['php_version']; ?></span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span class="text-slate-600">Zona horaria:</span>
-                                            <span class="font-medium text-slate-900"><?php echo $system_info['timezone']; ?></span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span class="text-slate-600">Memoria:</span>
-                                            <span class="font-medium text-slate-900"><?php echo $system_info['memory_usage']; ?></span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span class="text-slate-600">Pico memoria:</span>
-                                            <span class="font-medium text-slate-900"><?php echo $system_info['memory_peak']; ?></span>
+                                            <span class="text-slate-600">Estado:</span>
+                                            <span class="font-medium text-green-600"><?php echo $system_info['session_status']; ?></span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Información Detallada del Sistema -->
-                            <div class="mt-8 bg-slate-50 rounded-lg p-6 border border-slate-200">
+                            <!-- Enlaces a Herramientas Root -->
+                            <div class="mt-8 bg-red-50 rounded-lg p-6 border border-red-200">
                                 <h4 class="font-semibold text-slate-900 mb-4 flex items-center">
-                                    <i class="fas fa-info-circle text-slate-600 mr-2"></i>Detalles Técnicos del Servidor
+                                    <i class="fas fa-tools text-red-600 mr-2"></i>Herramientas de SuperAdmin
                                 </h4>
-                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 text-sm">
-                                    <div class="space-y-3">
-                                        <div>
-                                            <span class="text-slate-600 block">Servidor:</span>
-                                            <span class="font-mono text-slate-900"><?php echo $system_info['server_software']; ?></span>
-                                        </div>
-                                        <div>
-                                            <span class="text-slate-600 block">Tiempo actual:</span>
-                                            <span class="font-mono text-slate-900"><?php echo $system_info['current_time']; ?></span>
-                                        </div>
-                                        <div>
-                                            <span class="text-slate-600 block">Session ID:</span>
-                                            <span class="font-mono text-slate-900 text-xs"><?php echo $system_info['session_id']; ?></span>
-                                        </div>
-                                    </div>
-                                    <div class="space-y-3">
-                                        <div>
-                                            <span class="text-slate-600 block">Document Root:</span>
-                                            <span class="font-mono text-slate-900 text-xs break-all"><?php echo $system_info['document_root']; ?></span>
-                                        </div>
-                                        <div>
-                                            <span class="text-slate-600 block">User Agent:</span>
-                                            <span class="font-mono text-slate-900 text-xs break-all"><?php echo substr($system_info['user_agent'], 0, 80) . '...'; ?></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Configuración de la Aplicación -->
-                            <div class="mt-8 bg-purple-50 rounded-lg p-6 border border-purple-200">
-                                <h4 class="font-semibold text-slate-900 mb-4 flex items-center">
-                                    <i class="fas fa-cogs text-purple-600 mr-2"></i>Configuración de la Aplicación
-                                </h4>
-                                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 text-sm">
-                                    <div class="space-y-3">
-                                        <div>
-                                            <span class="text-slate-600 block">Base URL:</span>
-                                            <span class="font-mono text-slate-900"><?php echo BASE_URL; ?></span>
-                                        </div>
-                                        <div>
-                                            <span class="text-slate-600 block">Admin URL:</span>
-                                            <span class="font-mono text-slate-900"><?php echo ADMIN_URL; ?></span>
-                                        </div>
-                                        <div>
-                                            <span class="text-slate-600 block">Nombre del sitio:</span>
-                                            <span class="font-mono text-slate-900"><?php echo SITE_NAME; ?></span>
-                                        </div>
-                                    </div>
-                                    <div class="space-y-3">
-                                        <div>
-                                            <span class="text-slate-600 block">DB Host:</span>
-                                            <span class="font-mono text-slate-900"><?php echo DB_HOST; ?></span>
-                                        </div>
-                                        <div>
-                                            <span class="text-slate-600 block">DB Name:</span>
-                                            <span class="font-mono text-slate-900"><?php echo DB_NAME; ?></span>
-                                        </div>
-                                        <div>
-                                            <span class="text-slate-600 block">DB Charset:</span>
-                                            <span class="font-mono text-slate-900"><?php echo DB_CHARSET; ?></span>
-                                        </div>
-                                    </div>
-                                    <div class="space-y-3">
-                                        <div>
-                                            <span class="text-slate-600 block">Session Lifetime:</span>
-                                            <span class="font-mono text-slate-900"><?php echo SESSION_LIFETIME; ?>s</span>
-                                        </div>
-                                        <div>
-                                            <span class="text-slate-600 block">Max File Size:</span>
-                                            <span class="font-mono text-slate-900"><?php echo formatBytes(MAX_FILE_SIZE); ?></span>
-                                        </div>
-                                        <div>
-                                            <span class="text-slate-600 block">Records per Page:</span>
-                                            <span class="font-mono text-slate-900"><?php echo RECORDS_PER_PAGE; ?></span>
-                                        </div>
-                                    </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    <a href="../root/configuracion.php" class="flex items-center p-3 bg-white rounded-lg border hover:border-red-300 transition-colors group">
+                                        <i class="fas fa-cogs text-red-600 mr-3"></i>
+                                        <span class="text-sm font-medium text-gray-700 group-hover:text-red-700">Configuración</span>
+                                    </a>
+                                    <a href="../root/logs.php" class="flex items-center p-3 bg-white rounded-lg border hover:border-red-300 transition-colors group">
+                                        <i class="fas fa-file-alt text-red-600 mr-3"></i>
+                                        <span class="text-sm font-medium text-gray-700 group-hover:text-red-700">Logs</span>
+                                    </a>
+                                    <a href="../root/base_datos.php" class="flex items-center p-3 bg-white rounded-lg border hover:border-red-300 transition-colors group">
+                                        <i class="fas fa-database text-red-600 mr-3"></i>
+                                        <span class="text-sm font-medium text-gray-700 group-hover:text-red-700">Base de Datos</span>
+                                    </a>
+                                    <a href="../root/administradores.php" class="flex items-center p-3 bg-white rounded-lg border hover:border-red-300 transition-colors group">
+                                        <i class="fas fa-user-shield text-red-600 mr-3"></i>
+                                        <span class="text-sm font-medium text-gray-700 group-hover:text-red-700">Administradores</span>
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -437,13 +391,32 @@ function formatBytes($bytes, $precision = 2) {
     </div>
 
     <script>
-        // Log para debug
-        console.log('Página de perfil cargada correctamente');
-        <?php if (DEBUG_MODE): ?>
-        console.log('Modo debug activo');
-        console.log('Admin info:', <?php echo json_encode($admin); ?>);
-        console.log('System info:', <?php echo json_encode($system_info); ?>);
+        // Inicialización del perfil de usuario
+        console.log('Perfil cargado correctamente');
+        
+        <?php if ($is_superadmin && DEBUG_MODE): ?>
+        // Información de debug solo para SuperAdmin
+        console.log('SuperAdmin Debug Mode activo');
+        console.log('Admin:', '<?php echo htmlspecialchars($admin['nombre']); ?>');
+        console.log('Rol:', '<?php echo htmlspecialchars($admin['rol']); ?>');
+        <?php else: ?>
+        console.log('Modo usuario estándar');
         <?php endif; ?>
+        
+        // Funciones de interactividad
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animaciones de entrada suaves
+            const cards = document.querySelectorAll('.bg-white');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease-out';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
     </script>
 </body>
 </html>

@@ -8,68 +8,40 @@ verificarSesionAdmin();
 $admin = obtenerAdminActual();
 $page_title = "Gestión de Usuarios";
 
-// Parámetros de filtrado y paginación
-$filtro_nombre = $_GET['nombre'] ?? '';
-$filtro_email = $_GET['email'] ?? '';
-$filtro_verificado = $_GET['verificado'] ?? '';
-$filtro_proveedor = $_GET['proveedor'] ?? '';
-$pagina_actual = intval($_GET['pagina'] ?? 1);
-$registros_por_pagina = 20;
-$offset = ($pagina_actual - 1) * $registros_por_pagina;
-
 try {
     $connection = getConnection();
     
-    // Construir WHERE clause para filtros
-    $where_conditions = [];
-    $params = [];
-    
-    if (!empty($filtro_nombre)) {
-        $where_conditions[] = "u.nombre LIKE ?";
-        $params[] = "%$filtro_nombre%";
-    }
-    
-    if (!empty($filtro_email)) {
-        $where_conditions[] = "u.email LIKE ?";
-        $params[] = "%$filtro_email%";
-    }
-    
-    if ($filtro_verificado !== '') {
-        $where_conditions[] = "u.email_verificado = ?";
-        $params[] = $filtro_verificado;
-    }
-    
-    if (!empty($filtro_proveedor)) {
-        $where_conditions[] = "u.proveedor_oauth = ?";
-        $params[] = $filtro_proveedor;
-    }
-    
-    $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
-    
-    // Obtener usuarios con filtros y paginación
+    // Obtener todos los usuarios sin paginación (para filtros en tiempo real)
     $usuarios_sql = "SELECT u.*, 
                             COUNT(r.id_reserva) as total_reservas,
                             COALESCE(SUM(r.monto_total), 0) as total_gastado
                      FROM usuarios u
                      LEFT JOIN reservas r ON u.id_usuario = r.id_usuario
-                     $where_clause
                      GROUP BY u.id_usuario
-                     ORDER BY u.creado_en DESC
-                     LIMIT $registros_por_pagina OFFSET $offset";
+                     ORDER BY u.creado_en DESC";
     
     $usuarios_stmt = $connection->prepare($usuarios_sql);
-    $usuarios_stmt->execute($params);
+    $usuarios_stmt->execute();
     $usuarios = $usuarios_stmt->fetchAll();
     
-    // Contar total de registros para paginación
-    $count_sql = "SELECT COUNT(DISTINCT u.id_usuario) as total 
-                  FROM usuarios u
-                  $where_clause";
+    // Procesar las URLs de avatar para corregir las rutas
+    foreach ($usuarios as &$usuario) {
+        if (!empty($usuario['avatar_url'])) {
+            // Si es una URL completa (HTTP/HTTPS), dejarla como está
+            if (preg_match('/^https?:\/\//i', $usuario['avatar_url'])) {
+                // URL externa (Google, Facebook, etc.) - no hacer nada
+                continue;
+            }
+            // Si es una ruta local, ajustar la ruta relativa
+            elseif (!preg_match('/^https?:\/\//i', $usuario['avatar_url'])) {
+                // Ruta local: convertir a ruta relativa desde la ubicación actual
+                $usuario['avatar_url'] = '../../../../' . ltrim($usuario['avatar_url'], '/');
+            }
+        }
+    }
+    unset($usuario); // Romper la referencia
     
-    $count_stmt = $connection->prepare($count_sql);
-    $count_stmt->execute($params);
-    $total_registros = $count_stmt->fetch()['total'];
-    $total_paginas = ceil($total_registros / $registros_por_pagina);
+    $total_usuarios = count($usuarios);
     
     // Obtener estadísticas generales
     $stats_sql = "SELECT 
@@ -89,6 +61,10 @@ try {
     $total_paginas = 0;
     $stats = [];
 }
+
+// Manejar mensajes de éxito/error
+$mensaje_success = $_GET['success'] ?? null;
+$mensaje_error = $_GET['error'] ?? null;
 
 // Función para obtener clase CSS del proveedor
 function getProveedorClass($proveedor) {
@@ -120,7 +96,7 @@ function getProveedorIcon($proveedor) {
     <title><?php echo $page_title; ?> - <?php echo SITE_NAME; ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <title><?php echo $page_title; ?> - <?php echo SITE_NAME; ?></title>
-    <link rel="icon" type="image/png" href="../../../../imagenes/antares_logozz2.png">
+    <link rel="icon" type="image/png" href="/imagenes/antares_logozz2.png">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         .stats-card {
@@ -177,6 +153,136 @@ function getProveedorIcon($proveedor) {
             }
         }
         
+        /* Configuración de scroll para la tabla desktop */
+        .desktop-table {
+            border: 2px solid #d1d5db;
+            border-radius: 0.5rem;
+            background: white;
+            max-height: 600px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .desktop-table .table-container {
+            max-height: 600px;
+            overflow-y: auto;
+            overflow-x: auto;
+        }
+        
+        .desktop-table table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        /* Header sticky con mejor configuración */
+        .desktop-table thead {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: #f9fafb;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+        }
+        
+        .desktop-table thead th {
+            background: #f9fafb;
+            position: sticky;
+            top: 0;
+            z-index: 15;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .desktop-table tbody {
+            background: white;
+        }
+        
+        /* Scroll personalizado mejorado */
+        .desktop-table .table-container::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        
+        .desktop-table .table-container::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        
+        .desktop-table .table-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+        
+        .desktop-table .table-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+            
+            /* Mejorar separación visual en scroll */
+            .desktop-table tbody tr {
+                border-bottom: 1px solid #e5e7eb;
+                transition: background-color 0.2s ease;
+            }
+            
+            .desktop-table tbody tr:hover {
+                background-color: #f8fafc;
+            }
+            
+            /* Optimizar contenido de celdas para scroll */
+            .desktop-table td {
+                padding: 12px 16px;
+                vertical-align: middle;
+            }
+            
+            .desktop-table th {
+                padding: 12px 16px;
+                white-space: nowrap;
+                font-weight: 600;
+            }
+            
+            /* Anchos específicos para columnas críticas */
+            .desktop-table th:nth-child(1),
+            .desktop-table td:nth-child(1) { 
+                min-width: 250px;
+                max-width: 300px;
+            }
+            
+            .desktop-table th:nth-child(2),
+            .desktop-table td:nth-child(2) { 
+                min-width: 160px;
+                max-width: 180px;
+                text-align: center;
+            }
+            
+            .desktop-table th:nth-child(3),
+            .desktop-table td:nth-child(3) { 
+                min-width: 120px;
+                max-width: 140px;
+                text-align: center;
+            }
+            
+            .desktop-table th:nth-child(4),
+            .desktop-table td:nth-child(4) { 
+                min-width: 150px;
+                max-width: 180px;
+                text-align: center;
+            }
+            
+            .desktop-table th:nth-child(5),
+            .desktop-table td:nth-child(5) { 
+                min-width: 120px;
+                max-width: 140px;
+                text-align: center;
+            }
+            
+            .desktop-table th:nth-child(6),
+            .desktop-table td:nth-child(6) { 
+                min-width: 180px;
+                max-width: 200px;
+                text-align: center;
+            }
+        }
+        
+        /* Estilos para las tarjetas móviles */
         .user-card {
             border-radius: 0.75rem;
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
@@ -224,6 +330,49 @@ function getProveedorIcon($proveedor) {
                         </div>
                     </div>
                 </div>
+
+                <!-- Notificaciones de éxito/error -->
+                <?php if ($mensaje_success): ?>
+                    <div class="mb-6 bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-check-circle text-green-400"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-green-700 font-medium">
+                                    <?php echo htmlspecialchars($mensaje_success); ?>
+                                </p>
+                            </div>
+                            <div class="ml-auto">
+                                <button onclick="this.parentElement.parentElement.parentElement.remove()" 
+                                        class="text-green-400 hover:text-green-600">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+                <?php if ($mensaje_error): ?>
+                    <div class="mb-6 bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-circle text-red-400"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-red-700 font-medium">
+                                    <?php echo htmlspecialchars($mensaje_error); ?>
+                                </p>
+                            </div>
+                            <div class="ml-auto">
+                                <button onclick="this.parentElement.parentElement.parentElement.remove()" 
+                                        class="text-red-400 hover:text-red-600">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
 
                 <!-- Mostrar errores -->
                 <?php if (isset($error)): ?>
@@ -303,55 +452,68 @@ function getProveedorIcon($proveedor) {
 
                 <!-- Filtros -->
                 <div class="bg-white rounded-lg shadow-lg p-4 lg:p-6 mb-6">
-                    <form method="GET" class="filter-form grid gap-4">
+                    <div class="filter-form grid gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Buscar por nombre</label>
-                            <input type="text" name="nombre" value="<?php echo htmlspecialchars($filtro_nombre); ?>"
-                                   class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full text-sm"
-                                   placeholder="Nombre del usuario">
+                            <div class="relative">
+                                <input type="text" id="filtro-nombre" 
+                                       class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full text-sm pr-8"
+                                       placeholder="Nombre del usuario">
+                                <button type="button" id="limpiar-nombre" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 hidden">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
                         </div>
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Buscar por email</label>
-                            <input type="email" name="email" value="<?php echo htmlspecialchars($filtro_email); ?>"
-                                   class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full text-sm"
-                                   placeholder="Email del usuario">
+                            <div class="relative">
+                                <input type="email" id="filtro-email" 
+                                       class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full text-sm pr-8"
+                                       placeholder="Email del usuario">
+                                <button type="button" id="limpiar-email" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 hidden">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
                         </div>
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Estado de verificación</label>
-                            <select name="verificado" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full text-sm">
+                            <select id="filtro-verificado" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full text-sm">
                                 <option value="">Todos</option>
-                                <option value="1" <?php echo $filtro_verificado === '1' ? 'selected' : ''; ?>>Verificados</option>
-                                <option value="0" <?php echo $filtro_verificado === '0' ? 'selected' : ''; ?>>No verificados</option>
+                                <option value="1">Verificados</option>
+                                <option value="0">No verificados</option>
                             </select>
                         </div>
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de registro</label>
-                            <select name="proveedor" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full text-sm">
+                            <select id="filtro-proveedor" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full text-sm">
                                 <option value="">Todos</option>
-                                <option value="manual" <?php echo $filtro_proveedor === 'manual' ? 'selected' : ''; ?>>Manual</option>
-                                <option value="google" <?php echo $filtro_proveedor === 'google' ? 'selected' : ''; ?>>Google</option>
-                                <option value="apple" <?php echo $filtro_proveedor === 'apple' ? 'selected' : ''; ?>>Apple</option>
-                                <option value="microsoft" <?php echo $filtro_proveedor === 'microsoft' ? 'selected' : ''; ?>>Microsoft</option>
+                                <option value="manual">Manual</option>
+                                <option value="google">Google</option>
+                                <option value="apple">Apple</option>
+                                <option value="microsoft">Microsoft</option>
                             </select>
                         </div>
                         
-                        <div class="filter-actions flex items-end gap-2">
-                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
-                                <i class="fas fa-filter mr-1"></i>Filtrar
+                        <div class="filter-actions flex items-center gap-3">
+                            <span id="contador-resultados" class="text-sm text-gray-600">
+                                <i class="fas fa-list mr-1"></i>
+                                <span id="total-resultados"><?php echo count($usuarios); ?></span> usuarios
+                            </span>
+                            <button type="button" onclick="limpiarFiltros()" 
+                                    class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm border border-gray-300 transition-colors">
+                                <i class="fas fa-eraser mr-1"></i>Limpiar
                             </button>
-                            <a href="index.php" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors text-sm">
-                                <i class="fas fa-times mr-1"></i>Limpiar
-                            </a>
                         </div>
-                    </form>
+                    </div>
                 </div>
 
                 <!-- Tabla de usuarios - Vista Desktop -->
+                                <!-- Vista Desktop - Tabla con Scroll -->
                 <div class="desktop-table bg-white rounded-lg shadow-lg overflow-hidden">
-                    <div class="overflow-x-auto">
+                    <div class="table-container">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
@@ -569,82 +731,53 @@ function getProveedorIcon($proveedor) {
                         <?php endforeach; ?>
                     <?php endif; ?>
                 </div>
-
-                    <!-- Paginación -->
-                    <?php if ($total_paginas > 1): ?>
-                        <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-                            <div class="flex-1 flex justify-between sm:hidden">
-                                <?php if ($pagina_actual > 1): ?>
-                                    <a href="?<?php echo http_build_query(array_merge($_GET, ['pagina' => $pagina_actual - 1])); ?>" 
-                                       class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                                        Anterior
-                                    </a>
-                                <?php endif; ?>
-                                <?php if ($pagina_actual < $total_paginas): ?>
-                                    <a href="?<?php echo http_build_query(array_merge($_GET, ['pagina' => $pagina_actual + 1])); ?>" 
-                                       class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                                        Siguiente
-                                    </a>
-                                <?php endif; ?>
-                            </div>
-                            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                                <div>
-                                    <p class="text-sm text-gray-700">
-                                        Mostrando 
-                                        <span class="font-medium"><?php echo ($offset + 1); ?></span>
-                                        a 
-                                        <span class="font-medium"><?php echo min($offset + $registros_por_pagina, $total_registros); ?></span>
-                                        de 
-                                        <span class="font-medium"><?php echo $total_registros; ?></span>
-                                        resultados
-                                    </p>
-                                </div>
-                                <div>
-                                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                                        <?php for ($i = 1; $i <= $total_paginas; $i++): ?>
-                                            <a href="?<?php echo http_build_query(array_merge($_GET, ['pagina' => $i])); ?>" 
-                                               class="relative inline-flex items-center px-4 py-2 border text-sm font-medium
-                                                      <?php echo $i === $pagina_actual 
-                                                          ? 'z-10 bg-blue-50 border-blue-500 text-blue-600' 
-                                                          : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'; ?>">
-                                                <?php echo $i; ?>
-                                            </a>
-                                        <?php endfor; ?>
-                                    </nav>
-                                </div>
-                            </div>
-                        </div>
-                    <?php endif; ?>
-                </div>
             </div>
         </div>
     </div>
 
     <!-- Modal de confirmación para eliminar -->
     <div id="modalEliminar" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="relative top-20 mx-auto p-5 border w-[450px] shadow-xl rounded-lg bg-white">
             <div class="mt-3 text-center">
-                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
-                    <i class="fas fa-exclamation-triangle text-red-600"></i>
+                <div class="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-red-100 mb-4">
+                    <i class="fas fa-user-times text-red-600 text-xl"></i>
                 </div>
-                <h3 class="text-lg font-medium text-gray-900 mt-2">Eliminar Usuario</h3>
-                <div class="mt-2 px-7 py-3">
-                    <p class="text-sm text-gray-500 mb-4">
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">Eliminar Usuario</h3>
+                <div class="mt-2 px-4 py-3">
+                    <p class="text-sm text-gray-500 mb-6 leading-relaxed">
                         ¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer.
                     </p>
+                    
+                    <!-- Advertencia de datos relacionados -->
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-exclamation-triangle text-yellow-500 mr-2 mt-0.5"></i>
+                            <div class="text-xs text-yellow-700">
+                                <strong>Advertencia:</strong> Se eliminarán todos los datos del usuario, pero las reservas históricas se mantendrán de forma anónima para conservar registros contables.
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="text-left">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Motivo de eliminación (opcional):</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-clipboard-list mr-1"></i>Motivo de eliminación (opcional):
+                        </label>
                         <textarea name="motivo" rows="3" 
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
-                                  placeholder="Ingrese el motivo de la eliminación..."></textarea>
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm resize-none"
+                                  placeholder="Ej: Solicitud del usuario, cuenta duplicada, violación de términos..."></textarea>
+                        <div class="text-xs text-gray-400 mt-1">
+                            Este motivo quedará registrado en el historial administrativo
+                        </div>
                     </div>
                 </div>
-                <div class="items-center px-4 py-3">
-                    <button id="btnConfirmarEliminar" class="px-4 py-2 bg-red-500 text-white text-base font-medium rounded-md w-auto hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300 mr-2">
-                        Eliminar
+                <div class="flex items-center justify-center gap-3 px-4 py-4">
+                    <button id="btnConfirmarEliminar" 
+                            class="px-6 py-2 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors">
+                        <i class="fas fa-trash mr-2"></i>Eliminar Usuario
                     </button>
-                    <button onclick="cerrarModalEliminar()" class="px-4 py-2 bg-gray-300 text-gray-800 text-base font-medium rounded-md w-auto hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300">
-                        Cancelar
+                    <button onclick="cerrarModalEliminar()" 
+                            class="px-6 py-2 bg-gray-200 text-gray-800 text-sm font-semibold rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
+                        <i class="fas fa-times mr-2"></i>Cancelar
                     </button>
                 </div>
             </div>
@@ -656,42 +789,219 @@ function getProveedorIcon($proveedor) {
 
         function eliminarUsuario(id) {
             usuarioAEliminar = id;
+            
+            // Buscar información del usuario en la tabla para mostrarla en el modal
+            const filaUsuario = document.querySelector(`button[onclick="eliminarUsuario(${id})"]`)?.closest('tr');
+            let nombreUsuario = 'este usuario';
+            let emailUsuario = '';
+            
+            if (filaUsuario) {
+                const celdaUsuario = filaUsuario.cells[0];
+                if (celdaUsuario) {
+                    const nombreDiv = celdaUsuario.querySelector('.text-sm.font-medium');
+                    const emailDiv = celdaUsuario.querySelector('.text-sm.text-gray-500');
+                    if (nombreDiv) nombreUsuario = nombreDiv.textContent.trim();
+                    if (emailDiv) emailUsuario = emailDiv.textContent.trim();
+                }
+            } else {
+                // Buscar en tarjetas móviles
+                const tarjetaUsuario = document.querySelector(`button[onclick="eliminarUsuario(${id})"]`)?.closest('.user-card');
+                if (tarjetaUsuario) {
+                    const nombreH3 = tarjetaUsuario.querySelector('h3.font-semibold');
+                    const emailP = tarjetaUsuario.querySelector('p.text-xs.text-gray-500');
+                    if (nombreH3) nombreUsuario = nombreH3.textContent.trim();
+                    if (emailP) emailUsuario = emailP.textContent.trim();
+                }
+            }
+            
+            // Actualizar el contenido del modal
+            const modalTitulo = document.querySelector('#modalEliminar h3');
+            const modalTexto = document.querySelector('#modalEliminar .text-sm.text-gray-500');
+            
+            if (modalTitulo) {
+                modalTitulo.textContent = `Eliminar Usuario: ${nombreUsuario}`;
+            }
+            
+            if (modalTexto) {
+                modalTexto.innerHTML = `
+                    ¿Estás seguro de que deseas eliminar a <strong>${nombreUsuario}</strong> (${emailUsuario})?<br>
+                    Esta acción no se puede deshacer y se eliminarán todos los datos asociados.
+                `;
+            }
+            
+            // Limpiar el textarea
+            const textareaMotivo = document.querySelector('textarea[name="motivo"]');
+            if (textareaMotivo) {
+                textareaMotivo.value = '';
+            }
+            
             document.getElementById('modalEliminar').classList.remove('hidden');
         }
 
         function cerrarModalEliminar() {
+            // Ocultar modal
             document.getElementById('modalEliminar').classList.add('hidden');
+            
+            // Resetear variables
             usuarioAEliminar = null;
+            
+            // Restaurar estado del botón eliminar
+            const btnEliminar = document.getElementById('btnConfirmarEliminar');
+            const btnCancelar = document.querySelector('button[onclick="cerrarModalEliminar()"]');
+            
+            if (btnEliminar) {
+                btnEliminar.disabled = false;
+                btnEliminar.innerHTML = '<i class="fas fa-trash mr-2"></i>Eliminar Usuario';
+                btnEliminar.className = 'px-6 py-2 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors';
+            }
+            
+            if (btnCancelar) {
+                btnCancelar.disabled = false;
+            }
+            
+            // Restaurar título y texto del modal
+            const modalTitulo = document.querySelector('#modalEliminar h3');
+            const modalTexto = document.querySelector('#modalEliminar .text-sm.text-gray-500');
+            
+            if (modalTitulo) {
+                modalTitulo.textContent = 'Eliminar Usuario';
+            }
+            
+            if (modalTexto) {
+                modalTexto.innerHTML = '¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer.';
+            }
+            
+            // Limpiar textarea
+            const textareaMotivo = document.querySelector('textarea[name="motivo"]');
+            if (textareaMotivo) {
+                textareaMotivo.value = '';
+            }
         }
+        
+        // Cerrar modal al hacer clic fuera de él
+        document.getElementById('modalEliminar').addEventListener('click', function(e) {
+            if (e.target === this) {
+                cerrarModalEliminar();
+            }
+        });
+        
+        // Cerrar modal con tecla ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !document.getElementById('modalEliminar').classList.contains('hidden')) {
+                cerrarModalEliminar();
+            }
+        });
 
         function verificarEmail(id) {
-            if (confirm('¿Deseas marcar el email de este usuario como verificado?')) {
-                fetch('verificar_email.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ id_usuario: id })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        location.reload();
-                    } else {
-                        alert('Error al verificar email: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error al verificar email');
-                });
+            // Mostrar confirmación
+            const confirmacion = confirm('¿Deseas marcar el email de este usuario como verificado?\n\nEsta acción enviará una notificación al usuario.');
+            
+            if (!confirmacion) return;
+            
+            // Buscar el botón que se presionó para mostrar estado de carga
+            const botonVerificar = document.querySelector(`button[onclick="verificarEmail(${id})"]`);
+            let iconoOriginal = '';
+            let textoOriginal = '';
+            
+            if (botonVerificar) {
+                iconoOriginal = botonVerificar.innerHTML;
+                botonVerificar.disabled = true;
+                botonVerificar.innerHTML = '<i class="fas fa-spinner fa-spin text-sm"></i><span class="ml-1 text-xs">Verificando...</span>';
+                botonVerificar.className = 'text-gray-400 cursor-not-allowed transition-colors';
             }
+            
+            fetch('verificar_email.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ id_usuario: id })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Mostrar mensaje de éxito
+                    mostrarNotificacion('Email verificado exitosamente', 'success');
+                    
+                    // Recargar la página después de un momento para mostrar los cambios
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    // Mostrar error
+                    mostrarNotificacion('Error al verificar email: ' + data.message, 'error');
+                    
+                    // Restaurar botón
+                    if (botonVerificar) {
+                        botonVerificar.disabled = false;
+                        botonVerificar.innerHTML = iconoOriginal;
+                        botonVerificar.className = 'text-purple-600 hover:text-purple-900';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarNotificacion('Error de conexión al verificar email', 'error');
+                
+                // Restaurar botón
+                if (botonVerificar) {
+                    botonVerificar.disabled = false;
+                    botonVerificar.innerHTML = iconoOriginal;
+                    botonVerificar.className = 'text-purple-600 hover:text-purple-900';
+                }
+            });
+        }
+        
+        // Función para mostrar notificaciones
+        function mostrarNotificacion(mensaje, tipo = 'info') {
+            // Crear elemento de notificación
+            const notificacion = document.createElement('div');
+            notificacion.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full opacity-0`;
+            
+            // Estilos según tipo
+            if (tipo === 'success') {
+                notificacion.className += ' bg-green-500 text-white';
+                notificacion.innerHTML = `<i class="fas fa-check-circle mr-2"></i>${mensaje}`;
+            } else if (tipo === 'error') {
+                notificacion.className += ' bg-red-500 text-white';
+                notificacion.innerHTML = `<i class="fas fa-exclamation-circle mr-2"></i>${mensaje}`;
+            } else {
+                notificacion.className += ' bg-blue-500 text-white';
+                notificacion.innerHTML = `<i class="fas fa-info-circle mr-2"></i>${mensaje}`;
+            }
+            
+            // Agregar al DOM
+            document.body.appendChild(notificacion);
+            
+            // Animar entrada
+            setTimeout(() => {
+                notificacion.className = notificacion.className.replace('translate-x-full opacity-0', 'translate-x-0 opacity-100');
+            }, 100);
+            
+            // Remover después de 4 segundos
+            setTimeout(() => {
+                notificacion.className = notificacion.className.replace('translate-x-0 opacity-100', 'translate-x-full opacity-0');
+                setTimeout(() => {
+                    if (notificacion.parentNode) {
+                        notificacion.parentNode.removeChild(notificacion);
+                    }
+                }, 300);
+            }, 4000);
         }
 
         document.getElementById('btnConfirmarEliminar').addEventListener('click', function() {
             if (usuarioAEliminar) {
                 const motivo = document.querySelector('textarea[name="motivo"]')?.value || '';
+                const btnEliminar = document.getElementById('btnConfirmarEliminar');
+                const btnCancelar = document.querySelector('button[onclick="cerrarModalEliminar()"]');
                 
+                // Cambiar estado del botón a loading
+                btnEliminar.disabled = true;
+                btnEliminar.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Eliminando...';
+                btnEliminar.className = 'px-4 py-2 bg-gray-400 text-white text-base font-medium rounded-md w-auto cursor-not-allowed mr-2';
+                btnCancelar.disabled = true;
+                
+                // Crear formulario y enviar
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = 'eliminar.php';
@@ -712,6 +1022,220 @@ function getProveedorIcon($proveedor) {
                 form.submit();
             }
         });
+
+        // ============================================
+        // FILTROS EN TIEMPO REAL
+        // ============================================
+        
+        let filtroTimeout;
+        
+        // Función para filtrar usuarios
+        function filtrarUsuarios() {
+            const filtroNombre = document.getElementById('filtro-nombre')?.value.toLowerCase() || '';
+            const filtroEmail = document.getElementById('filtro-email')?.value.toLowerCase() || '';
+            const filtroVerificado = document.getElementById('filtro-verificado')?.value || '';
+            const filtroProveedor = document.getElementById('filtro-proveedor')?.value || '';
+            
+            // Filtrar tabla desktop
+            const filasTabla = document.querySelectorAll('.desktop-table tbody tr');
+            let visiblesTabla = 0;
+            
+            filasTabla.forEach(function(fila) {
+                // Verificar si es la fila de "no hay resultados"
+                if (fila.querySelector('td[colspan]')) {
+                    fila.style.display = 'none';
+                    return;
+                }
+                
+                let visible = true;
+                
+                // Filtro por nombre (incluyendo email en el campo de usuario)
+                if (filtroNombre) {
+                    const celdaUsuario = fila.cells[0];
+                    const textoUsuario = celdaUsuario ? celdaUsuario.textContent.toLowerCase() : '';
+                    if (!textoUsuario.includes(filtroNombre)) {
+                        visible = false;
+                    }
+                }
+                
+                // Filtro por email específico
+                if (filtroEmail) {
+                    const celdaUsuario = fila.cells[0];
+                    const textoEmail = celdaUsuario ? celdaUsuario.textContent.toLowerCase() : '';
+                    if (!textoEmail.includes(filtroEmail)) {
+                        visible = false;
+                    }
+                }
+                
+                // Filtro por verificación
+                if (filtroVerificado) {
+                    const celdaVerificado = fila.cells[2];
+                    if (celdaVerificado) {
+                        const textoEstado = celdaVerificado.textContent.toLowerCase();
+                        const esVerificado = textoEstado.includes('verificado') && !textoEstado.includes('pendiente');
+                        
+                        if ((filtroVerificado === '1' && !esVerificado) || 
+                            (filtroVerificado === '0' && esVerificado)) {
+                            visible = false;
+                        }
+                    }
+                }
+                
+                // Filtro por proveedor OAuth
+                if (filtroProveedor) {
+                    const celdaProveedor = fila.cells[1];
+                    const textoProveedor = celdaProveedor ? celdaProveedor.textContent.toLowerCase() : '';
+                    if (!textoProveedor.includes(filtroProveedor.toLowerCase())) {
+                        visible = false;
+                    }
+                }
+                
+                fila.style.display = visible ? '' : 'none';
+                if (visible) visiblesTabla++;
+            });
+            
+            // Filtrar tarjetas móviles
+            const tarjetas = document.querySelectorAll('.user-card');
+            let visiblesTarjetas = 0;
+            
+            tarjetas.forEach(function(tarjeta) {
+                let visible = true;
+                
+                // Filtro por nombre
+                if (filtroNombre) {
+                    const textoTarjeta = tarjeta.textContent.toLowerCase();
+                    if (!textoTarjeta.includes(filtroNombre)) {
+                        visible = false;
+                    }
+                }
+                
+                // Filtro por email
+                if (filtroEmail) {
+                    const textoTarjeta = tarjeta.textContent.toLowerCase();
+                    if (!textoTarjeta.includes(filtroEmail)) {
+                        visible = false;
+                    }
+                }
+                
+                // Filtro por verificación
+                if (filtroVerificado) {
+                    const badgeVerificado = tarjeta.querySelector('.status-badge');
+                    if (badgeVerificado) {
+                        const textoEstado = badgeVerificado.textContent.toLowerCase();
+                        const esVerificado = textoEstado.includes('verificado') && !textoEstado.includes('pendiente');
+                        
+                        if ((filtroVerificado === '1' && !esVerificado) || 
+                            (filtroVerificado === '0' && esVerificado)) {
+                            visible = false;
+                        }
+                    }
+                }
+                
+                // Filtro por proveedor
+                if (filtroProveedor) {
+                    const spanProveedor = tarjeta.querySelector('span[class*="rounded-full"]');
+                    const textoProveedor = spanProveedor ? spanProveedor.textContent.toLowerCase() : '';
+                    if (!textoProveedor.includes(filtroProveedor.toLowerCase())) {
+                        visible = false;
+                    }
+                }
+                
+                tarjeta.style.display = visible ? '' : 'none';
+                if (visible) visiblesTarjetas++;
+            });
+            
+            // Mostrar mensaje si no hay resultados
+            mostrarMensajeNoResultados(visiblesTabla, visiblesTarjetas);
+        }
+        
+        // Función para mostrar mensaje de no resultados
+        function mostrarMensajeNoResultados(visiblesTabla, visiblesTarjetas) {
+            // Para tabla desktop
+            const tablaBody = document.querySelector('.desktop-table tbody');
+            if (tablaBody) {
+                let filaSinResultados = tablaBody.querySelector('tr[data-no-results]');
+                
+                if (visiblesTabla === 0) {
+                    if (!filaSinResultados) {
+                        filaSinResultados = document.createElement('tr');
+                        filaSinResultados.setAttribute('data-no-results', 'true');
+                        filaSinResultados.innerHTML = `
+                            <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                                <i class="fas fa-search text-4xl text-gray-300 mb-4"></i>
+                                <p class="text-lg font-medium">No se encontraron usuarios</p>
+                                <p class="text-sm">Intenta ajustar los filtros de búsqueda</p>
+                            </td>
+                        `;
+                        tablaBody.appendChild(filaSinResultados);
+                    }
+                    filaSinResultados.style.display = '';
+                } else if (filaSinResultados) {
+                    filaSinResultados.style.display = 'none';
+                }
+            }
+            
+            // Para tarjetas móviles
+            const contenedorTarjetas = document.querySelector('.mobile-cards');
+            if (contenedorTarjetas) {
+                let tarjetaSinResultados = contenedorTarjetas.querySelector('[data-no-results]');
+                
+                if (visiblesTarjetas === 0) {
+                    if (!tarjetaSinResultados) {
+                        tarjetaSinResultados = document.createElement('div');
+                        tarjetaSinResultados.setAttribute('data-no-results', 'true');
+                        tarjetaSinResultados.className = 'bg-white rounded-lg shadow p-6 text-center';
+                        tarjetaSinResultados.innerHTML = `
+                            <i class="fas fa-search text-4xl text-gray-300 mb-4"></i>
+                            <p class="text-lg font-medium text-gray-900 mb-2">No se encontraron usuarios</p>
+                            <p class="text-sm text-gray-500">Intenta ajustar los filtros de búsqueda</p>
+                        `;
+                        contenedorTarjetas.appendChild(tarjetaSinResultados);
+                    }
+                    tarjetaSinResultados.style.display = '';
+                } else if (tarjetaSinResultados) {
+                    tarjetaSinResultados.style.display = 'none';
+                }
+            }
+        }
+        
+        // Función con debounce para optimizar rendimiento
+        function filtrarConDebounce() {
+            clearTimeout(filtroTimeout);
+            filtroTimeout = setTimeout(filtrarUsuarios, 300);
+        }
+        
+        // Event listeners para los campos de filtro
+        document.addEventListener('DOMContentLoaded', function() {
+            const filtroNombre = document.getElementById('filtro-nombre');
+            const filtroEmail = document.getElementById('filtro-email');
+            const filtroVerificado = document.getElementById('filtro-verificado');
+            const filtroProveedor = document.getElementById('filtro-proveedor');
+            
+            if (filtroNombre) {
+                filtroNombre.addEventListener('input', filtrarConDebounce);
+            }
+            
+            if (filtroEmail) {
+                filtroEmail.addEventListener('input', filtrarConDebounce);
+            }
+            
+            if (filtroVerificado) {
+                filtroVerificado.addEventListener('change', filtrarUsuarios);
+            }
+            
+            if (filtroProveedor) {
+                filtroProveedor.addEventListener('change', filtrarUsuarios);
+            }
+        });
+        
+        // Función para limpiar filtros
+        function limpiarFiltros() {
+            document.getElementById('filtro-nombre').value = '';
+            document.getElementById('filtro-email').value = '';
+            document.getElementById('filtro-verificado').value = '';
+            document.getElementById('filtro-proveedor').value = '';
+            filtrarUsuarios();
+        }
     </script>
 </body>
 </html>

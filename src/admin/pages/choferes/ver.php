@@ -7,6 +7,11 @@ require_once '../../functions/admin_functions.php';
 verificarSesionAdmin();
 $admin = obtenerAdminActual();
 
+// Función auxiliar para manejar valores nulos de forma segura
+function safeHtmlSpecialChars($value) {
+    return htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8');
+}
+
 // Obtener ID del chofer
 $id_chofer = intval($_GET['id'] ?? 0);
 
@@ -17,6 +22,17 @@ if (!$id_chofer) {
 
 try {
     $connection = getConnection();
+    
+    // Verificar si existe el campo foto_url
+    $has_foto_column = false;
+    try {
+        $check_column_sql = "SHOW COLUMNS FROM choferes LIKE 'foto_url'";
+        $check_column_stmt = $connection->prepare($check_column_sql);
+        $check_column_stmt->execute();
+        $has_foto_column = ($check_column_stmt->fetch() !== false);
+    } catch (Exception $e) {
+        $has_foto_column = false;
+    }
     
     // Obtener información del chofer con estadísticas
     $chofer_sql = "SELECT c.*,
@@ -177,20 +193,50 @@ try {
                     <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
                         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                             <div class="flex items-center">
-                                <div class="h-20 w-20 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0">
-                                    <span class="text-white font-bold text-2xl">
-                                        <?php echo strtoupper(substr($chofer['nombre'], 0, 1) . substr($chofer['apellido'] ?? '', 0, 1)); ?>
-                                    </span>
+                                <!-- Foto del chofer -->
+                                <div class="h-20 w-20 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0 overflow-hidden border-4 border-white shadow-lg">
+                                    <?php 
+                                    $foto_url = ($has_foto_column && !empty($chofer['foto_url'])) ? $chofer['foto_url'] : '';
+                                    $mostrar_foto = false;
+                                    $foto_src = '';
+                                    
+                                    if ($foto_url) {
+                                        // Manejar rutas tanto nuevas (completas) como legacy (solo nombre)
+                                        $foto_path = strpos($foto_url, 'storage/uploads/choferes/') === 0 
+                                            ? "../../../../" . $foto_url 
+                                            : "../../../../storage/uploads/choferes/" . $foto_url;
+                                        $foto_src = strpos($foto_url, 'storage/uploads/choferes/') === 0 
+                                            ? "../../../../" . $foto_url 
+                                            : "../../../../storage/uploads/choferes/" . $foto_url;
+                                        
+                                        $mostrar_foto = file_exists($foto_path);
+                                    }
+                                    
+                                    if ($mostrar_foto): ?>
+                                        <img src="<?php echo $foto_src; ?>" 
+                                             alt="Foto de <?php echo safeHtmlSpecialChars($chofer['nombre']); ?>" 
+                                             class="h-full w-full object-cover rounded-full">
+                                    <?php else: ?>
+                                        <span class="text-white font-bold text-2xl">
+                                            <?php echo strtoupper(substr($chofer['nombre'], 0, 1) . substr(safeHtmlSpecialChars($chofer['apellido']), 0, 1)); ?>
+                                        </span>
+                                    <?php endif; ?>
                                 </div>
                                 <div class="ml-6">
                                     <h1 class="text-2xl lg:text-3xl font-bold text-gray-900">
-                                        <?php echo htmlspecialchars($chofer['nombre'] . ' ' . ($chofer['apellido'] ?? '')); ?>
+                                        <?php echo safeHtmlSpecialChars($chofer['nombre'] . ' ' . ($chofer['apellido'] ?? '')); ?>
                                     </h1>
                                     <p class="text-gray-600">ID: #<?php echo $chofer['id_chofer']; ?></p>
-                                    <?php if ($chofer['licencia']): ?>
+                                    <?php if (!empty($chofer['licencia'])): ?>
                                         <div class="flex items-center mt-2">
                                             <i class="fas fa-id-badge text-gray-400 mr-2"></i>
-                                            <span class="text-sm text-gray-600">Licencia: <?php echo htmlspecialchars($chofer['licencia']); ?></span>
+                                            <span class="text-sm text-gray-600">Licencia: <?php echo safeHtmlSpecialChars($chofer['licencia']); ?></span>
+                                        </div>
+                                    <?php endif; ?>
+                                    <?php if (!empty($chofer['telefono'])): ?>
+                                        <div class="flex items-center mt-1">
+                                            <i class="fas fa-phone text-gray-400 mr-2"></i>
+                                            <span class="text-sm text-gray-600">Teléfono: <?php echo safeHtmlSpecialChars($chofer['telefono']); ?></span>
                                         </div>
                                     <?php endif; ?>
                                 </div>
@@ -200,7 +246,7 @@ try {
                                    class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
                                     <i class="fas fa-edit mr-2"></i>Editar
                                 </a>
-                                <button onclick="eliminarChofer(<?php echo $chofer['id_chofer']; ?>, '<?php echo htmlspecialchars($chofer['nombre'] . ' ' . ($chofer['apellido'] ?? '')); ?>')" 
+                                <button onclick="eliminarChofer(<?php echo $chofer['id_chofer']; ?>, '<?php echo safeHtmlSpecialChars($chofer['nombre'] . ' ' . ($chofer['apellido'] ?? '')); ?>')" 
                                         class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
                                     <i class="fas fa-trash mr-2"></i>Eliminar
                                 </button>

@@ -135,7 +135,7 @@ $reservas_recientes = getReservasRecientes(5);
                 </div>
 
                 <!-- Segunda fila de estadísticas - Métricas operativas -->
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
+                <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6 mb-6 lg:mb-8">
                     <!-- Reservas Pendientes -->
                     <div class="relative bg-gradient-to-br from-white via-yellow-50/30 to-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 lg:p-6 border border-yellow-100 overflow-hidden group">
                         <div class="absolute top-0 right-0 w-20 h-20 bg-yellow-100/20 rounded-full -mr-10 -mt-10"></div>
@@ -195,10 +195,29 @@ $reservas_recientes = getReservasRecientes(5);
                             </div>
                         </div>
                     </div>
+
+                    <!-- Ofertas Activas -->
+                    <div class="relative bg-gradient-to-br from-white via-emerald-50/30 to-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 lg:p-6 border border-emerald-100 overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-20 h-20 bg-emerald-100/20 rounded-full -mr-10 -mt-10"></div>
+                        <div class="absolute bottom-0 left-0 w-16 h-16 bg-emerald-200/10 rounded-full -ml-8 -mb-8"></div>
+                        <div class="relative flex items-center">
+                            <div class="p-3 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-xl shadow-sm group-hover:shadow-md transition-shadow">
+                                <i class="fas fa-tags text-emerald-600 text-lg lg:text-xl"></i>
+                            </div>
+                            <div class="ml-3 lg:ml-4">
+                                <p class="text-xs lg:text-sm text-gray-600 font-medium">Ofertas Activas</p>
+                                <p class="text-lg lg:text-2xl font-bold text-gray-900"><?php echo number_format($stats['stats_ofertas']['ofertas_activas'] ?? 0); ?></p>
+                                <div class="flex items-center text-xs text-emerald-600 mt-1">
+                                    <i class="fas fa-star mr-1"></i>
+                                    <?php echo number_format($stats['stats_ofertas']['ofertas_destacadas'] ?? 0); ?> destacadas
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Acciones Rápidas -->
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
+                <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6 mb-6 lg:mb-8">
                     <div class="relative bg-gradient-to-br from-white via-blue-50/20 to-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 lg:p-6 border border-blue-100/50 overflow-hidden group">
                         <div class="absolute top-0 right-0 w-16 h-16 bg-blue-100/10 rounded-full -mr-8 -mt-8"></div>
                         <div class="text-center relative">
@@ -229,7 +248,16 @@ $reservas_recientes = getReservasRecientes(5);
                     <div class="relative bg-gradient-to-br from-white via-orange-50/20 to-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 lg:p-6 border border-orange-100/50 overflow-hidden group">
                         <div class="absolute top-0 right-0 w-16 h-16 bg-orange-100/10 rounded-full -mr-8 -mt-8"></div>
                         <div class="text-center relative">
-                            <a href="#" onclick="mostrarReportesProximamente(); return false;" class="inline-flex items-center px-3 lg:px-4 py-2 bg-orange-500/80 text-white rounded-lg hover:bg-orange-600/90 transition duration-200 w-full justify-center text-sm lg:text-base">
+                            <a href="../ofertas/index.php" class="inline-flex items-center px-3 lg:px-4 py-2 bg-orange-500/80 text-white rounded-lg hover:bg-orange-600/90 transition duration-200 w-full justify-center text-sm lg:text-base">
+                                <i class="fas fa-tags mr-2"></i>Ofertas
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="relative bg-gradient-to-br from-white via-red-50/20 to-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 lg:p-6 border border-red-100/50 overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-red-100/10 rounded-full -mr-8 -mt-8"></div>
+                        <div class="text-center relative">
+                            <a href="#" onclick="mostrarReportesProximamente(); return false;" class="inline-flex items-center px-3 lg:px-4 py-2 bg-red-500/80 text-white rounded-lg hover:bg-red-600/90 transition duration-200 w-full justify-center text-sm lg:text-base">
                                 <i class="fas fa-chart-bar mr-2"></i>Reportes
                             </a>
                         </div>
@@ -238,26 +266,26 @@ $reservas_recientes = getReservasRecientes(5);
 
                 <!-- Sección de contenido principal - Gráficos -->
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8 mb-6 lg:mb-8">
-                    <!-- Gráfico de Reservas vs Objetivos -->
+                    <!-- Gráfico de Ingresos Mensuales -->
                     <div class="relative bg-gradient-to-br from-white via-slate-50/30 to-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 lg:p-6 border border-slate-100 overflow-hidden">
-                        <div class="absolute top-0 right-0 w-24 h-24 bg-blue-100/10 rounded-full -mr-12 -mt-12"></div>
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-100/10 rounded-full -mr-12 -mt-12"></div>
                         <div class="absolute bottom-0 left-0 w-20 h-20 bg-slate-100/20 rounded-full -ml-10 -mb-10"></div>
                         <div class="relative">
                             <div class="flex justify-between items-center mb-4">
-                                <h3 class="text-base lg:text-lg font-semibold text-gray-900">Reservas vs Objetivos</h3>
-                                <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">Últimos 6 meses</span>
+                                <h3 class="text-base lg:text-lg font-semibold text-gray-900">Ingresos Mensuales</h3>
+                                <span class="text-xs bg-emerald-100 text-emerald-800 px-2 py-1 rounded-full">Últimos 6 meses</span>
                             </div>
                             <div class="h-64 lg:h-80">
-                                <canvas id="reservas-chart"></canvas>
+                                <canvas id="ingresos-chart"></canvas>
                             </div>
                             <div class="mt-4 grid grid-cols-2 gap-4 text-center">
-                                <div class="bg-blue-50 rounded-lg p-3">
-                                    <p class="text-xs text-gray-600">Reservas este mes</p>
-                                    <p class="text-lg font-bold text-blue-600"><?php echo number_format($stats['reservas_mes'] ?? 0); ?></p>
+                                <div class="bg-emerald-50 rounded-lg p-3">
+                                    <p class="text-xs text-gray-600">Ingresos este mes</p>
+                                    <p class="text-lg font-bold text-emerald-600">S/ <?php echo number_format($stats['ingresos_mes'] ?? 0, 2); ?></p>
                                 </div>
-                                <div class="bg-green-50 rounded-lg p-3">
-                                    <p class="text-xs text-gray-600">Objetivo mensual</p>
-                                    <p class="text-lg font-bold text-green-600"><?php echo number_format($stats['objetivo_mensual'] ?? 50); ?></p>
+                                <div class="bg-blue-50 rounded-lg p-3">
+                                    <p class="text-xs text-gray-600">Promedio mensual</p>
+                                    <p class="text-lg font-bold text-blue-600">S/ <?php echo number_format($stats['promedio_ingresos'] ?? 0, 2); ?></p>
                                 </div>
                             </div>
                         </div>
@@ -275,6 +303,112 @@ $reservas_recientes = getReservasRecientes(5);
                             <div class="h-64 lg:h-80">
                                 <canvas id="estados-chart"></canvas>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección de Ofertas - Grid adicional -->
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8 mb-6 lg:mb-8">
+                    <!-- Ofertas Próximas a Vencer -->
+                    <div class="relative bg-gradient-to-br from-white via-red-50/30 to-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-red-100 overflow-hidden">
+                        <div class="absolute top-0 right-0 w-20 h-20 bg-red-100/20 rounded-full -mr-10 -mt-10"></div>
+                        <div class="relative p-4 lg:p-6 border-b border-gray-200">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-base lg:text-lg font-semibold text-gray-900">Ofertas por Vencer</h3>
+                                <span class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full">7 días</span>
+                            </div>
+                        </div>
+                        <div class="p-4 lg:p-6">
+                            <?php if (empty($stats['ofertas_por_vencer'])): ?>
+                                <div class="text-center py-8">
+                                    <i class="fas fa-tags text-gray-300 text-3xl mb-3"></i>
+                                    <p class="text-gray-500 text-sm">No hay ofertas próximas a vencer</p>
+                                </div>
+                            <?php else: ?>
+                                <div class="space-y-3">
+                                    <?php foreach ($stats['ofertas_por_vencer'] as $oferta): ?>
+                                        <div class="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                                            <div class="flex items-center flex-1">
+                                                <div class="flex-shrink-0 w-8 h-8 rounded-full bg-red-100 flex items-center justify-center mr-3">
+                                                    <i class="fas fa-exclamation-triangle text-red-600 text-sm"></i>
+                                                </div>
+                                                <div class="flex-1 min-w-0">
+                                                    <h4 class="font-medium text-gray-900 text-sm truncate">
+                                                        <?php echo htmlspecialchars($oferta['nombre']); ?>
+                                                    </h4>
+                                                    <div class="flex items-center text-xs text-gray-500 mt-1">
+                                                        <i class="fas fa-tag mr-1"></i>
+                                                        <?php echo $oferta['tipo_oferta']; ?>
+                                                        <?php if ($oferta['codigo_promocional']): ?>
+                                                            <span class="ml-2 font-mono"><?php echo $oferta['codigo_promocional']; ?></span>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="text-right">
+                                                <div class="text-sm font-medium text-red-600">
+                                                    <?php echo $oferta['dias_restantes']; ?> día<?php echo $oferta['dias_restantes'] != 1 ? 's' : ''; ?>
+                                                </div>
+                                                <div class="text-xs text-gray-500">
+                                                    <?php echo $oferta['usos_actuales']; ?> usos
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <!-- Ofertas Más Utilizadas -->
+                    <div class="relative bg-gradient-to-br from-white via-emerald-50/30 to-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-emerald-100 overflow-hidden">
+                        <div class="absolute top-0 right-0 w-20 h-20 bg-emerald-100/20 rounded-full -mr-10 -mt-10"></div>
+                        <div class="relative p-4 lg:p-6 border-b border-gray-200">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-base lg:text-lg font-semibold text-gray-900">Ofertas Más Utilizadas</h3>
+                                <span class="text-xs bg-emerald-100 text-emerald-600 px-2 py-1 rounded-full">Este mes</span>
+                            </div>
+                        </div>
+                        <div class="p-4 lg:p-6">
+                            <?php if (empty($stats['ofertas_mas_usadas'])): ?>
+                                <div class="text-center py-8">
+                                    <i class="fas fa-chart-line text-gray-300 text-3xl mb-3"></i>
+                                    <p class="text-gray-500 text-sm">No hay datos de uso de ofertas</p>
+                                </div>
+                            <?php else: ?>
+                                <div class="space-y-3">
+                                    <?php foreach ($stats['ofertas_mas_usadas'] as $index => $oferta): ?>
+                                        <div class="flex items-center justify-between p-3 bg-emerald-50 rounded-lg">
+                                            <div class="flex items-center flex-1">
+                                                <div class="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center mr-3">
+                                                    <span class="text-emerald-600 font-bold text-sm"><?php echo $index + 1; ?></span>
+                                                </div>
+                                                <div class="flex-1 min-w-0">
+                                                    <h4 class="font-medium text-gray-900 text-sm truncate">
+                                                        <?php echo htmlspecialchars($oferta['nombre']); ?>
+                                                    </h4>
+                                                    <div class="flex items-center text-xs text-gray-500 mt-1">
+                                                        <i class="fas fa-tag mr-1"></i>
+                                                        <?php echo $oferta['tipo_oferta']; ?>
+                                                        <span class="ml-2">
+                                                            <i class="fas fa-chart-bar mr-1"></i>
+                                                            <?php echo formatCurrency($oferta['descuento_total_mes'] ?: 0); ?> ahorrado
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="text-right">
+                                                <div class="text-sm font-medium text-emerald-600">
+                                                    <?php echo $oferta['usos_mes_actual']; ?> usos
+                                                </div>
+                                                <div class="text-xs text-gray-500">
+                                                    <?php echo $oferta['usos_actuales']; ?> total
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -526,10 +660,12 @@ $reservas_recientes = getReservasRecientes(5);
 
         // Datos para gráficos desde PHP
         const reservasData = <?php echo json_encode($stats['reservas_mensuales'] ?? []); ?>;
+        const ingresosData = <?php echo json_encode($stats['ingresos_mensuales'] ?? []); ?>;
         const estadosData = <?php echo json_encode($stats['reservas_por_estado'] ?? []); ?>;
         
         console.log('Dashboard Stats:', <?php echo json_encode($stats); ?>);
         console.log('Reservas Data:', reservasData);
+        console.log('Ingresos Data:', ingresosData);
         console.log('Estados Data:', estadosData);
 
         // Función para mostrar popup de reportes
@@ -610,81 +746,83 @@ $reservas_recientes = getReservasRecientes(5);
             return value.toString();
         }
 
-        // Gráfico de Reservas vs Objetivos
-        const reservasCtx = document.getElementById('reservas-chart');
+        // Gráfico de Ingresos Mensuales
+        const ingresosCtx = document.getElementById('ingresos-chart');
         
-        if (reservasCtx) {
-            // Generar datos para los últimos 6 meses
+        if (ingresosCtx) {
+            // Generar datos para los últimos 6 meses usando datos reales
             const meses = [];
-            const reservasReales = [];
-            const objetivos = [];
+            const ingresosReales = [];
             
             for (let i = 5; i >= 0; i--) {
                 const fecha = new Date();
                 fecha.setMonth(fecha.getMonth() - i);
-                meses.push(fecha.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' }));
+                const mesFormato = fecha.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' });
+                meses.push(mesFormato);
                 
-                // Datos simulados - en producción vendrían de la base de datos
-                const reservasDelMes = reservasData.find(r => {
-                    const mesData = new Date(r.mes + '-01');
-                    return mesData.getMonth() === fecha.getMonth() && mesData.getFullYear() === fecha.getFullYear();
-                });
+                // Buscar ingresos REALES del mes en los datos de PHP
+                const añoActual = fecha.getFullYear();
+                const mesActual = (fecha.getMonth() + 1).toString().padStart(2, '0');
+                const claveYear = `${añoActual}-${mesActual}`;
                 
-                reservasReales.push(reservasDelMes ? parseInt(reservasDelMes.total_reservas) : Math.floor(Math.random() * 40) + 10);
-                objetivos.push(50); // Objetivo fijo de 50 reservas por mes
+                // Buscar en los datos reales de ingresos mensuales
+                let ingresosDelMes = 0;
+                if (ingresosData && ingresosData.length > 0) {
+                    const ingresoReal = ingresosData.find(item => item.mes === claveYear);
+                    if (ingresoReal) {
+                        ingresosDelMes = parseFloat(ingresoReal.ingresos) || 0;
+                    }
+                }
+                
+                ingresosReales.push(ingresosDelMes);
             }
             
-            new Chart(reservasCtx, {
-                type: 'line',
+            new Chart(ingresosCtx, {
+                type: 'bar',
                 data: {
                     labels: meses,
                     datasets: [
                         {
-                            label: 'Reservas Reales',
-                            data: reservasReales,
-                            borderColor: '#3B82F6',
-                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                            tension: 0.4,
-                            fill: true,
-                            pointBackgroundColor: '#3B82F6',
-                            pointBorderColor: '#ffffff',
-                            pointBorderWidth: 2,
-                            pointRadius: 5
-                        },
-                        {
-                            label: 'Objetivo',
-                            data: objetivos,
-                            borderColor: '#10B981',
-                            backgroundColor: 'transparent',
-                            borderDash: [5, 5],
-                            tension: 0,
-                            fill: false,
-                            pointBackgroundColor: '#10B981',
-                            pointBorderColor: '#ffffff',
-                            pointBorderWidth: 2,
-                            pointRadius: 4
+                            label: 'Ingresos Mensuales (S/)',
+                            data: ingresosReales,
+                            backgroundColor: [
+                                'rgba(16, 185, 129, 0.8)',
+                                'rgba(34, 197, 94, 0.8)', 
+                                'rgba(59, 130, 246, 0.8)',
+                                'rgba(139, 92, 246, 0.8)',
+                                'rgba(236, 72, 153, 0.8)',
+                                'rgba(245, 158, 11, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgba(16, 185, 129, 1)',
+                                'rgba(34, 197, 94, 1)',
+                                'rgba(59, 130, 246, 1)',
+                                'rgba(139, 92, 246, 1)',
+                                'rgba(236, 72, 153, 1)',
+                                'rgba(245, 158, 11, 1)'
+                            ],
+                            borderWidth: 1,
+                            borderRadius: 4,
+                            borderSkipped: false,
                         }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false,
-                    },
                     plugins: {
                         legend: {
-                            position: 'top',
-                            labels: {
-                                usePointStyle: true,
-                                padding: 20
-                            }
+                            display: false
                         },
                         tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: 'white',
+                            bodyColor: 'white',
+                            borderColor: 'rgba(255, 255, 255, 0.1)',
+                            borderWidth: 1,
                             callbacks: {
                                 label: function(context) {
-                                    return context.dataset.label + ': ' + context.parsed.y + ' reservas';
+                                    return 'Ingresos: S/ ' + context.parsed.y.toLocaleString('es-PE');
                                 }
                             }
                         }
@@ -692,23 +830,38 @@ $reservas_recientes = getReservasRecientes(5);
                     scales: {
                         y: {
                             beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Número de Reservas'
-                            },
                             grid: {
-                                color: 'rgba(0, 0, 0, 0.1)'
+                                color: 'rgba(0, 0, 0, 0.05)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#6B7280',
+                                font: {
+                                    size: 11
+                                },
+                                callback: function(value) {
+                                    if (value >= 1000) {
+                                        return 'S/ ' + (value / 1000).toFixed(0) + 'K';
+                                    }
+                                    return 'S/ ' + value;
+                                }
                             }
                         },
                         x: {
-                            title: {
-                                display: true,
-                                text: 'Mes'
-                            },
                             grid: {
                                 display: false
+                            },
+                            ticks: {
+                                color: '#6B7280',
+                                font: {
+                                    size: 11
+                                }
                             }
                         }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
                     }
                 }
             });

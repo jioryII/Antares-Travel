@@ -15,7 +15,7 @@ function verificarSesionAPI() {
         return false;
     }
     
-    if (!isset($_SESSION['admin_rol']) || $_SESSION['admin_rol'] !== 'admin') {
+    if (!isset($_SESSION['admin_rol']) || !in_array($_SESSION['admin_rol'], ['admin', 'superadmin'])) {
         return false;
     }
     

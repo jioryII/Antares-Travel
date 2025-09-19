@@ -48,10 +48,7 @@ try {
     
     // Marcar email como verificado
     $update_sql = "UPDATE usuarios SET 
-                   email_verificado = 1, 
-                   fecha_verificacion = NOW(),
-                   token_verificacion = NULL,
-                   actualizado_en = NOW()
+                   email_verificado = 1
                    WHERE id_usuario = ?";
     
     $update_stmt = $connection->prepare($update_sql);
@@ -61,9 +58,14 @@ try {
         throw new Exception("No se pudo actualizar el estado de verificación");
     }
     
-    // Eliminar token de verificación si existe
-    $delete_token_sql = "DELETE FROM tokens_verificacion WHERE id_usuario = ?";
-    $connection->prepare($delete_token_sql)->execute([$id_usuario]);
+    // Intentar eliminar token de verificación si la tabla existe
+    try {
+        $delete_token_sql = "DELETE FROM tokens_verificacion WHERE id_usuario = ?";
+        $connection->prepare($delete_token_sql)->execute([$id_usuario]);
+    } catch (Exception $e) {
+        // Si la tabla no existe, continuar sin error
+        error_log("Tabla tokens_verificacion no existe: " . $e->getMessage());
+    }
     
     // Enviar email de confirmación al usuario
     $email_enviado = enviarEmailVerificacionCompletada($usuario['email'], $usuario['nombre']);

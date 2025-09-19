@@ -11,22 +11,70 @@ $page_title = "Crear Usuario";
 $success_message = '';
 $error_message = '';
 
+// Función para subir avatar
+function subirAvatar($archivo) {
+    $directorio_destino = __DIR__ . '/../../../../storage/uploads/avatars/';
+    $max_size = 5 * 1024 * 1024; // 5MB
+    $tipos_permitidos = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    
+    // Verificar si se subió el archivo
+    if (!isset($archivo) || $archivo['error'] !== UPLOAD_ERR_OK) {
+        throw new Exception('Error al subir el archivo');
+    }
+    
+    // Verificar tamaño
+    if ($archivo['size'] > $max_size) {
+        throw new Exception('El archivo es demasiado grande. Máximo 5MB.');
+    }
+    
+    // Verificar tipo MIME
+    $tipo_mime = mime_content_type($archivo['tmp_name']);
+    if (!in_array($tipo_mime, $tipos_permitidos)) {
+        throw new Exception('Tipo de archivo no permitido. Solo se permiten imágenes (JPG, PNG, GIF, WEBP).');
+    }
+    
+    // Crear directorio si no existe
+    if (!file_exists($directorio_destino)) {
+        mkdir($directorio_destino, 0777, true);
+    }
+    
+    // Generar nombre único
+    $extension = pathinfo($archivo['name'], PATHINFO_EXTENSION);
+    $nombre_archivo = 'avatar_' . uniqid() . '.' . strtolower($extension);
+    $ruta_completa = $directorio_destino . $nombre_archivo;
+    
+    // Mover archivo
+    if (!move_uploaded_file($archivo['tmp_name'], $ruta_completa)) {
+        throw new Exception('Error al guardar el archivo');
+    }
+    
+    // Retornar ruta relativa para la base de datos
+    return 'storage/uploads/avatars/' . $nombre_archivo;
+}
+
 // Procesar formulario
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $nombre = trim($_POST['nombre'] ?? '');
         $email = trim($_POST['email'] ?? '');
         $telefono = trim($_POST['telefono'] ?? '');
-        $fecha_nacimiento = $_POST['fecha_nacimiento'] ?? null;
-        $genero = $_POST['genero'] ?? null;
-        $pais = trim($_POST['pais'] ?? '');
         $password = $_POST['password'] ?? '';
         $email_verificado = isset($_POST['email_verificado']) ? 1 : 0;
         $enviar_email = isset($_POST['enviar_email']) ? 1 : 0;
         
+        // Manejar subida de avatar si se proporciona
+        $avatar_url = null;
+        if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
+            $avatar_url = subirAvatar($_FILES['avatar']);
+        }
+        
         // Validaciones básicas
         if (empty($nombre)) {
             throw new Exception("El nombre es obligatorio");
+        }
+        
+        if (strlen($nombre) > 100) {
+            throw new Exception("El nombre no puede tener más de 100 caracteres");
         }
         
         if (empty($email)) {
@@ -37,12 +85,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception("El formato del email no es válido");
         }
         
+        if (strlen($email) > 100) {
+            throw new Exception("El email no puede tener más de 100 caracteres");
+        }
+        
         if (empty($password)) {
             throw new Exception("La contraseña es obligatoria");
         }
         
         if (strlen($password) < 6) {
             throw new Exception("La contraseña debe tener al menos 6 caracteres");
+        }
+        
+        // Validar teléfono si se proporciona
+        if (!empty($telefono)) {
+            // Validar longitud (máximo 15 caracteres según estándar internacional)
+            if (strlen($telefono) > 15) {
+                throw new Exception("El teléfono no puede tener más de 15 caracteres");
+            }
+            
+            // Validar formato básico (números, espacios, paréntesis, guiones y signo +)
+            if (!preg_match('/^[\+]?[0-9\s\-\(\)]+$/', $telefono)) {
+                throw new Exception("El formato del teléfono no es válido. Solo se permiten números, espacios, paréntesis, guiones y el signo +");
+            }
         }
         
         $connection = getConnection();
@@ -57,34 +122,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         // Preparar datos para insertar
-        $password_hash = password_hash($password, PASSWORD_DEFAULT);
-        $token_verificacion = $email_verificado ? null : bin2hex(random_bytes(32));
+        $password_hash = password_hash($password, PASSWORD_BCRYPT);
         
         // Insertar usuario
         $insert_sql = "INSERT INTO usuarios (
-                        nombre, email, telefono, fecha_nacimiento, genero, pais,
-                        password_hash, email_verificado, token_verificacion,
-                        proveedor_oauth, creado_en
-                       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'manual', NOW())";
+                        nombre, email, telefono, password_hash, email_verificado, 
+                        avatar_url, proveedor_oauth
+                       ) VALUES (?, ?, ?, ?, ?, ?, 'manual')";
         
         $insert_stmt = $connection->prepare($insert_sql);
         $insert_stmt->execute([
             $nombre,
             $email,
             $telefono ?: null,
-            $fecha_nacimiento ?: null,
-            $genero ?: null,
-            $pais ?: null,
             $password_hash,
             $email_verificado,
-            $token_verificacion
+            $avatar_url
         ]);
         
         $usuario_id = $connection->lastInsertId();
         
         // Enviar email de bienvenida si está marcada la opción
         if ($enviar_email) {
-            $email_enviado = enviarEmailBienvenida($email, $nombre, $password, $token_verificacion);
+            $email_enviado = enviarEmailBienvenida($email, $nombre, $password);
             if (!$email_enviado) {
                 $success_message = "Usuario creado exitosamente, pero no se pudo enviar el email de bienvenida.";
             } else {
@@ -95,8 +155,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         // Registrar actividad del administrador
-        registrarActividadAdmin($admin['id_admin'], 'crear_usuario', 
-            "Creó el usuario: {$nombre} ({$email})", $usuario_id);
+        // registrarActividadAdmin($admin['id_admin'], 'crear_usuario', 
+        //     "Creó el usuario: {$nombre} ({$email})", $usuario_id);
         
         // Limpiar formulario
         $_POST = [];
@@ -107,7 +167,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Función para enviar email de bienvenida
-function enviarEmailBienvenida($email, $nombre, $password, $token_verificacion) {
+function enviarEmailBienvenida($email, $nombre, $password) {
     // Esta función debe implementarse según el sistema de email configurado
     // Por ahora retornamos true como simulación
     return true;
@@ -186,7 +246,7 @@ function enviarEmailBienvenida($email, $nombre, $password, $token_verificacion) 
                 <?php endif; ?>
 
                 <!-- Formulario -->
-                <form method="POST" class="max-w-4xl mx-auto">
+                <form method="POST" class="max-w-4xl mx-auto" enctype="multipart/form-data">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <!-- Información Personal -->
                         <div class="form-section bg-white rounded-lg shadow-lg p-6">
@@ -199,7 +259,7 @@ function enviarEmailBienvenida($email, $nombre, $password, $token_verificacion) 
                                     <label for="nombre" class="block text-sm font-medium text-gray-700 mb-1">
                                         Nombre completo <span class="text-red-500">*</span>
                                     </label>
-                                    <input type="text" id="nombre" name="nombre" required
+                                    <input type="text" id="nombre" name="nombre" required maxlength="100"
                                            value="<?php echo htmlspecialchars($_POST['nombre'] ?? ''); ?>"
                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                            placeholder="Ingrese el nombre completo">
@@ -209,7 +269,7 @@ function enviarEmailBienvenida($email, $nombre, $password, $token_verificacion) 
                                     <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
                                         Email <span class="text-red-500">*</span>
                                     </label>
-                                    <input type="email" id="email" name="email" required
+                                    <input type="email" id="email" name="email" required maxlength="100"
                                            value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>"
                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                            placeholder="usuario@ejemplo.com">
@@ -219,45 +279,41 @@ function enviarEmailBienvenida($email, $nombre, $password, $token_verificacion) 
                                     <label for="telefono" class="block text-sm font-medium text-gray-700 mb-1">
                                         Teléfono
                                     </label>
-                                    <input type="tel" id="telefono" name="telefono"
+                                    <input type="tel" id="telefono" name="telefono" maxlength="15"
                                            value="<?php echo htmlspecialchars($_POST['telefono'] ?? ''); ?>"
                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                            placeholder="+51 999 999 999">
                                 </div>
+                            </div>
+                        </div>
 
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="fecha_nacimiento" class="block text-sm font-medium text-gray-700 mb-1">
-                                            Fecha de Nacimiento
-                                        </label>
-                                        <input type="date" id="fecha_nacimiento" name="fecha_nacimiento"
-                                               value="<?php echo htmlspecialchars($_POST['fecha_nacimiento'] ?? ''); ?>"
-                                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                    </div>
-
-                                    <div>
-                                        <label for="genero" class="block text-sm font-medium text-gray-700 mb-1">
-                                            Género
-                                        </label>
-                                        <select id="genero" name="genero"
-                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                            <option value="">Seleccionar género</option>
-                                            <option value="masculino" <?php echo ($_POST['genero'] ?? '') === 'masculino' ? 'selected' : ''; ?>>Masculino</option>
-                                            <option value="femenino" <?php echo ($_POST['genero'] ?? '') === 'femenino' ? 'selected' : ''; ?>>Femenino</option>
-                                            <option value="otro" <?php echo ($_POST['genero'] ?? '') === 'otro' ? 'selected' : ''; ?>>Otro</option>
-                                            <option value="no_especificar" <?php echo ($_POST['genero'] ?? '') === 'no_especificar' ? 'selected' : ''; ?>>Prefiero no especificar</option>
-                                        </select>
-                                    </div>
-                                </div>
-
+                        <!-- Avatar -->
+                        <div class="form-section bg-white rounded-lg shadow-lg p-6">
+                            <h2 class="text-lg font-semibold text-gray-900 mb-4">
+                                <i class="fas fa-image text-purple-600 mr-2"></i>Avatar
+                            </h2>
+                            
+                            <div class="space-y-4">
                                 <div>
-                                    <label for="pais" class="block text-sm font-medium text-gray-700 mb-1">
-                                        País
+                                    <label for="avatar" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Subir Avatar
                                     </label>
-                                    <input type="text" id="pais" name="pais"
-                                           value="<?php echo htmlspecialchars($_POST['pais'] ?? ''); ?>"
-                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                           placeholder="Perú">
+                                    <div class="flex items-center space-x-4">
+                                        <input type="file" id="avatar" name="avatar" accept="image/*" 
+                                               class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                        <button type="button" id="clearAvatar" class="text-sm text-red-600 hover:text-red-800">
+                                            <i class="fas fa-trash mr-1"></i>Limpiar
+                                        </button>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        Formatos permitidos: JPG, PNG, GIF, WEBP. Tamaño máximo: 5MB
+                                    </p>
+                                    
+                                    <!-- Vista previa del avatar -->
+                                    <div id="avatarPreview" class="hidden mt-3">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Vista Previa</label>
+                                        <img id="previewImage" class="h-16 w-16 rounded-full object-cover border-2 border-blue-200" alt="Vista previa">
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -440,6 +496,119 @@ function enviarEmailBienvenida($email, $nombre, $password, $token_verificacion) 
         // Auto-focus en el primer campo
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('nombre').focus();
+        });
+
+        // Validación de nombre
+        document.getElementById('nombre').addEventListener('input', function() {
+            const nombre = this.value;
+            
+            if (nombre.length > 100) {
+                this.setCustomValidity('El nombre no puede tener más de 100 caracteres');
+                this.classList.add('border-red-500');
+            } else {
+                this.setCustomValidity('');
+                this.classList.remove('border-red-500');
+                if (nombre.length > 0) {
+                    this.classList.add('border-green-500');
+                } else {
+                    this.classList.remove('border-green-500');
+                }
+            }
+        });
+
+        // Validación de email
+        document.getElementById('email').addEventListener('input', function() {
+            const email = this.value;
+            
+            if (email.length > 100) {
+                this.setCustomValidity('El email no puede tener más de 100 caracteres');
+                this.classList.add('border-red-500');
+            } else if (email && !isValidEmail(email)) {
+                this.setCustomValidity('Formato de email inválido');
+                this.classList.add('border-red-500');
+            } else {
+                this.setCustomValidity('');
+                this.classList.remove('border-red-500');
+                if (email.length > 0) {
+                    this.classList.add('border-green-500');
+                } else {
+                    this.classList.remove('border-green-500');
+                }
+            }
+        });
+
+        // Validación de teléfono
+        document.getElementById('telefono').addEventListener('input', function() {
+            const telefono = this.value;
+            
+            if (telefono && telefono.length > 15) {
+                this.setCustomValidity('El teléfono no puede tener más de 15 caracteres');
+                this.classList.add('border-red-500');
+            } else if (telefono && !isValidPhone(telefono)) {
+                this.setCustomValidity('Formato de teléfono inválido. Solo números, espacios, paréntesis, guiones y el signo +');
+                this.classList.add('border-red-500');
+            } else {
+                this.setCustomValidity('');
+                this.classList.remove('border-red-500');
+                if (telefono.length > 0) {
+                    this.classList.add('border-green-500');
+                } else {
+                    this.classList.remove('border-green-500');
+                }
+            }
+        });
+
+        // Funciones auxiliares de validación
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        function isValidPhone(phone) {
+            const phoneRegex = /^[\+]?[0-9\s\-\(\)]+$/;
+            return phoneRegex.test(phone);
+        }
+
+        // Funciones para manejo de avatar
+        document.getElementById('avatar').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const previewContainer = document.getElementById('avatarPreview');
+            const previewImage = document.getElementById('previewImage');
+            
+            if (file) {
+                // Validar tipo de archivo
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('Por favor selecciona un archivo de imagen válido (JPG, PNG, GIF, WEBP)');
+                    this.value = '';
+                    previewContainer.classList.add('hidden');
+                    return;
+                }
+                
+                // Validar tamaño (5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('El archivo es demasiado grande. El tamaño máximo es 5MB.');
+                    this.value = '';
+                    previewContainer.classList.add('hidden');
+                    return;
+                }
+                
+                // Mostrar vista previa
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    previewContainer.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewContainer.classList.add('hidden');
+            }
+        });
+
+        // Limpiar selección de avatar
+        document.getElementById('clearAvatar').addEventListener('click', function() {
+            document.getElementById('avatar').value = '';
+            document.getElementById('avatarPreview').classList.add('hidden');
         });
     </script>
 </body>

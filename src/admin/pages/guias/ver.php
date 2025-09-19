@@ -86,6 +86,19 @@ try {
         exit;
     }
     
+    // Procesar la URL de foto para corregir la ruta
+    if (!empty($guia['foto_url'])) {
+        // Si es una URL completa (HTTP/HTTPS), dejarla como está
+        if (preg_match('/^https?:\/\//i', $guia['foto_url'])) {
+            // URL externa - no hacer nada
+        }
+        // Si es una ruta local, ajustar la ruta relativa
+        elseif (!preg_match('/^https?:\/\//i', $guia['foto_url'])) {
+            // Ruta local: convertir a ruta relativa desde la ubicación actual
+            $guia['foto_url'] = '../../../../' . ltrim($guia['foto_url'], '/');
+        }
+    }
+    
     // Obtener tours asignados al guía
     $tours_sql = "SELECT t.*, r.nombre_region
                   FROM tours t
@@ -97,7 +110,8 @@ try {
     $tours = $tours_stmt->fetchAll();
     
     // Obtener próximos tours diarios
-    $proximos_tours_sql = "SELECT td.*, t.titulo, t.lugar_salida, t.lugar_llegada,
+    $proximos_tours_sql = "SELECT td.id_tour_diario, td.fecha, td.hora_salida, td.num_adultos, td.num_ninos,
+                                  t.titulo, t.lugar_salida, t.lugar_llegada, t.precio, t.duracion,
                                   c.nombre as chofer_nombre, c.apellido as chofer_apellido,
                                   v.marca, v.modelo, v.placa
                            FROM tours_diarios td
@@ -110,6 +124,22 @@ try {
     $proximos_stmt = $connection->prepare($proximos_tours_sql);
     $proximos_stmt->execute([$id_guia]);
     $proximos_tours = $proximos_stmt->fetchAll();
+    
+    // Obtener historial de tours diarios completados
+    $historial_tours_sql = "SELECT td.id_tour_diario, td.fecha, td.hora_salida, td.num_adultos, td.num_ninos,
+                                   t.titulo, t.lugar_salida, t.lugar_llegada, t.precio, t.duracion,
+                                   c.nombre as chofer_nombre, c.apellido as chofer_apellido,
+                                   v.marca, v.modelo, v.placa
+                            FROM tours_diarios td
+                            INNER JOIN tours t ON td.id_tour = t.id_tour
+                            LEFT JOIN choferes c ON td.id_chofer = c.id_chofer
+                            LEFT JOIN vehiculos v ON td.id_vehiculo = v.id_vehiculo
+                            WHERE td.id_guia = ? AND td.fecha < CURDATE()
+                            ORDER BY td.fecha DESC, td.hora_salida DESC
+                            LIMIT 20";
+    $historial_stmt = $connection->prepare($historial_tours_sql);
+    $historial_stmt->execute([$id_guia]);
+    $historial_tours = $historial_stmt->fetchAll();
     
     // Obtener calificaciones recientes
     $calificaciones_sql = "SELECT cg.*, u.nombre as usuario_nombre, u.email as usuario_email
@@ -159,6 +189,7 @@ try {
     ];
     $tours = [];
     $proximos_tours = [];
+    $historial_tours = [];
     $calificaciones = [];
     $idiomas = [];
     $page_title = "Error - Guía";
@@ -181,6 +212,16 @@ function getEstadoTourIcon($estado) {
         'finalizada' => 'fas fa-check-circle'
     ];
     return $icons[$estado_lower] ?? 'fas fa-question';
+}
+
+function safeHtml($value, $default = '') {
+    $cleanValue = $value ?? $default;
+    return htmlspecialchars($cleanValue);
+}
+
+function getChoferName($nombre, $apellido) {
+    $fullName = trim(($nombre ?? '') . ' ' . ($apellido ?? ''));
+    return !empty($fullName) ? $fullName : 'No asignado';
 }
 ?>
 
@@ -468,26 +509,49 @@ function getEstadoTourIcon($estado) {
                                                 <div class="flex items-start justify-between">
                                                     <div class="flex-1">
                                                         <h4 class="font-medium text-gray-900">
-                                                            Reserva #<?php echo $tour['id_reserva']; ?>
+                                                            <?php echo htmlspecialchars($tour['titulo']); ?>
                                                         </h4>
                                                         <p class="text-sm text-gray-600 mt-1">
-                                                            Cliente: <?php echo htmlspecialchars($tour['cliente_nombre'] ?? 'Cliente eliminado'); ?>
+                                                            Tour ID: #<?php echo $tour['id_tour_diario']; ?>
                                                         </p>
                                                         <div class="flex items-center mt-2 space-x-4 text-sm text-gray-500">
                                                             <span>
                                                                 <i class="fas fa-calendar mr-1"></i>
-                                                                <?php echo formatDate($tour['fecha_tour'], 'd/m/Y'); ?>
+                                                                <?php echo formatDate($tour['fecha'], 'd/m/Y'); ?>
+                                                            </span>
+                                                            <span>
+                                                                <i class="fas fa-clock mr-1"></i>
+                                                                <?php echo date('H:i', strtotime($tour['hora_salida'])); ?>
+                                                            </span>
+                                                            <span>
+                                                                <i class="fas fa-users mr-1"></i>
+                                                                <?php echo ($tour['num_adultos'] + $tour['num_ninos']); ?> personas
                                                             </span>
                                                             <span>
                                                                 <i class="fas fa-dollar-sign mr-1"></i>
-                                                                <?php echo formatCurrency($tour['monto_total']); ?>
+                                                                <?php echo formatCurrency($tour['precio']); ?> (base)
                                                             </span>
+                                                        </div>
+                                                        <div class="flex items-center mt-1 space-x-4 text-sm text-gray-500">
+                                                            <span>
+                                                                <i class="fas fa-map-marker-alt mr-1"></i>
+                                                                <?php echo safeHtml($tour['lugar_salida'], 'No especificado'); ?>
+                                                            </span>
+                                                            <?php if (!empty($tour['chofer_nombre'])): ?>
+                                                                <span>
+                                                                    <i class="fas fa-user-tie mr-1"></i>
+                                                                    <?php 
+                                                                        $choferFullName = trim(($tour['chofer_nombre'] ?? '') . ' ' . ($tour['chofer_apellido'] ?? ''));
+                                                                        echo htmlspecialchars($choferFullName ?: 'No asignado');
+                                                                    ?>
+                                                                </span>
+                                                            <?php endif; ?>
                                                         </div>
                                                     </div>
                                                     <div class="text-right">
-                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                                             <i class="fas fa-clock mr-1"></i>
-                                                            <?php echo ucfirst(strtolower($tour['estado'])); ?>
+                                                            Programado
                                                         </span>
                                                     </div>
                                                 </div>
@@ -512,53 +576,70 @@ function getEstadoTourIcon($estado) {
                                 <h3 class="text-lg font-semibold text-gray-900 mb-4">
                                     <i class="fas fa-history text-gray-600 mr-2"></i>Historial de Tours
                                 </h3>
-                                <?php if (empty($tours)): ?>
+                                <?php if (empty($historial_tours)): ?>
                                     <div class="text-center py-8">
                                         <i class="fas fa-history text-4xl text-gray-300 mb-4"></i>
                                         <p class="text-gray-500">No hay tours en el historial</p>
                                     </div>
                                 <?php else: ?>
                                     <div class="space-y-4">
-                                        <?php foreach ($tours as $tour): ?>
+                                        <?php foreach ($historial_tours as $tour): ?>
                                             <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
                                                 <div class="flex items-start justify-between">
                                                     <div class="flex-1">
                                                         <h4 class="font-medium text-gray-900">
-                                                            Reserva #<?php echo $tour['id_reserva']; ?>
+                                                            <?php echo htmlspecialchars($tour['titulo']); ?>
                                                         </h4>
                                                         <p class="text-sm text-gray-600 mt-1">
-                                                            Cliente: <?php echo htmlspecialchars($tour['cliente_nombre'] ?? 'Cliente eliminado'); ?>
+                                                            Tour ID: #<?php echo $tour['id_tour_diario']; ?>
                                                         </p>
                                                         <div class="flex items-center mt-2 space-x-4 text-sm text-gray-500">
                                                             <span>
                                                                 <i class="fas fa-calendar mr-1"></i>
-                                                                <?php echo formatDate($tour['fecha_tour'], 'd/m/Y'); ?>
+                                                                <?php echo formatDate($tour['fecha'], 'd/m/Y'); ?>
+                                                            </span>
+                                                            <span>
+                                                                <i class="fas fa-clock mr-1"></i>
+                                                                <?php echo date('H:i', strtotime($tour['hora_salida'])); ?>
+                                                            </span>
+                                                            <span>
+                                                                <i class="fas fa-users mr-1"></i>
+                                                                <?php echo ($tour['num_adultos'] + $tour['num_ninos']); ?> personas
                                                             </span>
                                                             <span>
                                                                 <i class="fas fa-dollar-sign mr-1"></i>
-                                                                <?php echo formatCurrency($tour['monto_total']); ?>
+                                                                <?php echo formatCurrency($tour['precio']); ?> (base)
                                                             </span>
                                                         </div>
-                                                        <?php if ($tour['observaciones']): ?>
-                                                            <p class="text-sm text-gray-600 mt-2">
-                                                                <i class="fas fa-comment mr-1"></i>
-                                                                <?php echo htmlspecialchars($tour['observaciones']); ?>
-                                                            </p>
-                                                        <?php endif; ?>
+                                                        <div class="flex items-center mt-1 space-x-4 text-sm text-gray-500">
+                                                            <span>
+                                                                <i class="fas fa-map-marker-alt mr-1"></i>
+                                                                <?php echo safeHtml($tour['lugar_salida'], 'No especificado'); ?>
+                                                            </span>
+                                                            <?php if (!empty($tour['chofer_nombre'])): ?>
+                                                                <span>
+                                                                    <i class="fas fa-user-tie mr-1"></i>
+                                                                    <?php 
+                                                                        $choferFullName = trim(($tour['chofer_nombre'] ?? '') . ' ' . ($tour['chofer_apellido'] ?? ''));
+                                                                        echo htmlspecialchars($choferFullName ?: 'No asignado');
+                                                                    ?>
+                                                                </span>
+                                                            <?php endif; ?>
+                                                        </div>
                                                     </div>
                                                     <div class="text-right">
-                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?php echo $tour['estado_clase']; ?>">
-                                                            <i class="<?php echo getEstadoTourIcon($tour['estado']); ?> mr-1"></i>
-                                                            <?php echo ucfirst(strtolower($tour['estado'])); ?>
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                            <i class="fas fa-check-circle mr-1"></i>
+                                                            Completado
                                                         </span>
                                                     </div>
                                                 </div>
                                             </div>
                                         <?php endforeach; ?>
                                     </div>
-                                    <?php if (count($tours) >= 10): ?>
+                                    <?php if (count($historial_tours) >= 20): ?>
                                         <div class="text-center mt-4">
-                                            <a href="../reservas/index.php?guia=<?php echo $guia['id_guia']; ?>" 
+                                            <a href="../tours_diarios/index.php?guia=<?php echo $guia['id_guia']; ?>" 
                                                class="text-blue-600 hover:text-blue-800 text-sm">
                                                 Ver todo el historial →
                                             </a>

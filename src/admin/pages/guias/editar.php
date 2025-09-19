@@ -55,8 +55,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $experiencia = trim($_POST['experiencia'] ?? '');
     $estado = $_POST['estado'] ?? 'Libre';
-    $foto_url = trim($_POST['foto_url'] ?? '');
+    $foto_url = $guia['foto_url'] ?? null; // Mantener la foto actual por defecto
     $idiomas_seleccionados = $_POST['idiomas'] ?? [];
+    
+    // Procesar eliminación de foto si se solicitó
+    if (isset($_POST['eliminar_foto']) && $_POST['eliminar_foto'] === '1') {
+        // Eliminar archivo físico si existe y es local
+        if ($guia['foto_url'] && !preg_match('/^https?:\/\//i', $guia['foto_url'])) {
+            $old_file = '../../../../' . ltrim($guia['foto_url'], '/');
+            if (file_exists($old_file)) {
+                unlink($old_file);
+            }
+        }
+        $foto_url = null;
+    }
+    
+    // Procesar subida de foto si se envió una
+    if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
+        $foto = $_FILES['foto'];
+        $upload_dir = '../../../../storage/uploads/guias/';
+        
+        // Crear directorio si no existe
+        if (!is_dir($upload_dir)) {
+            if (!mkdir($upload_dir, 0755, true)) {
+                $errors[] = "No se pudo crear el directorio de subida";
+            }
+        }
+        
+        if (empty($errors)) {
+            // Validar archivo
+            $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            $max_size = 5 * 1024 * 1024; // 5MB
+            
+            if (!in_array($foto['type'], $allowed_types)) {
+                $errors[] = "Tipo de archivo no permitido. Solo se permiten: JPG, PNG, GIF, WEBP";
+            }
+            
+            if ($foto['size'] > $max_size) {
+                $errors[] = "El archivo es demasiado grande. Máximo permitido: 5MB";
+            }
+            
+            if (empty($errors)) {
+                // Generar nombre único para el archivo
+                $extension = pathinfo($foto['name'], PATHINFO_EXTENSION);
+                $filename = 'guia_' . $id_guia . '_' . time() . '.' . $extension;
+                $filepath = $upload_dir . $filename;
+                
+                if (move_uploaded_file($foto['tmp_name'], $filepath)) {
+                    // Eliminar foto anterior si existe y es local
+                    if ($guia['foto_url'] && !preg_match('/^https?:\/\//i', $guia['foto_url'])) {
+                        $old_file = '../../../../' . ltrim($guia['foto_url'], '/');
+                        if (file_exists($old_file)) {
+                            unlink($old_file);
+                        }
+                    }
+                    
+                    $foto_url = 'storage/uploads/guias/' . $filename;
+                } else {
+                    $errors[] = "Error al subir la foto";
+                }
+            }
+        }
+    }
     
     // Validaciones
     if (empty($nombre)) {
@@ -160,7 +220,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'email' => $email,
                 'experiencia' => $experiencia,
                 'estado' => $estado,
-                'foto_url' => $foto_url
+                'foto_url' => $foto_url ?: null
             ]);
             
             // Actualizar idiomas del guía para la vista
@@ -254,7 +314,7 @@ $page_title = "Editar Guía: " . $guia['nombre'] . ' ' . $guia['apellido'];
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <!-- Formulario -->
                     <div class="lg:col-span-2">
-                        <form method="POST" class="bg-white rounded-lg shadow-lg p-6">
+                        <form method="POST" enctype="multipart/form-data" class="bg-white rounded-lg shadow-lg p-6">
                             <div class="space-y-6">
                                 <!-- Información Personal -->
                                 <div>
@@ -341,17 +401,72 @@ $page_title = "Editar Guía: " . $guia['nombre'] . ' ' . $guia['apellido'];
                                         </div>
                                         
                                         <div>
-                                            <label for="foto_url" class="block text-sm font-medium text-gray-700 mb-2">
-                                                URL de Foto
+                                            <label for="foto" class="block text-sm font-medium text-gray-700 mb-2">
+                                                Foto del Guía
                                             </label>
-                                            <div class="relative">
-                                                <input type="url" name="foto_url" id="foto_url"
-                                                       value="<?php echo htmlspecialchars($_POST['foto_url'] ?? $guia['foto_url'] ?? ''); ?>"
-                                                       class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                                       placeholder="https://ejemplo.com/foto.jpg">
-                                                <i class="fas fa-image absolute left-3 top-3 text-gray-400"></i>
+                                            <div class="space-y-3">
+                                                <!-- Foto actual -->
+                                                <?php if (!empty($guia['foto_url'])): ?>
+                                                    <div class="current-photo">
+                                                        <p class="text-sm text-gray-600 mb-2">Foto actual:</p>
+                                                        <div class="relative w-24 h-24 rounded-lg overflow-hidden border-2 border-gray-200">
+                                                            <?php
+                                                            // Procesar la URL de foto para mostrar correctamente
+                                                            $foto_display = $guia['foto_url'];
+                                                            if (!preg_match('/^https?:\/\//i', $foto_display)) {
+                                                                $foto_display = '../../../../' . ltrim($foto_display, '/');
+                                                            }
+                                                            ?>
+                                                            <img src="<?php echo htmlspecialchars($foto_display); ?>" 
+                                                                 alt="Foto actual" 
+                                                                 class="w-full h-full object-cover">
+                                                        </div>
+                                                        <button type="button" 
+                                                                onclick="confirmarEliminarFoto()"
+                                                                class="mt-2 inline-flex items-center px-3 py-1 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 hover:bg-red-100 transition-colors">
+                                                            <i class="fas fa-trash-alt mr-1"></i>
+                                                            Eliminar foto
+                                                        </button>
+                                                        <input type="hidden" name="eliminar_foto" id="eliminar_foto" value="0">
+                                                    </div>
+                                                <?php else: ?>
+                                                    <div class="current-photo">
+                                                        <p class="text-sm text-gray-500 mb-2">No hay foto actual</p>
+                                                        <div class="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
+                                                            <i class="fas fa-user text-3xl text-gray-400"></i>
+                                                        </div>
+                                                    </div>
+                                                <?php endif; ?>
+                                                
+                                                <!-- Campo de subida -->
+                                                <div class="upload-section">
+                                                    <input type="file" 
+                                                           name="foto" 
+                                                           id="foto" 
+                                                           accept="image/jpeg,image/png,image/gif,image/webp"
+                                                           class="hidden"
+                                                           onchange="previewImage(this)">
+                                                    <label for="foto" 
+                                                           class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                        <i class="fas fa-upload mr-2 text-gray-500"></i>
+                                                        <span class="text-sm text-gray-700">Cambiar foto</span>
+                                                    </label>
+                                                    <p class="text-xs text-gray-500 mt-1">JPG, PNG, GIF, WEBP. Máximo 5MB</p>
+                                                </div>
+                                                
+                                                <!-- Preview de nueva foto -->
+                                                <div id="photo-preview" class="hidden">
+                                                    <p class="text-sm text-gray-600 mb-2">Nueva foto:</p>
+                                                    <div class="relative w-24 h-24 rounded-lg overflow-hidden border-2 border-green-200">
+                                                        <img id="preview-image" src="" alt="Preview" class="w-full h-full object-cover">
+                                                        <button type="button" 
+                                                                onclick="clearPreview()"
+                                                                class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <p class="text-xs text-gray-500 mt-1">Opcional. URL de la foto del guía</p>
                                         </div>
                                     </div>
                                 </div>
@@ -580,6 +695,54 @@ $page_title = "Editar Guía: " . $guia['nombre'] . ' ' . $guia['apellido'];
         
         // Inicializar vista previa
         updatePreview();
+        
+        // Funciones para manejo de foto
+        function previewImage(input) {
+            const file = input.files[0];
+            if (file) {
+                // Validar tipo de archivo
+                if (!file.type.match('image.*')) {
+                    alert('Por favor selecciona un archivo de imagen válido.');
+                    clearPreview();
+                    return;
+                }
+                
+                // Validar tamaño de archivo (5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('El archivo es demasiado grande. El tamaño máximo permitido es 5MB.');
+                    clearPreview();
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const previewContainer = document.getElementById('photo-preview');
+                    const previewImage = document.getElementById('preview-image');
+                    
+                    previewImage.src = e.target.result;
+                    previewContainer.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        function clearPreview() {
+            const fileInput = document.getElementById('foto');
+            const previewContainer = document.getElementById('photo-preview');
+            const previewImage = document.getElementById('preview-image');
+            
+            fileInput.value = '';
+            previewImage.src = '';
+            previewContainer.classList.add('hidden');
+        }
+        
+        function confirmarEliminarFoto() {
+            if (confirm('¿Estás seguro de que quieres eliminar la foto actual? Esta acción no se puede deshacer.')) {
+                document.getElementById('eliminar_foto').value = '1';
+                // Enviar el formulario
+                document.querySelector('form').submit();
+            }
+        }
     </script>
 </body>
 </html>

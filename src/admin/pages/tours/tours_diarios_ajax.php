@@ -25,7 +25,7 @@ function verificarSesionAjax() {
         exit;
     }
     
-    if (!isset($_SESSION['admin_rol']) || $_SESSION['admin_rol'] !== 'admin') {
+    if (!isset($_SESSION['admin_rol']) || !in_array($_SESSION['admin_rol'], ['admin', 'superadmin'])) {
         echo json_encode([
             'success' => false,
             'error' => 'Permisos insuficientes',

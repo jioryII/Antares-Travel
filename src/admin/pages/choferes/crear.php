@@ -19,13 +19,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $apellido = trim($_POST['apellido'] ?? '');
         $telefono = trim($_POST['telefono'] ?? '');
         $licencia = trim($_POST['licencia'] ?? '');
+        $foto_url = '';
         
+        // Validaciones básicas
         if (empty($nombre)) {
             throw new Exception('El nombre es obligatorio');
         }
         
-        // Verificar si la licencia ya existe (si se proporciona)
+        if (strlen($nombre) > 100) {
+            throw new Exception('El nombre no puede exceder 100 caracteres');
+        }
+        
+        if (!empty($apellido) && strlen($apellido) > 100) {
+            throw new Exception('El apellido no puede exceder 100 caracteres');
+        }
+        
+        if (!empty($telefono) && strlen($telefono) > 20) {
+            throw new Exception('El teléfono no puede exceder 20 caracteres');
+        }
+        
         if (!empty($licencia)) {
+            if (strlen($licencia) > 50) {
+                throw new Exception('La licencia no puede exceder 50 caracteres');
+            }
+            
+            // Verificar si la licencia ya existe
             $check_licencia_sql = "SELECT id_chofer FROM choferes WHERE licencia = ? AND licencia != ''";
             $check_stmt = $connection->prepare($check_licencia_sql);
             $check_stmt->execute([$licencia]);
@@ -34,15 +52,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         
-        // Insertar nuevo chofer
-        $insert_sql = "INSERT INTO choferes (nombre, apellido, telefono, licencia) VALUES (?, ?, ?, ?)";
-        $insert_stmt = $connection->prepare($insert_sql);
-        $insert_stmt->execute([
+        // Manejo de foto si se subió
+        if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
+            $foto = $_FILES['foto'];
+            $allowed_types = ['image/jpeg', 'image/png', 'image/jpg'];
+            $max_size = 5 * 1024 * 1024; // 5MB
+            
+            // Validar tipo de archivo
+            if (!in_array($foto['type'], $allowed_types)) {
+                throw new Exception('Solo se permiten archivos JPG, JPEG y PNG');
+            }
+            
+            // Validar tamaño
+            if ($foto['size'] > $max_size) {
+                throw new Exception('La imagen no puede superar 5MB');
+            }
+            
+            // Crear directorio si no existe
+            $upload_dir = '../../../../storage/uploads/choferes/';
+            if (!is_dir($upload_dir)) {
+                mkdir($upload_dir, 0777, true);
+            }
+            
+            // Generar nombre único
+            $extension = pathinfo($foto['name'], PATHINFO_EXTENSION);
+            $filename = 'chofer_' . time() . '_' . uniqid() . '.' . $extension;
+            $upload_path = $upload_dir . $filename;
+            
+            // Mover archivo
+            if (!move_uploaded_file($foto['tmp_name'], $upload_path)) {
+                throw new Exception('Error al subir la imagen');
+            }
+            
+            // Guardar ruta completa como en guías (consistencia)
+            $foto_url = 'storage/uploads/choferes/' . $filename;
+        }
+        
+        // Preparar la consulta SQL según si hay campo foto_url o no
+        $columns = ['nombre', 'apellido', 'telefono', 'licencia'];
+        $placeholders = ['?', '?', '?', '?'];
+        $values = [
             $nombre,
             $apellido ?: null,
             $telefono ?: null,
             $licencia ?: null
-        ]);
+        ];
+        
+        // Verificar si existe el campo foto_url en la tabla
+        try {
+            $check_column_sql = "SHOW COLUMNS FROM choferes LIKE 'foto_url'";
+            $check_column_stmt = $connection->prepare($check_column_sql);
+            $check_column_stmt->execute();
+            $column_exists = $check_column_stmt->fetch();
+            
+            if ($column_exists && !empty($foto_url)) {
+                $columns[] = 'foto_url';
+                $placeholders[] = '?';
+                $values[] = $foto_url;
+            }
+        } catch (Exception $e) {
+            // Si hay error verificando la columna, continuamos sin foto
+            if (!empty($foto_url)) {
+                // Eliminar archivo subido si no podemos guardarlo en BD
+                @unlink($upload_path);
+                $foto_url = '';
+            }
+        }
+        
+        // Insertar nuevo chofer
+        $insert_sql = "INSERT INTO choferes (" . implode(', ', $columns) . ") VALUES (" . implode(', ', $placeholders) . ")";
+        $insert_stmt = $connection->prepare($insert_sql);
+        $insert_stmt->execute($values);
         
         $id_chofer = $connection->lastInsertId();
         $success = "Chofer creado exitosamente";
@@ -53,6 +133,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
     } catch (Exception $e) {
         $error = $e->getMessage();
+        
+        // Eliminar archivo subido si hay error
+        if (isset($upload_path) && file_exists($upload_path)) {
+            @unlink($upload_path);
+        }
     }
 }
 
@@ -124,15 +209,48 @@ $page_title = "Crear Nuevo Chofer";
                 <!-- Formulario -->
                 <div class="bg-white rounded-lg shadow-lg">
                     <div class="px-6 py-4 border-b border-gray-200">
-                        <h2 class="text-lg font-semibold text-gray-900">Información del Chofer</h2>
+                        <h2 class="text-lg font-semibold text-gray-900">
+                            <i class="fas fa-user-plus text-blue-600 mr-2"></i>Información del Chofer
+                        </h2>
                     </div>
                     
-                    <form method="POST" class="p-6 space-y-6">
+                    <form method="POST" enctype="multipart/form-data" class="p-6 space-y-6">
+                        <!-- Foto del chofer -->
+                        <div class="border-b border-gray-200 pb-6">
+                            <h3 class="text-sm font-medium text-gray-900 mb-4">
+                                <i class="fas fa-camera text-gray-600 mr-2"></i>Foto del Chofer
+                            </h3>
+                            <div class="flex items-start space-x-6">
+                                <div class="flex-shrink-0">
+                                    <div id="preview-container" class="relative">
+                                        <div id="photo-preview" class="h-24 w-24 rounded-full bg-blue-600 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
+                                            <span id="preview-initials" class="text-white font-bold text-xl">?</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center space-x-4">
+                                        <label for="foto" class="cursor-pointer bg-white px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                                            <i class="fas fa-upload mr-2"></i>Subir Foto
+                                        </label>
+                                        <button type="button" id="remove-photo" class="hidden px-4 py-2 text-red-600 border border-red-200 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors">
+                                            <i class="fas fa-trash mr-2"></i>Quitar
+                                        </button>
+                                    </div>
+                                    <input type="file" id="foto" name="foto" accept="image/*" class="hidden">
+                                    <p class="text-xs text-gray-500 mt-2">
+                                        JPG, JPEG o PNG. Máximo 5MB. Opcional.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <!-- Información básica -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <!-- Nombre -->
                             <div>
                                 <label for="nombre" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-user text-gray-400 mr-1"></i>
                                     Nombre <span class="text-red-500">*</span>
                                 </label>
                                 <input type="text" 
@@ -141,13 +259,15 @@ $page_title = "Crear Nuevo Chofer";
                                        value="<?php echo htmlspecialchars($_POST['nombre'] ?? ''); ?>"
                                        required 
                                        maxlength="100"
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                        placeholder="Ingresa el nombre del chofer">
+                                <div class="text-xs text-gray-500 mt-1" id="nombre-counter">0/100 caracteres</div>
                             </div>
 
                             <!-- Apellido -->
                             <div>
                                 <label for="apellido" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-user text-gray-400 mr-1"></i>
                                     Apellido
                                 </label>
                                 <input type="text" 
@@ -155,8 +275,9 @@ $page_title = "Crear Nuevo Chofer";
                                        id="apellido" 
                                        value="<?php echo htmlspecialchars($_POST['apellido'] ?? ''); ?>"
                                        maxlength="100"
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                        placeholder="Ingresa el apellido del chofer">
+                                <div class="text-xs text-gray-500 mt-1" id="apellido-counter">0/100 caracteres</div>
                             </div>
                         </div>
 
@@ -165,6 +286,7 @@ $page_title = "Crear Nuevo Chofer";
                             <!-- Teléfono -->
                             <div>
                                 <label for="telefono" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-phone text-gray-400 mr-1"></i>
                                     Teléfono
                                 </label>
                                 <input type="tel" 
@@ -172,7 +294,7 @@ $page_title = "Crear Nuevo Chofer";
                                        id="telefono" 
                                        value="<?php echo htmlspecialchars($_POST['telefono'] ?? ''); ?>"
                                        maxlength="20"
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                        placeholder="Ej: +51 987 654 321">
                                 <p class="text-xs text-gray-500 mt-1">Número de contacto del chofer</p>
                             </div>
@@ -180,6 +302,7 @@ $page_title = "Crear Nuevo Chofer";
                             <!-- Licencia de conducir -->
                             <div>
                                 <label for="licencia" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-id-badge text-gray-400 mr-1"></i>
                                     Licencia de Conducir
                                 </label>
                                 <input type="text" 
@@ -187,7 +310,7 @@ $page_title = "Crear Nuevo Chofer";
                                        id="licencia" 
                                        value="<?php echo htmlspecialchars($_POST['licencia'] ?? ''); ?>"
                                        maxlength="50"
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                        placeholder="Ej: Q12345678">
                                 <p class="text-xs text-gray-500 mt-1">Número de licencia de conducir (opcional)</p>
                             </div>
@@ -240,6 +363,9 @@ $page_title = "Crear Nuevo Chofer";
     </div>
 
     <script>
+        // Variables globales
+        let currentPhotoFile = null;
+        
         // Actualizar vista previa en tiempo real
         function updatePreview() {
             const nombre = document.getElementById('nombre').value || '';
@@ -251,9 +377,11 @@ $page_title = "Crear Nuevo Chofer";
             const nombreCompleto = (nombre + ' ' + apellido).trim() || 'Nombre del chofer';
             document.getElementById('preview-name').textContent = nombreCompleto;
 
-            // Actualizar iniciales
-            const iniciales = (nombre.charAt(0) + (apellido.charAt(0) || '')).toUpperCase() || '?';
-            document.getElementById('preview-initials').textContent = iniciales;
+            // Actualizar iniciales si no hay foto
+            if (!currentPhotoFile) {
+                const iniciales = (nombre.charAt(0) + (apellido.charAt(0) || '')).toUpperCase() || '?';
+                document.getElementById('preview-initials').textContent = iniciales;
+            }
 
             // Actualizar información adicional
             const infoArray = [];
@@ -263,40 +391,174 @@ $page_title = "Crear Nuevo Chofer";
             const infoText = infoArray.length > 0 ? infoArray.join(' • ') : 'Información adicional';
             document.getElementById('preview-info').textContent = infoText;
         }
-
-        // Agregar event listeners
-        document.getElementById('nombre').addEventListener('input', updatePreview);
-        document.getElementById('apellido').addEventListener('input', updatePreview);
-        document.getElementById('telefono').addEventListener('input', updatePreview);
-        document.getElementById('licencia').addEventListener('input', updatePreview);
-
-        // Validación del formulario
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const nombre = document.getElementById('nombre').value.trim();
+        
+        // Manejo de contadores de caracteres
+        function updateCounter(inputId, counterId, maxLength) {
+            const input = document.getElementById(inputId);
+            const counter = document.getElementById(counterId);
+            const currentLength = input.value.length;
             
-            if (!nombre) {
-                e.preventDefault();
-                alert('El nombre es obligatorio');
-                document.getElementById('nombre').focus();
-                return;
+            counter.textContent = `${currentLength}/${maxLength} caracteres`;
+            
+            if (currentLength > maxLength * 0.8) {
+                counter.classList.add('text-orange-600');
+                counter.classList.remove('text-gray-500');
+            } else {
+                counter.classList.add('text-gray-500');
+                counter.classList.remove('text-orange-600');
             }
-        });
-
-        // Formatear teléfono automáticamente
-        document.getElementById('telefono').addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 0) {
-                if (value.startsWith('51')) {
-                    value = '+' + value;
-                } else if (!value.startsWith('+')) {
-                    value = '+51' + value;
+            
+            if (currentLength === maxLength) {
+                counter.classList.add('text-red-600');
+                counter.classList.remove('text-orange-600', 'text-gray-500');
+            }
+        }
+        
+        // Manejo de subida de fotos
+        function initializePhotoUpload() {
+            const photoInput = document.getElementById('foto');
+            const photoPreview = document.getElementById('photo-preview');
+            const previewInitials = document.getElementById('preview-initials');
+            const removeButton = document.getElementById('remove-photo');
+            
+            photoInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    // Validar tipo de archivo
+                    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+                    if (!allowedTypes.includes(file.type)) {
+                        alert('Solo se permiten archivos JPG, JPEG y PNG');
+                        e.target.value = '';
+                        return;
+                    }
+                    
+                    // Validar tamaño (5MB)
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert('La imagen no puede superar 5MB');
+                        e.target.value = '';
+                        return;
+                    }
+                    
+                    // Mostrar preview
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        photoPreview.innerHTML = `<img src="${e.target.result}" alt="Preview" class="h-full w-full object-cover rounded-full">`;
+                        removeButton.classList.remove('hidden');
+                        currentPhotoFile = file;
+                    };
+                    reader.readAsDataURL(file);
                 }
-            }
-            e.target.value = value;
+            });
+            
+            removeButton.addEventListener('click', function() {
+                photoInput.value = '';
+                currentPhotoFile = null;
+                const iniciales = getInitials();
+                photoPreview.innerHTML = `<span id="preview-initials" class="text-white font-bold text-xl">${iniciales}</span>`;
+                removeButton.classList.add('hidden');
+                updatePreview();
+            });
+        }
+        
+        // Obtener iniciales
+        function getInitials() {
+            const nombre = document.getElementById('nombre').value || '';
+            const apellido = document.getElementById('apellido').value || '';
+            return (nombre.charAt(0) + (apellido.charAt(0) || '')).toUpperCase() || '?';
+        }
+        
+        // Event listeners para campos de texto
+        function initializeEventListeners() {
+            // Actualización de preview
+            ['nombre', 'apellido', 'telefono', 'licencia'].forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                field.addEventListener('input', updatePreview);
+                
+                // Actualizar iniciales cuando no hay foto
+                if (fieldId === 'nombre' || fieldId === 'apellido') {
+                    field.addEventListener('input', function() {
+                        if (!currentPhotoFile) {
+                            document.getElementById('preview-initials').textContent = getInitials();
+                        }
+                    });
+                }
+            });
+            
+            // Contadores
+            document.getElementById('nombre').addEventListener('input', function() {
+                updateCounter('nombre', 'nombre-counter', 100);
+            });
+            
+            document.getElementById('apellido').addEventListener('input', function() {
+                updateCounter('apellido', 'apellido-counter', 100);
+            });
+            
+            // Formatear teléfono
+            document.getElementById('telefono').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 0 && !value.startsWith('51')) {
+                    if (value.length <= 9) {
+                        value = '51' + value;
+                    }
+                }
+                if (value.length > 0) {
+                    value = '+' + value;
+                }
+                e.target.value = value.substring(0, 20);
+            });
+        }
+        
+        // Validación del formulario
+        function initializeFormValidation() {
+            document.querySelector('form').addEventListener('submit', function(e) {
+                const nombre = document.getElementById('nombre').value.trim();
+                
+                if (!nombre) {
+                    e.preventDefault();
+                    alert('El nombre es obligatorio');
+                    document.getElementById('nombre').focus();
+                    return;
+                }
+                
+                // Validar foto si se seleccionó
+                const photoInput = document.getElementById('foto');
+                if (photoInput.files[0]) {
+                    const file = photoInput.files[0];
+                    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+                    if (!allowedTypes.includes(file.type)) {
+                        e.preventDefault();
+                        alert('Solo se permiten archivos JPG, JPEG y PNG');
+                        return;
+                    }
+                    
+                    if (file.size > 5 * 1024 * 1024) {
+                        e.preventDefault();
+                        alert('La imagen no puede superar 5MB');
+                        return;
+                    }
+                }
+                
+                // Mostrar indicador de carga
+                const submitButton = this.querySelector('button[type="submit"]');
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creando...';
+                submitButton.disabled = true;
+            });
+        }
+        
+        // Inicialización cuando el DOM está listo
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePhotoUpload();
+            initializeEventListeners();
+            initializeFormValidation();
+            
+            // Actualizar vista previa inicial
+            updatePreview();
+            updateCounter('nombre', 'nombre-counter', 100);
+            updateCounter('apellido', 'apellido-counter', 100);
+            
+            // Enfocar primer campo
+            document.getElementById('nombre').focus();
         });
-
-        // Actualizar vista previa inicial
-        updatePreview();
     </script>
 </body>
 </html>
