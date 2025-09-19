@@ -53,7 +53,8 @@ if ($tour['precio'] && $tour['precio'] > 0) {
                     ORDER BY o.destacada DESC, o.valor_descuento DESC";
     
     $stmt_ofertas = $conn->prepare($ofertas_sql);
-    $stmt_ofertas->bind_param("diiiiii", $tour['precio'], $id_tour, $user_id, $user_id, $user_id, $user_id);
+    $stmt_ofertas->bind_param("diiiii", $tour['precio'], $id_tour, $user_id, $user_id, $user_id, $user_id);
+
     $stmt_ofertas->execute();
     $result_ofertas = $stmt_ofertas->get_result();
     
