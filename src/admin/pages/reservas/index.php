@@ -359,6 +359,21 @@ function getEstadoClass($estado) {
                 text-overflow: ellipsis;
             }
         }
+        
+        /* Estilos para el modal de eliminación */
+        #modalEliminar .bg-yellow-50 {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        #modalEliminar button:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -752,24 +767,40 @@ function getEstadoClass($estado) {
                 <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
                     <i class="fas fa-exclamation-triangle text-red-600"></i>
                 </div>
-                <h3 class="text-lg font-medium text-gray-900 mt-2">Eliminar Reserva</h3>
+                <h3 class="text-lg font-medium text-gray-900 mt-2">⚠️ Eliminar Reserva</h3>
                 <div class="mt-2 px-7 py-3">
-                    <p class="text-sm text-gray-500 mb-4">
-                        ¿Estás seguro de que deseas eliminar esta reserva? Esta acción no se puede deshacer.
+                    <p class="text-sm text-gray-500 mb-2">
+                        <strong>¿Estás seguro de que deseas eliminar esta reserva?</strong>
                     </p>
+                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 mb-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-yellow-700">
+                                    <strong>Se eliminarán automáticamente:</strong><br>
+                                    • Todos los pagos asociados<br>
+                                    • Información de pasajeros<br>
+                                    • Historial de ofertas aplicadas<br>
+                                    • Esta acción NO se puede deshacer
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                     <div class="text-left">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Motivo de eliminación (opcional):</label>
                         <textarea name="motivo" rows="3" 
                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
-                                  placeholder="Ingrese el motivo de la eliminación..."></textarea>
+                                  placeholder="Ejemplo: Reserva duplicada, error de sistema, cancelación por cliente..."></textarea>
                     </div>
                 </div>
                 <div class="items-center px-4 py-3">
-                    <button id="btnConfirmarEliminar" class="px-4 py-2 bg-red-500 text-white text-base font-medium rounded-md w-auto hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300 mr-2">
-                        Eliminar
+                    <button id="btnConfirmarEliminar" class="px-6 py-3 bg-red-600 text-white text-base font-medium rounded-md w-auto hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 mr-3 transition-colors">
+                        <i class="fas fa-trash mr-2"></i>Confirmar Eliminación
                     </button>
-                    <button onclick="cerrarModalEliminar()" class="px-4 py-2 bg-gray-300 text-gray-800 text-base font-medium rounded-md w-auto hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300">
-                        Cancelar
+                    <button onclick="cerrarModalEliminar()" class="px-6 py-3 bg-gray-300 text-gray-800 text-base font-medium rounded-md w-auto hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-colors">
+                        <i class="fas fa-times mr-2"></i>Cancelar
                     </button>
                 </div>
             </div>
@@ -778,20 +809,84 @@ function getEstadoClass($estado) {
 
     <script>
         let reservaAEliminar = null;
+        let datosReserva = null;
 
         function eliminarReserva(id) {
             reservaAEliminar = id;
+            
+            // Buscar datos de la reserva en la tabla
+            const filas = document.querySelectorAll('.desktop-table tbody tr');
+            const cards = document.querySelectorAll('.mobile-grid > div');
+            
+            let clienteNombre = 'Desconocido';
+            let tourTitulo = 'Desconocido';
+            
+            // Buscar en tabla desktop
+            filas.forEach(fila => {
+                const idCell = fila.querySelector('td:first-child');
+                if (idCell && idCell.textContent.includes('#' + id)) {
+                    clienteNombre = fila.querySelector('td:nth-child(2) .text-sm.font-medium')?.textContent || 'Desconocido';
+                    tourTitulo = fila.querySelector('td:nth-child(3) .text-sm.font-medium')?.textContent || 'Desconocido';
+                }
+            });
+            
+            // Si no se encontró en desktop, buscar en cards móviles
+            if (clienteNombre === 'Desconocido') {
+                cards.forEach(card => {
+                    // Buscar por ID en algún atributo o contenido (esto podría necesitar ajuste según tu implementación)
+                    const botonEliminar = card.querySelector(`button[onclick*="${id}"]`);
+                    if (botonEliminar) {
+                        clienteNombre = card.querySelector('h3')?.textContent || 'Desconocido';
+                        tourTitulo = card.querySelector('.font-medium')?.textContent || 'Desconocido';
+                    }
+                });
+            }
+            
+            // Actualizar el título del modal con información de la reserva
+            const tituloModal = document.querySelector('#modalEliminar h3');
+            if (tituloModal) {
+                tituloModal.innerHTML = `⚠️ Eliminar Reserva #${id}`;
+            }
+            
+            // Actualizar la descripción con datos específicos
+            const descripcionModal = document.querySelector('#modalEliminar .text-sm.text-gray-500');
+            if (descripcionModal) {
+                descripcionModal.innerHTML = `
+                    <strong>¿Estás seguro de eliminar esta reserva?</strong><br>
+                    <span class="text-blue-700">Cliente:</span> ${clienteNombre}<br>
+                    <span class="text-green-700">Tour:</span> ${tourTitulo}
+                `;
+            }
+            
             document.getElementById('modalEliminar').classList.remove('hidden');
         }
 
         function cerrarModalEliminar() {
             document.getElementById('modalEliminar').classList.add('hidden');
             reservaAEliminar = null;
+            
+            // Limpiar el textarea
+            const textarea = document.querySelector('textarea[name="motivo"]');
+            if (textarea) {
+                textarea.value = '';
+            }
+            
+            // Restaurar el botón a su estado original
+            const btn = document.getElementById('btnConfirmarEliminar');
+            if (btn) {
+                btn.innerHTML = '<i class="fas fa-trash mr-2"></i>Confirmar Eliminación';
+                btn.disabled = false;
+            }
         }
 
         document.getElementById('btnConfirmarEliminar').addEventListener('click', function() {
             if (reservaAEliminar) {
                 const motivo = document.querySelector('textarea[name="motivo"]')?.value || '';
+                const btn = this;
+                
+                // Mostrar indicador de carga
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Eliminando...';
+                btn.disabled = true;
                 
                 // Crear formulario para enviar la eliminación
                 const form = document.createElement('form');
