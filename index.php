@@ -3117,10 +3117,6 @@ body {
                     <span id="cart-count-mobile" data-count="<?php echo $cart_count; ?>"><?php echo $cart_count; ?></span>
                 </a>
             <?php endif; ?>
-            <div class="lang-switch">
-                <a href="?lang=es" class="lang-btn <?php if ($current_lang == 'es') echo 'active'; ?>"><?php echo $lang['lang_es']; ?></a>
-                <a href="?lang=en" class="lang-btn <?php if ($current_lang == 'en') echo 'active'; ?>"><?php echo $lang['lang_en']; ?></a>
-            </div>
         </div>
     </div>
 
