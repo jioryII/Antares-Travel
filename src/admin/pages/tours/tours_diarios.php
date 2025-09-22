@@ -31,12 +31,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $stmt_delete->execute([$id_tour_diario]);
                 
                 // Liberar disponibilidad de guía
-                $sql_update_guia = "UPDATE disponibilidad_guias SET estado = 'Disponible' WHERE id_guia = ? AND fecha = ?";
+                $sql_update_guia = "UPDATE disponibilidad_guias SET estado = 'Libre' WHERE id_guia = ? AND fecha = ?";
                 $stmt_update_guia = $connection->prepare($sql_update_guia);
                 $stmt_update_guia->execute([$tour_data['id_guia'], $tour_data['fecha']]);
                 
                 // Liberar disponibilidad de vehículo
-                $sql_update_vehiculo = "UPDATE disponibilidad_vehiculos SET estado = 'Disponible' WHERE id_vehiculo = ? AND fecha = ?";
+                $sql_update_vehiculo = "UPDATE disponibilidad_vehiculos SET estado = 'Libre' WHERE id_vehiculo = ? AND fecha = ?";
                 $stmt_update_vehiculo = $connection->prepare($sql_update_vehiculo);
                 $stmt_update_vehiculo->execute([$tour_data['id_vehiculo'], $tour_data['fecha']]);
                 
@@ -374,6 +374,7 @@ try {
                             </h1>
                             <p class="text-sm lg:text-base text-gray-600">Registra y gestiona tours diarios con asignación de recursos</p>
                         </div>
+                    </div>
                     </div>
                 </div>
 
@@ -948,7 +949,7 @@ try {
         
         // Función para eliminar tour diario
         function eliminarTourDiario(id, titulo, fecha) {
-            if (confirm(`¿Está seguro de que desea eliminar el tour "${titulo}" programado para el ${fecha}?\n\nEsta acción no se puede deshacer.`)) {
+            if (confirm(`¿Está seguro de que desea eliminar el tour "${titulo}" programado para el ${fecha}?\n\nEsta acción eliminará el tour y liberará los recursos asignados (guía y vehículo).\n\nEsta acción NO se puede deshacer.`)) {
                 // Crear formulario para enviar la petición de eliminación
                 const form = document.createElement('form');
                 form.method = 'POST';
