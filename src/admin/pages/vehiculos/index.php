@@ -7,6 +7,10 @@ require_once '../../functions/admin_functions.php';
 verificarSesionAdmin();
 $admin = obtenerAdminActual();
 
+// Mensajes de éxito y error
+$mensaje_success = $_GET['success'] ?? null;
+$mensaje_error = $_GET['error'] ?? null;
+
 try {
     $connection = getConnection();
     
@@ -233,6 +237,27 @@ try {
                         </div>
                     </div>
                 </div>
+
+                <!-- Mensajes de éxito y error -->
+                <?php if ($mensaje_success): ?>
+                <div class="mb-4 lg:mb-6 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg flex items-center">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    <span><?php echo htmlspecialchars($mensaje_success); ?></span>
+                    <button onclick="this.parentElement.remove()" class="ml-auto text-green-600 hover:text-green-800">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <?php endif; ?>
+
+                <?php if ($mensaje_error): ?>
+                <div class="mb-4 lg:mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg flex items-center">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <span><?php echo htmlspecialchars($mensaje_error); ?></span>
+                    <button onclick="this.parentElement.remove()" class="ml-auto text-red-600 hover:text-red-800">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <?php endif; ?>
 
                 <!-- Filtros y búsqueda -->
                 <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
@@ -529,7 +554,16 @@ try {
 
         function confirmarEliminacion() {
             if (vehiculoAEliminar) {
-                window.location.href = `eliminar.php?id=${vehiculoAEliminar}`;
+                // Mostrar estado de carga
+                const botonEliminar = document.querySelector('#modalEliminar button[onclick="confirmarEliminacion()"]');
+                const textoOriginal = botonEliminar.innerHTML;
+                botonEliminar.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Eliminando...';
+                botonEliminar.disabled = true;
+                
+                // Realizar la eliminación
+                setTimeout(() => {
+                    window.location.href = `eliminar.php?id=${vehiculoAEliminar}`;
+                }, 500);
             }
         }
 
@@ -548,6 +582,26 @@ try {
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 cerrarModal();
+            }
+        });
+
+        // Auto-ocultar mensajes después de 5 segundos
+        document.addEventListener('DOMContentLoaded', function() {
+            const mensajeSuccess = document.querySelector('.bg-green-50');
+            const mensajeError = document.querySelector('.bg-red-50');
+            
+            if (mensajeSuccess) {
+                setTimeout(() => {
+                    mensajeSuccess.style.opacity = '0';
+                    setTimeout(() => mensajeSuccess.remove(), 300);
+                }, 5000);
+            }
+            
+            if (mensajeError) {
+                setTimeout(() => {
+                    mensajeError.style.opacity = '0';
+                    setTimeout(() => mensajeError.remove(), 300);
+                }, 7000); // Los errores se muestran más tiempo
             }
         });
     </script>

@@ -44,6 +44,20 @@ try {
         throw new Exception('No se puede eliminar: el vehículo tiene tours próximos programados. Cancela primero los tours o espera a que se completen.');
     }
     
+    // Verificar si el chofer asignado tiene tours próximos con este vehículo
+    if ($vehiculo['id_chofer']) {
+        $chofer_tours_check = "SELECT COUNT(*) as total FROM tours_diarios td
+                               INNER JOIN choferes c ON td.id_chofer = c.id_chofer
+                               WHERE c.id_chofer = ? AND td.fecha >= CURDATE() AND td.id_vehiculo = ?";
+        $chofer_tours_stmt = $connection->prepare($chofer_tours_check);
+        $chofer_tours_stmt->execute([$vehiculo['id_chofer'], $id_vehiculo]);
+        $chofer_tours_result = $chofer_tours_stmt->fetch();
+        
+        if ($chofer_tours_result['total'] > 0) {
+            throw new Exception('No se puede eliminar: el chofer asignado a este vehículo tiene tours próximos programados.');
+        }
+    }
+    
     // Eliminar registros relacionados en orden correcto
     
     // 1. Eliminar disponibilidad del vehículo
@@ -67,6 +81,14 @@ try {
     
     $connection->commit();
     
+    // Log detallado de éxito
+    $log_detalles = "VEHÍCULOS - Eliminación exitosa: ID $id_vehiculo - {$vehiculo['marca']} {$vehiculo['modelo']} (Placa: {$vehiculo['placa']})";
+    if ($vehiculo['chofer_nombre']) {
+        $log_detalles .= " - Chofer asignado: {$vehiculo['chofer_nombre']}";
+    }
+    $log_detalles .= " - Admin: {$admin['nombre_usuario']} - " . date('Y-m-d H:i:s');
+    error_log($log_detalles);
+    
     // Redirigir con mensaje de éxito
     $mensaje = "Vehículo '{$vehiculo['marca']} {$vehiculo['modelo']}' (Placa: {$vehiculo['placa']}) eliminado exitosamente";
     header('Location: index.php?success=' . urlencode($mensaje));
@@ -76,6 +98,9 @@ try {
     if ($connection->inTransaction()) {
         $connection->rollback();
     }
+    
+    // Log detallado del error
+    error_log("VEHÍCULOS - Error en eliminación: " . $e->getMessage() . " - ID: $id_vehiculo - Admin: " . ($admin['nombre_usuario'] ?? 'desconocido'));
     
     // Redirigir con mensaje de error
     header('Location: index.php?error=' . urlencode($e->getMessage()));
