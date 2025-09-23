@@ -1,1 +1,516 @@
-[Sun Sep 21 05:29:46 2025] Failed to listen on 0.0.0.0:8000 (reason: Address already in use)
+[Tue Sep 23 12:23:40 2025] PHP 8.3.6 Development Server (http://0.0.0.0:8000) started
+[Tue Sep 23 12:23:42 2025] 127.0.0.1:42254 Accepted
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42254 [200]: GET /index.php
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42254 Closing
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42256 Accepted
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42260 Accepted
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42256 [200]: GET /imagenes/fondo01.jpg
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42264 Accepted
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42268 Accepted
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42282 Accepted
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42286 Accepted
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42260 [200]: GET /imagenes/fondo02.jpg
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42264 [200]: GET /imagenes/fondo03.jpg
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42268 [200]: GET /imagenes/fondo04.jpg
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42282 [200]: GET /imagenes/fondo05.jpg
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42286 [200]: GET /uploads/tours/tour_new_1756738076.jpg
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42256 Closing
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42268 Closing
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42260 Closing
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42282 Closing
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42286 Closing
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42264 Closing
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42292 Accepted
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42308 Accepted
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42314 Accepted
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42322 Accepted
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42330 Accepted
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42292 [404]: GET /uploads/tours/tour_new_1758569501.jpg - No such file or directory
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42292 Closing
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42308 [200]: GET /uploads/tours/tour_new_1756738047.jpg
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42314 [200]: GET /uploads/tours/tour_new_1756738031.jpg
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42322 [200]: GET /uploads/tours/tour_new_1756737996.jpg
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42308 Closing
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42330 [200]: GET /uploads/tours/tour_new_1756737984.jpg
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42314 Closing
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42322 Closing
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42330 Closing
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42332 Accepted
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42346 Accepted
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42352 Accepted
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42354 Accepted
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42362 Accepted
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42332 [200]: GET /uploads/tours/tour_new_1756737968.jpg
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42346 [200]: GET /uploads/tours/tour_new_1756737909.jpg
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42332 Closing
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42352 [200]: GET /uploads/tours/tour_new_1756737897.jpg
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42354 [404]: GET /uploads/tours/tour_new_1758569260.jpg - No such file or directory
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42362 [404]: GET /uploads/tours/tour_new_1758569292.jpg - No such file or directory
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42354 Closing
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42362 Closing
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42346 Closing
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42352 Closing
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42364 Accepted
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42368 Accepted
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42364 [200]: GET /uploads/tours/tour_new_1756737298.jpg
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42368 [200]: GET /uploads/tours/tour_new_1756737280.jpg
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42364 Closing
+[Tue Sep 23 12:23:44 2025] 127.0.0.1:42368 Closing
+[Tue Sep 23 12:23:48 2025] 127.0.0.1:39632 Accepted
+[Tue Sep 23 12:23:48 2025] 127.0.0.1:39638 Accepted
+[Tue Sep 23 12:23:51 2025] 127.0.0.1:39632 [302]: POST /index.php
+[Tue Sep 23 12:23:51 2025] 127.0.0.1:39632 Closing
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39638 [200]: GET /
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39638 Closing
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39646 Accepted
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39646 [200]: GET /imagenes/fondo01.jpg
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39658 Accepted
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39664 Accepted
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39676 Accepted
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39646 Closing
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39658 [200]: GET /imagenes/fondo02.jpg
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39664 [200]: GET /imagenes/fondo03.jpg
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39658 Closing
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39676 [200]: GET /imagenes/fondo04.jpg
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39692 Accepted
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39676 Closing
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39664 Closing
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39702 Accepted
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39692 [200]: GET /imagenes/fondo05.jpg
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39702 [200]: GET /uploads/tours/tour_new_1756738076.jpg
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39692 Closing
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39702 Closing
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39706 Accepted
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39712 Accepted
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39714 Accepted
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39706 [404]: GET /uploads/tours/tour_new_1758569501.jpg - No such file or directory
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39706 Closing
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39712 [200]: GET /uploads/tours/tour_new_1756738047.jpg
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39714 [200]: GET /uploads/tours/tour_new_1756738031.jpg
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39712 Closing
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39714 Closing
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39728 Accepted
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39732 Accepted
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39736 Accepted
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39750 Accepted
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39728 [200]: GET /uploads/tours/tour_new_1756737996.jpg
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39732 [200]: GET /uploads/tours/tour_new_1756737984.jpg
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39736 [200]: GET /uploads/tours/tour_new_1756737968.jpg
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39728 Closing
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39732 Closing
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39736 Closing
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39752 Accepted
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39750 [200]: GET /uploads/tours/tour_new_1756737909.jpg
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39750 Closing
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39758 Accepted
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39752 [200]: GET /uploads/tours/tour_new_1756737897.jpg
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39752 Closing
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39758 [404]: GET /uploads/tours/tour_new_1758569260.jpg - No such file or directory
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39758 Closing
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39766 Accepted
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39782 Accepted
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39794 Accepted
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39766 [404]: GET /uploads/tours/tour_new_1758569292.jpg - No such file or directory
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39766 Closing
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39782 [200]: GET /uploads/tours/tour_new_1756737298.jpg
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39794 [200]: GET /uploads/tours/tour_new_1756737280.jpg
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39782 Closing
+[Tue Sep 23 12:23:53 2025] 127.0.0.1:39794 Closing
+[Tue Sep 23 12:23:55 2025] 127.0.0.1:39798 Accepted
+[Tue Sep 23 12:23:55 2025] 127.0.0.1:39798 [200]: GET /imagenes/antares_logozz2.png
+[Tue Sep 23 12:23:55 2025] 127.0.0.1:39798 Closing
+[Tue Sep 23 12:25:00 2025] 127.0.0.1:40874 Accepted
+[Tue Sep 23 12:25:00 2025] 127.0.0.1:40876 Accepted
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40874 [200]: GET /
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40874 Closing
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40880 Accepted
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40876 [200]: GET /imagenes/fondo01.jpg
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40894 Accepted
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40896 Accepted
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40902 Accepted
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40918 Accepted
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40880 [200]: GET /imagenes/fondo02.jpg
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40894 [200]: GET /imagenes/fondo03.jpg
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40896 [200]: GET /imagenes/fondo04.jpg
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40876 Closing
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40902 [200]: GET /imagenes/fondo05.jpg
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40918 [200]: GET /uploads/tours/tour_new_1756738076.jpg
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40880 Closing
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40896 Closing
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40902 Closing
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40918 Closing
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40894 Closing
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40922 Accepted
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40924 Accepted
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40922 [404]: GET /uploads/tours/tour_new_1758569501.jpg - No such file or directory
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40922 Closing
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40924 [200]: GET /uploads/tours/tour_new_1756738047.jpg
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40924 Closing
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40938 Accepted
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40938 [200]: GET /uploads/tours/tour_new_1756738031.jpg
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40938 Closing
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40952 Accepted
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40960 Accepted
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40972 Accepted
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40986 Accepted
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40952 [200]: GET /uploads/tours/tour_new_1756737996.jpg
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40960 [200]: GET /uploads/tours/tour_new_1756737984.jpg
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40952 Closing
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40960 Closing
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40994 Accepted
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40972 [200]: GET /uploads/tours/tour_new_1756737968.jpg
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40986 [200]: GET /uploads/tours/tour_new_1756737909.jpg
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40972 Closing
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40986 Closing
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40994 [200]: GET /uploads/tours/tour_new_1756737897.jpg
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:40994 Closing
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:41008 Accepted
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:41014 Accepted
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:41018 Accepted
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:41008 [404]: GET /uploads/tours/tour_new_1758569260.jpg - No such file or directory
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:41008 Closing
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:41014 [404]: GET /uploads/tours/tour_new_1758569292.jpg - No such file or directory
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:41014 Closing
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:41018 [200]: GET /uploads/tours/tour_new_1756737298.jpg
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:41018 Closing
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:41024 Accepted
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:41036 Accepted
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:41024 [200]: GET /uploads/tours/tour_new_1756737280.jpg
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:41036 [200]: GET /imagenes/antares_logozz2.png
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:41024 Closing
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:41036 Closing
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:41044 Accepted
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:41044 [200]: GET /imagenes/antares_logozz3.png
+[Tue Sep 23 12:25:02 2025] 127.0.0.1:41044 Closing
+[Tue Sep 23 12:25:54 2025] 127.0.0.1:52042 Accepted
+[Tue Sep 23 12:25:54 2025] 127.0.0.1:52048 Accepted
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:52042 [200]: GET /
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:52042 Closing
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:52048 [200]: GET /imagenes/fondo01.jpg
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37402 Accepted
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37408 Accepted
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:52048 Closing
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37420 Accepted
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37432 Accepted
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37438 Accepted
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37402 [200]: GET /imagenes/fondo02.jpg
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37408 [200]: GET /imagenes/fondo03.jpg
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37420 [200]: GET /imagenes/fondo04.jpg
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37402 Closing
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37420 Closing
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37408 Closing
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37432 [200]: GET /imagenes/fondo05.jpg
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37438 [200]: GET /uploads/tours/tour_new_1756738076.jpg
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37432 Closing
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37438 Closing
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37450 Accepted
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37458 Accepted
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37450 [404]: GET /uploads/tours/tour_new_1758569501.jpg - No such file or directory
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37450 Closing
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37458 [200]: GET /uploads/tours/tour_new_1756738047.jpg
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37458 Closing
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37464 Accepted
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37464 [200]: GET /uploads/tours/tour_new_1756738031.jpg
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37464 Closing
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37480 Accepted
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37494 Accepted
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37510 Accepted
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37480 [200]: GET /uploads/tours/tour_new_1756737996.jpg
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37494 [200]: GET /uploads/tours/tour_new_1756737984.jpg
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37510 [200]: GET /uploads/tours/tour_new_1756737968.jpg
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37480 Closing
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37494 Closing
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37510 Closing
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37522 Accepted
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37522 [200]: GET /uploads/tours/tour_new_1756737909.jpg
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37522 Closing
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37536 Accepted
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37552 Accepted
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37536 [200]: GET /uploads/tours/tour_new_1756737897.jpg
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37536 Closing
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37552 [404]: GET /uploads/tours/tour_new_1758569260.jpg - No such file or directory
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37552 Closing
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37562 Accepted
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37562 [404]: GET /uploads/tours/tour_new_1758569292.jpg - No such file or directory
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37562 Closing
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37576 Accepted
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37576 [200]: GET /uploads/tours/tour_new_1756737298.jpg
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37576 Closing
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37584 Accepted
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37584 [200]: GET /uploads/tours/tour_new_1756737280.jpg
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37584 Closing
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37598 Accepted
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37598 [200]: GET /imagenes/antares_logozz2.png
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37598 Closing
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37608 Accepted
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37608 [200]: GET /imagenes/antares_logozz3.png
+[Tue Sep 23 12:25:57 2025] 127.0.0.1:37608 Closing
+[Tue Sep 23 12:26:00 2025] 127.0.0.1:37616 Accepted
+[Tue Sep 23 12:26:01 2025] 127.0.0.1:37616 [302]: GET /?logout=1
+[Tue Sep 23 12:26:01 2025] 127.0.0.1:37616 Closing
+[Tue Sep 23 12:26:01 2025] 127.0.0.1:37618 Accepted
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37618 [200]: GET /
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37618 Closing
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37632 Accepted
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37632 [200]: GET /imagenes/fondo01.jpg
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37632 Closing
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37648 Accepted
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37662 Accepted
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37672 Accepted
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37648 [200]: GET /imagenes/fondo02.jpg
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37662 [200]: GET /imagenes/fondo03.jpg
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37672 [200]: GET /imagenes/fondo04.jpg
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37648 Closing
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37672 Closing
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37662 Closing
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37674 Accepted
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37686 Accepted
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37674 [200]: GET /imagenes/fondo05.jpg
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37674 Closing
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37686 [200]: GET /uploads/tours/tour_new_1756738076.jpg
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37686 Closing
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37694 Accepted
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37700 Accepted
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37694 [404]: GET /uploads/tours/tour_new_1758569501.jpg - No such file or directory
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37694 Closing
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37700 [200]: GET /uploads/tours/tour_new_1756738047.jpg
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37700 Closing
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37702 Accepted
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37708 Accepted
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37720 Accepted
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37702 [200]: GET /uploads/tours/tour_new_1756738031.jpg
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37702 Closing
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37708 [200]: GET /uploads/tours/tour_new_1756737996.jpg
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37720 [200]: GET /uploads/tours/tour_new_1756737984.jpg
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37708 Closing
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37720 Closing
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37736 Accepted
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37736 [200]: GET /uploads/tours/tour_new_1756737968.jpg
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37736 Closing
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37738 Accepted
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37738 [200]: GET /uploads/tours/tour_new_1756737909.jpg
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37738 Closing
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37754 Accepted
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37758 Accepted
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37754 [200]: GET /uploads/tours/tour_new_1756737897.jpg
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37754 Closing
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37758 [404]: GET /uploads/tours/tour_new_1758569260.jpg - No such file or directory
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37758 Closing
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37770 Accepted
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37780 Accepted
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37782 Accepted
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37770 [404]: GET /uploads/tours/tour_new_1758569292.jpg - No such file or directory
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37770 Closing
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37780 [200]: GET /uploads/tours/tour_new_1756737298.jpg
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37780 Closing
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37782 [200]: GET /uploads/tours/tour_new_1756737280.jpg
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37782 Closing
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37788 Accepted
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37788 [200]: GET /imagenes/antares_logozz2.png
+[Tue Sep 23 12:26:02 2025] 127.0.0.1:37788 Closing
+[Tue Sep 23 12:26:09 2025] 127.0.0.1:36582 Accepted
+[Tue Sep 23 12:26:09 2025] 127.0.0.1:36598 Accepted
+[Tue Sep 23 12:26:10 2025] 127.0.0.1:36582 [302]: POST /index.php
+[Tue Sep 23 12:26:10 2025] 127.0.0.1:36582 Closing
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36598 [200]: GET /
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36598 Closing
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36604 Accepted
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36606 Accepted
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36622 Accepted
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36638 Accepted
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36644 Accepted
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36604 [200]: GET /imagenes/fondo01.jpg
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36606 [200]: GET /imagenes/fondo02.jpg
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36622 [200]: GET /imagenes/fondo03.jpg
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36606 Closing
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36638 [200]: GET /imagenes/fondo04.jpg
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36644 [200]: GET /imagenes/fondo05.jpg
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36638 Closing
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36656 Accepted
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36622 Closing
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36644 Closing
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36604 Closing
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36656 [200]: GET /uploads/tours/tour_new_1756738076.jpg
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36656 Closing
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36658 Accepted
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36664 Accepted
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36658 [404]: GET /uploads/tours/tour_new_1758569501.jpg - No such file or directory
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36658 Closing
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36664 [200]: GET /uploads/tours/tour_new_1756738047.jpg
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36664 Closing
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36680 Accepted
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36696 Accepted
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36702 Accepted
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36710 Accepted
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36680 [200]: GET /uploads/tours/tour_new_1756738031.jpg
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36696 [200]: GET /uploads/tours/tour_new_1756737996.jpg
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36680 Closing
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36702 [200]: GET /uploads/tours/tour_new_1756737984.jpg
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36696 Closing
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36702 Closing
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36710 [200]: GET /uploads/tours/tour_new_1756737968.jpg
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36710 Closing
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36716 Accepted
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36716 [200]: GET /uploads/tours/tour_new_1756737909.jpg
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36716 Closing
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36724 Accepted
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36736 Accepted
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36724 [200]: GET /uploads/tours/tour_new_1756737897.jpg
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36724 Closing
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36736 [404]: GET /uploads/tours/tour_new_1758569260.jpg - No such file or directory
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36736 Closing
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36746 Accepted
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36748 Accepted
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36746 [404]: GET /uploads/tours/tour_new_1758569292.jpg - No such file or directory
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36746 Closing
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36750 Accepted
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36762 Accepted
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36748 [200]: GET /uploads/tours/tour_new_1756737298.jpg
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36748 Closing
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36750 [200]: GET /uploads/tours/tour_new_1756737280.jpg
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36750 Closing
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36762 [200]: GET /imagenes/antares_logozz2.png
+[Tue Sep 23 12:26:11 2025] 127.0.0.1:36762 Closing
+[Tue Sep 23 12:26:41 2025] 127.0.0.1:38974 Accepted
+[Tue Sep 23 12:26:41 2025] 127.0.0.1:38976 Accepted
+[Tue Sep 23 12:26:41 2025] 127.0.0.1:38974 [302]: GET /src/admin/
+[Tue Sep 23 12:26:41 2025] 127.0.0.1:38974 Closing
+[Tue Sep 23 12:26:41 2025] 127.0.0.1:38976 [302]: GET /src/admin/pages/dashboard/
+[Tue Sep 23 12:26:41 2025] 127.0.0.1:38976 Closing
+[Tue Sep 23 12:26:41 2025] 127.0.0.1:38984 Accepted
+[Tue Sep 23 12:26:42 2025] 127.0.0.1:38984 [200]: GET /src/admin/auth/login.php
+[Tue Sep 23 12:26:42 2025] 127.0.0.1:38984 Closing
+[Tue Sep 23 12:26:42 2025] 127.0.0.1:38996 Accepted
+[Tue Sep 23 12:26:42 2025] 127.0.0.1:38996 [404]: GET /favicon.ico - No such file or directory
+[Tue Sep 23 12:26:42 2025] 127.0.0.1:38996 Closing
+[Tue Sep 23 12:26:44 2025] 127.0.0.1:39012 Accepted
+[Tue Sep 23 12:26:44 2025] 127.0.0.1:39020 Accepted
+[Tue Sep 23 12:26:45 2025] 127.0.0.1:39012 [302]: POST /src/admin/auth/login.php
+[Tue Sep 23 12:26:45 2025] 127.0.0.1:39012 Closing
+[Tue Sep 23 12:26:54 2025] 127.0.0.1:39020 [200]: GET /src/admin/pages/dashboard/
+[Tue Sep 23 12:26:54 2025] 127.0.0.1:39020 Closing
+[Tue Sep 23 12:26:54 2025] 127.0.0.1:60852 Accepted
+[Tue Sep 23 12:26:54 2025] 127.0.0.1:60852 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Tue Sep 23 12:26:54 2025] 127.0.0.1:60852 Closing
+[Tue Sep 23 12:27:19 2025] 127.0.0.1:45306 Accepted
+[Tue Sep 23 12:27:21 2025] PHP Warning:  Undefined variable $page_title in /home/andi/vXcode/Antares-Travel/src/admin/pages/tours/index.php on line 49
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45306 [200]: GET /src/admin/pages/tours/
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45306 Closing
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45312 Accepted
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45312 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45312 Closing
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45328 Accepted
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45334 Accepted
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45336 Accepted
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45340 Accepted
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45356 Accepted
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45328 [200]: GET /uploads/tours/tour_new_1756737280.jpg
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45334 [200]: GET /uploads/tours/tour_new_1756737298.jpg
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45328 Closing
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45336 [404]: GET /uploads/tours/tour_new_1758569292.jpg - No such file or directory
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45336 Closing
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45340 [404]: GET /uploads/tours/tour_new_1758569260.jpg - No such file or directory
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45340 Closing
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45356 [200]: GET /uploads/tours/tour_new_1756737897.jpg
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45334 Closing
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45356 Closing
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45364 Accepted
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45364 [200]: GET /uploads/tours/tour_new_1756737909.jpg
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45364 Closing
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45366 Accepted
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45368 Accepted
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45378 Accepted
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45388 Accepted
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45398 Accepted
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45366 [200]: GET /uploads/tours/tour_new_1756737968.jpg
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45368 [200]: GET /uploads/tours/tour_new_1756737984.jpg
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45366 Closing
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45378 [200]: GET /uploads/tours/tour_new_1756737996.jpg
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45388 [200]: GET /uploads/tours/tour_new_1756738031.jpg
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45398 [200]: GET /uploads/tours/tour_new_1756738047.jpg
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45368 Closing
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45398 Closing
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45378 Closing
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45388 Closing
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45400 Accepted
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45412 Accepted
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45400 [404]: GET /uploads/tours/tour_new_1758569501.jpg - No such file or directory
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45400 Closing
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45412 [200]: GET /uploads/tours/tour_new_1756738076.jpg
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45412 Closing
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45424 Accepted
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45430 Accepted
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45442 Accepted
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45424 [404]: GET /uploads/tours/tour_new_1758569292.jpg - No such file or directory
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45424 Closing
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45430 [404]: GET /uploads/tours/tour_new_1758569260.jpg - No such file or directory
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45430 Closing
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45442 [404]: GET /uploads/tours/tour_new_1758569501.jpg - No such file or directory
+[Tue Sep 23 12:27:21 2025] 127.0.0.1:45442 Closing
+[Tue Sep 23 12:27:23 2025] 127.0.0.1:45454 Accepted
+[Tue Sep 23 12:27:23 2025] 127.0.0.1:45456 Accepted
+[Tue Sep 23 12:27:25 2025] 127.0.0.1:45454 [200]: GET /src/admin/pages/tours/tours_diarios.php
+[Tue Sep 23 12:27:25 2025] 127.0.0.1:45454 Closing
+[Tue Sep 23 12:27:25 2025] 127.0.0.1:45456 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Tue Sep 23 12:27:25 2025] 127.0.0.1:45456 Closing
+[Tue Sep 23 12:27:26 2025] 127.0.0.1:42432 Accepted
+[Tue Sep 23 12:27:26 2025] 127.0.0.1:42440 Accepted
+[Tue Sep 23 12:27:27 2025] PHP Warning:  Undefined variable $page_title in /home/andi/vXcode/Antares-Travel/src/admin/pages/tours/index.php on line 49
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42432 [200]: GET /src/admin/pages/tours/
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42432 Closing
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42440 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42440 Closing
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42446 Accepted
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42454 Accepted
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42460 Accepted
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42464 Accepted
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42480 Accepted
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42446 [200]: GET /uploads/tours/tour_new_1756737280.jpg
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42454 [200]: GET /uploads/tours/tour_new_1756737298.jpg
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42460 [404]: GET /uploads/tours/tour_new_1758569292.jpg - No such file or directory
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42460 Closing
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42464 [404]: GET /uploads/tours/tour_new_1758569260.jpg - No such file or directory
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42464 Closing
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42480 [200]: GET /uploads/tours/tour_new_1756737897.jpg
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42446 Closing
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42486 Accepted
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42454 Closing
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42480 Closing
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42486 [200]: GET /uploads/tours/tour_new_1756737909.jpg
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42486 Closing
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42492 Accepted
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42502 Accepted
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42492 [200]: GET /uploads/tours/tour_new_1756737968.jpg
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42502 [200]: GET /uploads/tours/tour_new_1756737984.jpg
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42492 Closing
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42502 Closing
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42504 Accepted
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42518 Accepted
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42504 [200]: GET /uploads/tours/tour_new_1756737996.jpg
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42518 [200]: GET /uploads/tours/tour_new_1756738031.jpg
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42504 Closing
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42518 Closing
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42522 Accepted
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42532 Accepted
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42538 Accepted
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42522 [200]: GET /uploads/tours/tour_new_1756738047.jpg
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42532 [404]: GET /uploads/tours/tour_new_1758569501.jpg - No such file or directory
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42532 Closing
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42522 Closing
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42538 [200]: GET /uploads/tours/tour_new_1756738076.jpg
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42538 Closing
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42544 Accepted
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42558 Accepted
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42572 Accepted
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42544 [404]: GET /uploads/tours/tour_new_1758569292.jpg - No such file or directory
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42544 Closing
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42558 [404]: GET /uploads/tours/tour_new_1758569260.jpg - No such file or directory
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42558 Closing
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42572 [404]: GET /uploads/tours/tour_new_1758569501.jpg - No such file or directory
+[Tue Sep 23 12:27:27 2025] 127.0.0.1:42572 Closing
+[Tue Sep 23 12:27:32 2025] 127.0.0.1:42584 Accepted
+[Tue Sep 23 12:27:35 2025] 127.0.0.1:42584 [200]: GET /src/admin/pages/tours/tours_diarios.php
+[Tue Sep 23 12:27:35 2025] 127.0.0.1:42584 Closing
+[Tue Sep 23 12:27:35 2025] 127.0.0.1:42586 Accepted
+[Tue Sep 23 12:27:35 2025] 127.0.0.1:42586 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Tue Sep 23 12:27:35 2025] 127.0.0.1:42586 Closing
