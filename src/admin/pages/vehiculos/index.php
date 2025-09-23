@@ -76,10 +76,10 @@ try {
     
     // Obtener estadísticas generales
     $estadisticas_sql = "SELECT 
-                            COUNT(*) as total_vehiculos,
-                            SUM(CASE WHEN id_chofer IS NOT NULL THEN 1 ELSE 0 END) as con_chofer,
-                            SUM(CASE WHEN id_chofer IS NULL THEN 1 ELSE 0 END) as sin_chofer,
-                            AVG(capacidad) as capacidad_promedio
+                            COALESCE(COUNT(*), 0) as total_vehiculos,
+                            COALESCE(SUM(CASE WHEN id_chofer IS NOT NULL THEN 1 ELSE 0 END), 0) as con_chofer,
+                            COALESCE(SUM(CASE WHEN id_chofer IS NULL THEN 1 ELSE 0 END), 0) as sin_chofer,
+                            COALESCE(AVG(capacidad), 0) as capacidad_promedio
                          FROM vehiculos";
     
     $estadisticas_stmt = $connection->prepare($estadisticas_sql);
@@ -87,14 +87,15 @@ try {
     $estadisticas = $estadisticas_stmt->fetch();
     
     // Obtener tours activos hoy
-    $tours_hoy_sql = "SELECT COUNT(*) as tours_hoy
+    $tours_hoy_sql = "SELECT COALESCE(COUNT(*), 0) as tours_hoy
                       FROM tours_diarios td
                       INNER JOIN vehiculos v ON td.id_vehiculo = v.id_vehiculo
                       WHERE td.fecha = CURDATE()";
     
     $tours_hoy_stmt = $connection->prepare($tours_hoy_sql);
     $tours_hoy_stmt->execute();
-    $tours_hoy = $tours_hoy_stmt->fetch()['tours_hoy'];
+    $tours_hoy_result = $tours_hoy_stmt->fetch();
+    $tours_hoy = $tours_hoy_result['tours_hoy'] ?? 0;
     
     // Obtener lista de choferes para filtro
     $choferes_sql = "SELECT id_chofer, nombre, apellido FROM choferes ORDER BY nombre, apellido";
@@ -111,6 +112,14 @@ try {
     $tours_hoy = 0;
     $choferes = [];
     $page_title = "Error - Vehículos";
+}
+
+// Función helper para number_format seguro
+function formatNumber($value, $decimales = 0, $separador_decimal = '.', $separador_miles = ',') {
+    if ($value === null || $value === '') {
+        return '0';
+    }
+    return number_format((float)$value, $decimales, $separador_decimal, $separador_miles);
 }
 ?>
 
@@ -196,7 +205,7 @@ try {
                             </div>
                             <div class="ml-4">
                                 <p class="text-sm font-medium text-gray-600">Total Vehículos</p>
-                                <p class="text-2xl font-bold text-blue-600"><?php echo number_format($estadisticas['total_vehiculos']); ?></p>
+                                <p class="text-2xl font-bold text-blue-600"><?php echo formatNumber($estadisticas['total_vehiculos']); ?></p>
                             </div>
                         </div>
                     </div>
@@ -208,7 +217,7 @@ try {
                             </div>
                             <div class="ml-4">
                                 <p class="text-sm font-medium text-gray-600">Con Chofer</p>
-                                <p class="text-2xl font-bold text-green-600"><?php echo number_format($estadisticas['con_chofer']); ?></p>
+                                <p class="text-2xl font-bold text-green-600"><?php echo formatNumber($estadisticas['con_chofer']); ?></p>
                             </div>
                         </div>
                     </div>
@@ -220,7 +229,7 @@ try {
                             </div>
                             <div class="ml-4">
                                 <p class="text-sm font-medium text-gray-600">Disponibles</p>
-                                <p class="text-2xl font-bold text-orange-600"><?php echo number_format($estadisticas['sin_chofer']); ?></p>
+                                <p class="text-2xl font-bold text-orange-600"><?php echo formatNumber($estadisticas['sin_chofer']); ?></p>
                             </div>
                         </div>
                     </div>
@@ -232,7 +241,7 @@ try {
                             </div>
                             <div class="ml-4">
                                 <p class="text-sm font-medium text-gray-600">Tours Hoy</p>
-                                <p class="text-2xl font-bold text-purple-600"><?php echo number_format($tours_hoy); ?></p>
+                                <p class="text-2xl font-bold text-purple-600"><?php echo formatNumber($tours_hoy); ?></p>
                             </div>
                         </div>
                     </div>

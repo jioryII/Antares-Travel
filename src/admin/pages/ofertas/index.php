@@ -89,14 +89,14 @@ try {
     
     // Estadísticas generales
     $stats_sql = "SELECT 
-                    COUNT(*) as total_ofertas,
-                    SUM(CASE WHEN estado = 'Activa' THEN 1 ELSE 0 END) as ofertas_activas,
-                    SUM(CASE WHEN estado = 'Pausada' THEN 1 ELSE 0 END) as ofertas_pausadas,
-                    SUM(CASE WHEN estado = 'Finalizada' THEN 1 ELSE 0 END) as ofertas_finalizadas,
-                    SUM(CASE WHEN estado = 'Borrador' THEN 1 ELSE 0 END) as ofertas_borrador,
+                    COALESCE(COUNT(*), 0) as total_ofertas,
+                    COALESCE(SUM(CASE WHEN estado = 'Activa' THEN 1 ELSE 0 END), 0) as ofertas_activas,
+                    COALESCE(SUM(CASE WHEN estado = 'Pausada' THEN 1 ELSE 0 END), 0) as ofertas_pausadas,
+                    COALESCE(SUM(CASE WHEN estado = 'Finalizada' THEN 1 ELSE 0 END), 0) as ofertas_finalizadas,
+                    COALESCE(SUM(CASE WHEN estado = 'Borrador' THEN 1 ELSE 0 END), 0) as ofertas_borrador,
                     COALESCE(SUM(uso_stats.total_usos), 0) as total_usos_sistema,
                     COALESCE(SUM(uso_stats.total_descuento), 0) as total_descuento_sistema,
-                    SUM(CASE WHEN fecha_fin >= CURDATE() AND estado = 'Activa' THEN 1 ELSE 0 END) as ofertas_vigentes
+                    COALESCE(SUM(CASE WHEN fecha_fin >= CURDATE() AND estado = 'Activa' THEN 1 ELSE 0 END), 0) as ofertas_vigentes
                   FROM ofertas o
                   LEFT JOIN (
                       SELECT id_oferta, COUNT(*) as total_usos, SUM(monto_descuento) as total_descuento
@@ -178,6 +178,14 @@ function getTipoOfertaClass($tipo) {
     }
 }
 
+// Función helper para number_format seguro
+function formatNumber($value, $decimales = 0, $separador_decimal = '.', $separador_miles = ',') {
+    if ($value === null || $value === '') {
+        return '0';
+    }
+    return number_format((float)$value, $decimales, $separador_decimal, $separador_miles);
+}
+
 function getSortIcon($campo, $orden_actual, $direccion_actual) {
     if ($campo !== $orden_actual) {
         return 'fas fa-sort text-gray-400';
@@ -203,7 +211,7 @@ function formatearFecha($fecha) {
 }
 
 function formatearMonto($monto) {
-    return 'S/ ' . number_format($monto, 2);
+    return 'S/ ' . formatNumber($monto, 2);
 }
 
 function estaVigente($fecha_inicio, $fecha_fin, $estado) {
@@ -301,7 +309,7 @@ function estaVigente($fecha_inicio, $fecha_fin, $estado) {
                             </div>
                             <div class="ml-4">
                                 <p class="text-xs lg:text-sm font-medium text-gray-500">Total Ofertas</p>
-                                <p class="text-lg lg:text-2xl font-semibold text-gray-900"><?php echo number_format($stats['total_ofertas']); ?></p>
+                                <p class="text-lg lg:text-2xl font-semibold text-gray-900"><?php echo formatNumber($stats['total_ofertas']); ?></p>
                             </div>
                         </div>
                     </div>
@@ -313,7 +321,7 @@ function estaVigente($fecha_inicio, $fecha_fin, $estado) {
                             </div>
                             <div class="ml-4">
                                 <p class="text-xs lg:text-sm font-medium text-gray-500">Activas</p>
-                                <p class="text-lg lg:text-2xl font-semibold text-green-600"><?php echo number_format($stats['ofertas_activas']); ?></p>
+                                <p class="text-lg lg:text-2xl font-semibold text-green-600"><?php echo formatNumber($stats['ofertas_activas']); ?></p>
                             </div>
                         </div>
                     </div>
@@ -325,7 +333,7 @@ function estaVigente($fecha_inicio, $fecha_fin, $estado) {
                             </div>
                             <div class="ml-4">
                                 <p class="text-xs lg:text-sm font-medium text-gray-500">Vigentes</p>
-                                <p class="text-lg lg:text-2xl font-semibold text-blue-600"><?php echo number_format($stats['ofertas_vigentes']); ?></p>
+                                <p class="text-lg lg:text-2xl font-semibold text-blue-600"><?php echo formatNumber($stats['ofertas_vigentes']); ?></p>
                             </div>
                         </div>
                     </div>
@@ -337,7 +345,7 @@ function estaVigente($fecha_inicio, $fecha_fin, $estado) {
                             </div>
                             <div class="ml-4">
                                 <p class="text-xs lg:text-sm font-medium text-gray-500">Total Usos</p>
-                                <p class="text-lg lg:text-2xl font-semibold text-purple-600"><?php echo number_format($stats['total_usos_sistema']); ?></p>
+                                <p class="text-lg lg:text-2xl font-semibold text-purple-600"><?php echo formatNumber($stats['total_usos_sistema']); ?></p>
                             </div>
                         </div>
                     </div>
@@ -364,7 +372,7 @@ function estaVigente($fecha_inicio, $fecha_fin, $estado) {
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-500">En Pausa</p>
-                                <p class="text-2xl font-bold text-yellow-600"><?php echo number_format($stats['ofertas_pausadas']); ?></p>
+                                <p class="text-2xl font-bold text-yellow-600"><?php echo formatNumber($stats['ofertas_pausadas']); ?></p>
                             </div>
                             <div class="p-3 rounded-full bg-yellow-100">
                                 <i class="fas fa-pause-circle text-yellow-600 text-xl"></i>
@@ -376,7 +384,7 @@ function estaVigente($fecha_inicio, $fecha_fin, $estado) {
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-500">Borradores</p>
-                                <p class="text-2xl font-bold text-blue-600"><?php echo number_format($stats['ofertas_borrador']); ?></p>
+                                <p class="text-2xl font-bold text-blue-600"><?php echo formatNumber($stats['ofertas_borrador']); ?></p>
                             </div>
                             <div class="p-3 rounded-full bg-blue-100">
                                 <i class="fas fa-edit text-blue-600 text-xl"></i>
@@ -442,7 +450,7 @@ function estaVigente($fecha_inicio, $fecha_fin, $estado) {
                                         <i class="fas fa-check-circle text-emerald-600 text-xl"></i>
                                     </div>
                                     <h4 class="font-semibold text-gray-900 text-sm mb-1">Activas</h4>
-                                    <p class="text-xs text-gray-500"><?php echo number_format($stats['ofertas_activas']); ?> ofertas</p>
+                                    <p class="text-xs text-gray-500"><?php echo formatNumber($stats['ofertas_activas']); ?> ofertas</p>
                                     <div class="mt-2 text-xs text-emerald-600 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <i class="fas fa-filter mr-1"></i>Filtrar
                                     </div>
@@ -458,7 +466,7 @@ function estaVigente($fecha_inicio, $fecha_fin, $estado) {
                                         <i class="fas fa-pause-circle text-yellow-600 text-xl"></i>
                                     </div>
                                     <h4 class="font-semibold text-gray-900 text-sm mb-1">Pausadas</h4>
-                                    <p class="text-xs text-gray-500"><?php echo number_format($stats['ofertas_pausadas']); ?> ofertas</p>
+                                    <p class="text-xs text-gray-500"><?php echo formatNumber($stats['ofertas_pausadas']); ?> ofertas</p>
                                     <div class="mt-2 text-xs text-yellow-600 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <i class="fas fa-filter mr-1"></i>Filtrar
                                     </div>
@@ -539,7 +547,7 @@ function estaVigente($fecha_inicio, $fecha_fin, $estado) {
                                 <div>
                                     <h5 class="font-medium text-green-900 mb-1">Estadísticas del Sistema</h5>
                                     <p class="text-sm text-green-800">
-                                        Total de usos: <strong><?php echo number_format($stats['total_usos_sistema']); ?></strong> |
+                                        Total de usos: <strong><?php echo formatNumber($stats['total_usos_sistema']); ?></strong> |
                                         Ahorro generado: <strong><?php echo formatearMonto($stats['total_descuento_sistema']); ?></strong>
                                     </p>
                                 </div>
@@ -718,9 +726,9 @@ function estaVigente($fecha_inicio, $fecha_fin, $estado) {
                                             </td>
                                             <td class="px-6 py-4 text-sm">
                                                 <div class="text-center">
-                                                    <p class="font-semibold text-gray-900"><?php echo number_format($oferta['total_usos']); ?></p>
+                                                    <p class="font-semibold text-gray-900"><?php echo formatNumber($oferta['total_usos']); ?></p>
                                                     <?php if ($oferta['limite_usos']): ?>
-                                                        <p class="text-xs text-gray-500">de <?php echo number_format($oferta['limite_usos']); ?></p>
+                                                        <p class="text-xs text-gray-500">de <?php echo formatNumber($oferta['limite_usos']); ?></p>
                                                         <div class="w-full bg-gray-200 rounded-full h-1 mt-1">
                                                             <div class="bg-red-600 h-1 rounded-full" style="width: <?php echo min(100, ($oferta['total_usos'] / $oferta['limite_usos']) * 100); ?>%"></div>
                                                         </div>
@@ -843,9 +851,9 @@ function estaVigente($fecha_inicio, $fecha_fin, $estado) {
                                 <div class="mb-4">
                                     <p class="text-xs text-gray-500">Usos</p>
                                     <div class="flex items-center">
-                                        <span class="text-sm font-semibold text-gray-900"><?php echo number_format($oferta['total_usos']); ?></span>
+                                        <span class="text-sm font-semibold text-gray-900"><?php echo formatNumber($oferta['total_usos']); ?></span>
                                         <?php if ($oferta['limite_usos']): ?>
-                                            <span class="text-sm text-gray-500 ml-1">/ <?php echo number_format($oferta['limite_usos']); ?></span>
+                                            <span class="text-sm text-gray-500 ml-1">/ <?php echo formatNumber($oferta['limite_usos']); ?></span>
                                             <div class="flex-1 ml-3">
                                                 <div class="w-full bg-gray-200 rounded-full h-1">
                                                     <div class="bg-red-600 h-1 rounded-full" style="width: <?php echo min(100, ($oferta['total_usos'] / $oferta['limite_usos']) * 100); ?>%"></div>
@@ -960,6 +968,12 @@ function estaVigente($fecha_inicio, $fecha_fin, $estado) {
         // Funciones para gestionar ofertas
         function pausarOferta(idOferta) {
             if (confirm('¿Estás seguro de que deseas pausar esta oferta?')) {
+                // Mostrar indicador de carga
+                const boton = document.querySelector(`button[onclick="pausarOferta(${idOferta})"]`);
+                const textoOriginal = boton.innerHTML;
+                boton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                boton.disabled = true;
+                
                 fetch('procesar_oferta.php', {
                     method: 'POST',
                     headers: {
@@ -967,22 +981,57 @@ function estaVigente($fecha_inicio, $fecha_fin, $estado) {
                     },
                     body: `action=pausar&id=${idOferta}`
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.text(); // Primero obtener como texto
+                })
+                .then(text => {
+                    console.log('Response text:', text); // Debug
+                    try {
+                        return JSON.parse(text);
+                    } catch (e) {
+                        console.error('JSON parse error:', e);
+                        console.error('Response text:', text);
+                        
+                        // Mostrar más información del error para pausar
+                        if (text.includes('<?php') || text.includes('<!DOCTYPE') || text.includes('<html')) {
+                            throw new Error('El servidor devolvió HTML en lugar de JSON. Revisa la consola para más detalles.');
+                        } else if (text.length > 500) {
+                            throw new Error('Respuesta demasiado larga. Revisa la consola para más detalles.');
+                        } else {
+                            throw new Error('JSON inválido: "' + text.substring(0, 100) + '..."');
+                        }
+                    }
+                })
                 .then(data => {
                     if (data.success) {
+                        alert('Oferta pausada exitosamente');
                         location.reload();
                     } else {
                         alert('Error: ' + data.message);
+                        boton.innerHTML = textoOriginal;
+                        boton.disabled = false;
                     }
                 })
                 .catch(error => {
-                    alert('Error al pausar la oferta: ' + error);
+                    console.error('Error:', error);
+                    alert('Error al pausar la oferta: ' + error.message);
+                    boton.innerHTML = textoOriginal;
+                    boton.disabled = false;
                 });
             }
         }
 
         function activarOferta(idOferta) {
             if (confirm('¿Estás seguro de que deseas activar esta oferta?')) {
+                // Mostrar indicador de carga
+                const boton = document.querySelector(`button[onclick="activarOferta(${idOferta})"]`);
+                const textoOriginal = boton.innerHTML;
+                boton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                boton.disabled = true;
+                
                 fetch('procesar_oferta.php', {
                     method: 'POST',
                     headers: {
@@ -990,16 +1039,37 @@ function estaVigente($fecha_inicio, $fecha_fin, $estado) {
                     },
                     body: `action=activar&id=${idOferta}`
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.text(); // Primero obtener como texto
+                })
+                .then(text => {
+                    console.log('Response text:', text); // Debug
+                    try {
+                        return JSON.parse(text);
+                    } catch (e) {
+                        console.error('JSON parse error:', e);
+                        console.error('Response text:', text);
+                        throw new Error('Respuesta del servidor no válida');
+                    }
+                })
                 .then(data => {
                     if (data.success) {
+                        alert('Oferta activada exitosamente');
                         location.reload();
                     } else {
                         alert('Error: ' + data.message);
+                        boton.innerHTML = textoOriginal;
+                        boton.disabled = false;
                     }
                 })
                 .catch(error => {
-                    alert('Error al activar la oferta: ' + error);
+                    console.error('Error:', error);
+                    alert('Error al activar la oferta: ' + error.message);
+                    boton.innerHTML = textoOriginal;
+                    boton.disabled = false;
                 });
             }
         }

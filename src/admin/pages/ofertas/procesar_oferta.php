@@ -1,24 +1,50 @@
 <?php
+// Iniciar control de buffer antes de cualquier include
+ob_start();
+
+// Iniciar sesión si no está iniciada
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
 require_once '../../config/config.php';
 require_once '../../auth/middleware.php';
 
 // Verificar sesión de administrador
 verificarSesionAdmin();
 
+// Limpiar cualquier salida previa de los includes
+ob_clean();
+
 header('Content-Type: application/json');
+header('Cache-Control: no-cache, must-revalidate');
+header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+
+// Función para asegurar respuesta JSON limpia
+function sendJsonResponse($data) {
+    // Limpiar cualquier salida previa
+    if (ob_get_level()) {
+        ob_clean();
+    }
+    
+    // Enviar headers de nuevo por seguridad
+    header('Content-Type: application/json');
+    
+    // Enviar respuesta y terminar
+    echo json_encode($data);
+    exit();
+}
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
-    echo json_encode(['success' => false, 'message' => 'Método no permitido']);
-    exit;
+    sendJsonResponse(['success' => false, 'message' => 'Método no permitido']);
 }
 
 $action = $_POST['action'] ?? '';
 $id = intval($_POST['id'] ?? 0);
 
 if (empty($action) || $id <= 0) {
-    echo json_encode(['success' => false, 'message' => 'Acción o ID inválido']);
-    exit;
+    sendJsonResponse(['success' => false, 'message' => 'Acción o ID inválido']);
 }
 
 try {
@@ -116,29 +142,27 @@ try {
             throw new Exception("Acción no válida");
     }
     
-    // Log de auditoría (si existe función de logging)
-    session_start();
+    // Log de auditoría simple (sin dependencia de tabla específica)
     if (isset($_SESSION['admin_id'])) {
         try {
-            $log_sql = "INSERT INTO logs_admin (id_admin, accion, tabla, registro_id, descripcion, fecha) 
-                       VALUES (?, ?, 'ofertas', ?, ?, NOW())";
-            $log_stmt = $connection->prepare($log_sql);
-            $log_stmt->execute([
-                $_SESSION['admin_id'],
-                strtoupper($action),
-                $id,
-                $message
-            ]);
+            // Solo log en archivo de errores
+            error_log("OFERTAS - Acción: " . strtoupper($action) . " - ID: $id - Admin: " . $_SESSION['admin_id'] . " - " . $message);
         } catch (Exception $e) {
-            // Ignore logging errors
+            // Ignore logging errors silently
         }
     }
     
     $connection->commit();
-    echo json_encode(['success' => true, 'message' => $message]);
+    
+    // Enviar respuesta de éxito
+    sendJsonResponse(['success' => true, 'message' => $message]);
     
 } catch (Exception $e) {
-    $connection->rollback();
-    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    if ($connection && $connection->inTransaction()) {
+        $connection->rollback();
+    }
+    
+    // Enviar respuesta de error
+    sendJsonResponse(['success' => false, 'message' => $e->getMessage()]);
 }
 ?>
