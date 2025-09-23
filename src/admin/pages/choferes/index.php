@@ -7,6 +7,10 @@ require_once '../../functions/admin_functions.php';
 verificarSesionAdmin();
 $admin = obtenerAdminActual();
 
+// Mensajes de éxito y error
+$mensaje_success = $_GET['success'] ?? null;
+$mensaje_error = $_GET['error'] ?? null;
+
 // Parámetros de búsqueda y filtrado
 $buscar = $_GET['buscar'] ?? '';
 $orden = $_GET['orden'] ?? 'nombre';
@@ -287,6 +291,27 @@ function getSortUrl($campo, $orden_actual, $direccion_actual) {
                         </div>
                     </div>
                 </div>
+
+                <!-- Mensajes de éxito y error -->
+                <?php if ($mensaje_success): ?>
+                <div class="mb-4 lg:mb-6 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg flex items-center">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    <span><?php echo htmlspecialchars($mensaje_success); ?></span>
+                    <button onclick="this.parentElement.remove()" class="ml-auto text-green-600 hover:text-green-800">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <?php endif; ?>
+
+                <?php if ($mensaje_error): ?>
+                <div class="mb-4 lg:mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg flex items-center">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <span><?php echo htmlspecialchars($mensaje_error); ?></span>
+                    <button onclick="this.parentElement.remove()" class="ml-auto text-red-600 hover:text-red-800">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <?php endif; ?>
 
                 <!-- Filtros y búsqueda -->
                 <div class="bg-white rounded-lg shadow-lg p-4 lg:p-6 mb-6 lg:mb-8">
@@ -618,6 +643,56 @@ function getSortUrl($campo, $orden_actual, $direccion_actual) {
         </div>
     </div>
 
+    <!-- Modal de confirmación para eliminar -->
+    <div id="modalEliminar" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-[450px] shadow-xl rounded-lg bg-white">
+            <div class="mt-3 text-center">
+                <div class="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-red-100 mb-4">
+                    <i class="fas fa-user-times text-red-600 text-xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">Eliminar Chofer</h3>
+                <div class="mt-2 px-4 py-3">
+                    <p class="text-sm text-gray-500 mb-6 leading-relaxed">
+                        ¿Estás seguro de que deseas eliminar al chofer <span id="nombreChofer" class="font-medium"></span>? 
+                        Esta acción no se puede deshacer.
+                    </p>
+                    
+                    <!-- Advertencia de datos relacionados -->
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-exclamation-triangle text-yellow-500 mr-2 mt-0.5"></i>
+                            <div class="text-xs text-yellow-700">
+                                <strong>Advertencia:</strong> Se eliminarán todos los datos del chofer, pero los vehículos asignados quedarán sin chofer para poder reasignarlos.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-left">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-clipboard-list mr-1"></i>Motivo de eliminación (opcional):
+                        </label>
+                        <textarea id="motivoEliminacion" rows="3" 
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm resize-none"
+                                  placeholder="Ej: Finalización de contrato, cambio de empleo, violación de normas..."></textarea>
+                        <div class="text-xs text-gray-400 mt-1">
+                            Este motivo quedará registrado en el historial administrativo
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center justify-center gap-3 px-4 py-4">
+                    <button id="btnConfirmarEliminar" 
+                            class="px-6 py-2 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors">
+                        <i class="fas fa-trash mr-2"></i>Eliminar Chofer
+                    </button>
+                    <button onclick="cerrarModal()" 
+                            class="px-6 py-2 bg-gray-200 text-gray-800 text-sm font-semibold rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
+                        <i class="fas fa-times mr-2"></i>Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Variables para el filtrado en tiempo real
         let timeoutId;
@@ -724,10 +799,35 @@ function getSortUrl($campo, $orden_actual, $direccion_actual) {
             }
         }
         
-        // Función para confirmar eliminación
+        // Función para confirmar eliminación con modal
+        let choferAEliminar = null;
+
         function confirmarEliminar(id, nombre) {
-            if (confirm(`¿Estás seguro de que quieres eliminar al chofer "${nombre}"?\n\nEsta acción no se puede deshacer.`)) {
-                // Crear formulario para enviar la eliminación
+            choferAEliminar = id;
+            document.getElementById('nombreChofer').textContent = nombre;
+            document.getElementById('modalEliminar').classList.remove('hidden');
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalEliminar').classList.add('hidden');
+            document.getElementById('motivoEliminacion').value = '';
+            choferAEliminar = null;
+        }
+
+        // Confirmar eliminación
+        document.getElementById('btnConfirmarEliminar').addEventListener('click', function() {
+            if (choferAEliminar) {
+                const motivo = document.getElementById('motivoEliminacion').value;
+                const btnEliminar = this;
+                const btnCancelar = document.querySelector('button[onclick="cerrarModal()"]');
+                
+                // Deshabilitar botones durante la eliminación
+                btnEliminar.disabled = true;
+                btnEliminar.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Eliminando...';
+                btnEliminar.className = 'px-6 py-2 bg-gray-400 text-white text-sm font-semibold rounded-lg cursor-not-allowed';
+                btnCancelar.disabled = true;
+                
+                // Crear formulario y enviar
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = 'eliminar.php';
@@ -735,13 +835,33 @@ function getSortUrl($campo, $orden_actual, $direccion_actual) {
                 const inputId = document.createElement('input');
                 inputId.type = 'hidden';
                 inputId.name = 'id_chofer';
-                inputId.value = id;
-                
+                inputId.value = choferAEliminar;
                 form.appendChild(inputId);
+                
+                const inputMotivo = document.createElement('input');
+                inputMotivo.type = 'hidden';
+                inputMotivo.name = 'motivo';
+                inputMotivo.value = motivo;
+                form.appendChild(inputMotivo);
+                
                 document.body.appendChild(form);
                 form.submit();
             }
-        }
+        });
+
+        // Cerrar modal al hacer clic fuera
+        document.getElementById('modalEliminar').addEventListener('click', function(e) {
+            if (e.target === this) {
+                cerrarModal();
+            }
+        });
+
+        // Cerrar modal con Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                cerrarModal();
+            }
+        });
         
         // Función para exportar
         function exportarChoferes() {
