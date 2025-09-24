@@ -101,6 +101,15 @@ $admin = obtenerAdminActual();
                                     <p class="text-xs text-gray-500">Documentación</p>
                                 </div>
                             </a>
+                            <a href="https://antarestravelperu.com/" target="_blank" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors group">
+                                <div class="w-8 h-8 bg-gray-100 group-hover:bg-gray-200 rounded-lg flex items-center justify-center mr-3 transition-colors">
+                                    <i class="fas fa-external-link-alt text-gray-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium">Visitar Sitio Web</p>
+                                    <p class="text-xs text-gray-500">Ver página pública</p>
+                                </div>
+                            </a>
                             <div class="border-t border-gray-200 my-1"></div>
                             <a href="../../auth/logout.php" class="flex items-center px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors group">
                                 <div class="w-8 h-8 bg-red-50 group-hover:bg-red-100 rounded-lg flex items-center justify-center mr-3 transition-colors">
@@ -163,6 +172,15 @@ $admin = obtenerAdminActual();
                             <div>
                                 <p class="font-medium">Manual de Usuario</p>
                                 <p class="text-xs text-gray-500">Documentación</p>
+                            </div>
+                        </a>
+                        <a href="https://antarestravelperu.com/" target="_blank" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors group">
+                            <div class="w-8 h-8 bg-gray-100 group-hover:bg-gray-200 rounded-lg flex items-center justify-center mr-3 transition-colors">
+                                <i class="fas fa-external-link-alt text-gray-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium">Visitar Sitio Web</p>
+                                <p class="text-xs text-gray-500">Ver página pública</p>
                             </div>
                         </a>
                         <div class="border-t border-gray-200 my-1"></div>
