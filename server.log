@@ -2707,3 +2707,217 @@ Stack trace:
 [Wed Sep 24 03:25:26 2025] 127.0.0.1:59546 Accepted
 [Wed Sep 24 03:25:26 2025] 127.0.0.1:59546 [200]: GET /imagenes/antares_logozz2.png
 [Wed Sep 24 03:25:26 2025] 127.0.0.1:59546 Closing
+[Wed Sep 24 03:33:35 2025] 127.0.0.1:48480 Accepted
+[Wed Sep 24 03:33:35 2025] 127.0.0.1:48492 Accepted
+[Wed Sep 24 03:33:35 2025] 127.0.0.1:48480 [302]: GET /src/admin/
+[Wed Sep 24 03:33:35 2025] 127.0.0.1:48480 Closing
+[Wed Sep 24 03:33:45 2025] 127.0.0.1:48492 [200]: GET /src/admin/pages/dashboard/
+[Wed Sep 24 03:33:45 2025] 127.0.0.1:48492 Closing
+[Wed Sep 24 03:33:45 2025] 127.0.0.1:41812 Accepted
+[Wed Sep 24 03:33:45 2025] 127.0.0.1:41812 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Wed Sep 24 03:33:45 2025] 127.0.0.1:41812 Closing
+[Wed Sep 24 03:33:49 2025] 127.0.0.1:39474 Accepted
+[Wed Sep 24 03:33:49 2025] PHP Notice:  session_start(): Ignoring session_start() because a session is already active (started from /home/andi/vXcode/Antares-Travel/src/admin/auth/logout.php on line 2) in /home/andi/vXcode/Antares-Travel/src/admin/auth/middleware.php on line 7
+[Wed Sep 24 03:33:49 2025] 127.0.0.1:39474 [302]: GET /src/admin/auth/logout.php
+[Wed Sep 24 03:33:49 2025] 127.0.0.1:39474 Closing
+[Wed Sep 24 03:33:49 2025] 127.0.0.1:39476 Accepted
+[Wed Sep 24 03:33:50 2025] 127.0.0.1:39476 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:33:50 2025] 127.0.0.1:39476 Closing
+[Wed Sep 24 03:34:10 2025] 127.0.0.1:35658 Accepted
+[Wed Sep 24 03:34:11 2025] 127.0.0.1:35658 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:34:11 2025] 127.0.0.1:35658 Closing
+[Wed Sep 24 03:34:20 2025] 127.0.0.1:34080 Accepted
+[Wed Sep 24 03:34:20 2025] 127.0.0.1:34090 Accepted
+[Wed Sep 24 03:34:20 2025] 127.0.0.1:34080 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:34:20 2025] 127.0.0.1:34080 Closing
+[Wed Sep 24 03:34:51 2025] 127.0.0.1:39542 Accepted
+[Wed Sep 24 03:34:52 2025] 127.0.0.1:34090 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:34:52 2025] 127.0.0.1:34090 Closing
+[Wed Sep 24 03:35:00 2025] 127.0.0.1:39542 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:35:00 2025] 127.0.0.1:39542 Closing
+[Wed Sep 24 03:35:00 2025] 127.0.0.1:37444 Accepted
+[Wed Sep 24 03:35:11 2025] 127.0.0.1:37444 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:35:11 2025] 127.0.0.1:37444 Closing
+[Wed Sep 24 03:35:11 2025] 127.0.0.1:34900 Accepted
+[Wed Sep 24 03:35:29 2025] 127.0.0.1:34900 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:35:29 2025] 127.0.0.1:34900 Closing
+[Wed Sep 24 03:35:29 2025] 127.0.0.1:51888 Accepted
+[Wed Sep 24 03:36:12 2025] 127.0.0.1:51888 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:36:12 2025] 127.0.0.1:51888 Closing
+[Wed Sep 24 03:36:20 2025] 127.0.0.1:37138 Accepted
+[Wed Sep 24 03:36:20 2025] 127.0.0.1:37144 Accepted
+[Wed Sep 24 03:36:21 2025] 127.0.0.1:37138 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:36:21 2025] 127.0.0.1:37138 Closing
+[Wed Sep 24 03:36:32 2025] 127.0.0.1:39088 Accepted
+[Wed Sep 24 03:36:33 2025] 127.0.0.1:37144 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:36:33 2025] 127.0.0.1:37144 Closing
+[Wed Sep 24 03:36:47 2025] 127.0.0.1:39088 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:36:47 2025] 127.0.0.1:39088 Closing
+[Wed Sep 24 03:38:01 2025] 127.0.0.1:34260 Accepted
+[Wed Sep 24 03:38:01 2025] 127.0.0.1:34272 Accepted
+[Wed Sep 24 03:38:02 2025] 127.0.0.1:34260 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:38:02 2025] 127.0.0.1:34260 Closing
+[Wed Sep 24 03:38:03 2025] 127.0.0.1:34272 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:38:03 2025] 127.0.0.1:34272 Closing
+[Wed Sep 24 03:38:28 2025] 127.0.0.1:37158 Accepted
+[Wed Sep 24 03:38:28 2025] 127.0.0.1:37160 Accepted
+[Wed Sep 24 03:38:29 2025] 127.0.0.1:37158 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:38:29 2025] 127.0.0.1:37158 Closing
+[Wed Sep 24 03:38:43 2025] 127.0.0.1:37160 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:38:43 2025] 127.0.0.1:37160 Closing
+[Wed Sep 24 03:39:01 2025] 127.0.0.1:48170 Accepted
+[Wed Sep 24 03:39:01 2025] 127.0.0.1:48180 Accepted
+[Wed Sep 24 03:39:02 2025] 127.0.0.1:48170 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:39:02 2025] 127.0.0.1:48170 Closing
+[Wed Sep 24 03:39:03 2025] 127.0.0.1:48180 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:39:03 2025] 127.0.0.1:48180 Closing
+[Wed Sep 24 03:40:17 2025] 127.0.0.1:40194 Accepted
+[Wed Sep 24 03:40:17 2025] 127.0.0.1:40204 Accepted
+[Wed Sep 24 03:40:18 2025] 127.0.0.1:40194 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:40:18 2025] 127.0.0.1:40194 Closing
+[Wed Sep 24 03:40:19 2025] 127.0.0.1:40204 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:40:19 2025] 127.0.0.1:40204 Closing
+[Wed Sep 24 03:40:43 2025] 127.0.0.1:33864 Accepted
+[Wed Sep 24 03:40:43 2025] 127.0.0.1:33866 Accepted
+[Wed Sep 24 03:40:44 2025] 127.0.0.1:33864 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:40:44 2025] 127.0.0.1:33864 Closing
+[Wed Sep 24 03:41:55 2025] 127.0.0.1:33866 Closed without sending a request; it was probably just an unused speculative preconnection
+[Wed Sep 24 03:41:55 2025] 127.0.0.1:33866 Closing
+[Wed Sep 24 03:44:18 2025] 127.0.0.1:47146 Accepted
+[Wed Sep 24 03:44:18 2025] 127.0.0.1:47156 Accepted
+[Wed Sep 24 03:44:19 2025] 127.0.0.1:47146 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:44:19 2025] 127.0.0.1:47146 Closing
+[Wed Sep 24 03:45:30 2025] 127.0.0.1:47156 Closed without sending a request; it was probably just an unused speculative preconnection
+[Wed Sep 24 03:45:30 2025] 127.0.0.1:47156 Closing
+[Wed Sep 24 03:45:37 2025] 127.0.0.1:54838 Accepted
+[Wed Sep 24 03:45:37 2025] 127.0.0.1:54842 Accepted
+[Wed Sep 24 03:45:38 2025] 127.0.0.1:54838 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:45:38 2025] 127.0.0.1:54838 Closing
+[Wed Sep 24 03:45:57 2025] 127.0.0.1:54842 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:45:57 2025] 127.0.0.1:54842 Closing
+[Wed Sep 24 03:45:57 2025] 127.0.0.1:39770 Accepted
+[Wed Sep 24 03:46:51 2025] 127.0.0.1:46396 Accepted
+[Wed Sep 24 03:46:53 2025] 127.0.0.1:39770 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:46:53 2025] 127.0.0.1:39770 Closing
+[Wed Sep 24 03:47:52 2025] 127.0.0.1:46396 Closed without sending a request; it was probably just an unused speculative preconnection
+[Wed Sep 24 03:47:52 2025] 127.0.0.1:46396 Closing
+[Wed Sep 24 03:47:52 2025] 127.0.0.1:49074 Accepted
+[Wed Sep 24 03:47:52 2025] 127.0.0.1:49084 Accepted
+[Wed Sep 24 03:47:53 2025] 127.0.0.1:49074 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:47:53 2025] 127.0.0.1:49074 Closing
+[Wed Sep 24 03:48:07 2025] 127.0.0.1:49084 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:48:07 2025] 127.0.0.1:49084 Closing
+[Wed Sep 24 03:48:19 2025] 127.0.0.1:42290 Accepted
+[Wed Sep 24 03:48:19 2025] 127.0.0.1:42292 Accepted
+[Wed Sep 24 03:48:20 2025] 127.0.0.1:42290 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:48:20 2025] 127.0.0.1:42290 Closing
+[Wed Sep 24 03:48:28 2025] 127.0.0.1:42292 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:48:28 2025] 127.0.0.1:42292 Closing
+[Wed Sep 24 03:48:28 2025] 127.0.0.1:51898 Accepted
+[Wed Sep 24 03:48:44 2025] 127.0.0.1:48648 Accepted
+[Wed Sep 24 03:48:45 2025] 127.0.0.1:51898 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:48:45 2025] 127.0.0.1:51898 Closing
+[Wed Sep 24 03:48:54 2025] 127.0.0.1:48648 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:48:54 2025] 127.0.0.1:48648 Closing
+[Wed Sep 24 03:48:54 2025] 127.0.0.1:48144 Accepted
+[Wed Sep 24 03:49:37 2025] 127.0.0.1:49690 Accepted
+[Wed Sep 24 03:49:38 2025] 127.0.0.1:48144 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:49:38 2025] 127.0.0.1:48144 Closing
+[Wed Sep 24 03:49:54 2025] 127.0.0.1:49690 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:49:54 2025] 127.0.0.1:49690 Closing
+[Wed Sep 24 03:49:54 2025] 127.0.0.1:53770 Accepted
+[Wed Sep 24 03:50:02 2025] 127.0.0.1:53770 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:50:02 2025] 127.0.0.1:53770 Closing
+[Wed Sep 24 03:50:02 2025] 127.0.0.1:58238 Accepted
+[Wed Sep 24 03:50:06 2025] 127.0.0.1:58238 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:50:06 2025] 127.0.0.1:58238 Closing
+[Wed Sep 24 03:50:06 2025] 127.0.0.1:58254 Accepted
+[Wed Sep 24 03:50:24 2025] 127.0.0.1:58254 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:50:24 2025] 127.0.0.1:58254 Closing
+[Wed Sep 24 03:50:24 2025] 127.0.0.1:55900 Accepted
+[Wed Sep 24 03:51:00 2025] 127.0.0.1:55900 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:51:00 2025] 127.0.0.1:55900 Closing
+[Wed Sep 24 03:51:00 2025] 127.0.0.1:44330 Accepted
+[Wed Sep 24 03:51:18 2025] 127.0.0.1:44330 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:51:18 2025] 127.0.0.1:44330 Closing
+[Wed Sep 24 03:51:18 2025] 127.0.0.1:45800 Accepted
+[Wed Sep 24 03:51:32 2025] 127.0.0.1:57424 Accepted
+[Wed Sep 24 03:51:34 2025] 127.0.0.1:45800 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:51:34 2025] 127.0.0.1:45800 Closing
+[Wed Sep 24 03:52:10 2025] 127.0.0.1:39584 Accepted
+[Wed Sep 24 03:52:11 2025] 127.0.0.1:57424 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:52:11 2025] 127.0.0.1:57424 Closing
+[Wed Sep 24 03:52:34 2025] 127.0.0.1:47952 Accepted
+[Wed Sep 24 03:52:35 2025] 127.0.0.1:39584 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:52:35 2025] 127.0.0.1:39584 Closing
+[Wed Sep 24 03:53:11 2025] 127.0.0.1:47952 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:53:11 2025] 127.0.0.1:47952 Closing
+[Wed Sep 24 03:53:11 2025] 127.0.0.1:36204 Accepted
+[Wed Sep 24 03:53:33 2025] 127.0.0.1:46750 Accepted
+[Wed Sep 24 03:53:35 2025] 127.0.0.1:36204 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:53:35 2025] 127.0.0.1:36204 Closing
+[Wed Sep 24 03:54:01 2025] 127.0.0.1:46750 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:54:01 2025] 127.0.0.1:46750 Closing
+[Wed Sep 24 03:54:13 2025] 127.0.0.1:38838 Accepted
+[Wed Sep 24 03:54:13 2025] 127.0.0.1:38844 Accepted
+[Wed Sep 24 03:54:13 2025] 127.0.0.1:38838 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:54:13 2025] 127.0.0.1:38838 Closing
+[Wed Sep 24 03:55:16 2025] 127.0.0.1:38844 Closed without sending a request; it was probably just an unused speculative preconnection
+[Wed Sep 24 03:55:16 2025] 127.0.0.1:38844 Closing
+[Wed Sep 24 03:55:16 2025] 127.0.0.1:44024 Accepted
+[Wed Sep 24 03:55:16 2025] 127.0.0.1:44034 Accepted
+[Wed Sep 24 03:55:18 2025] 127.0.0.1:44024 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:55:18 2025] 127.0.0.1:44024 Closing
+[Wed Sep 24 03:55:36 2025] 127.0.0.1:44034 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:55:36 2025] 127.0.0.1:44034 Closing
+[Wed Sep 24 03:55:36 2025] 127.0.0.1:52570 Accepted
+[Wed Sep 24 03:55:58 2025] 127.0.0.1:52570 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:55:58 2025] 127.0.0.1:52570 Closing
+[Wed Sep 24 03:55:58 2025] 127.0.0.1:47020 Accepted
+[Wed Sep 24 03:56:12 2025] 127.0.0.1:47020 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:56:12 2025] 127.0.0.1:47020 Closing
+[Wed Sep 24 03:56:12 2025] 127.0.0.1:58894 Accepted
+[Wed Sep 24 03:56:24 2025] 127.0.0.1:58894 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:56:24 2025] 127.0.0.1:58894 Closing
+[Wed Sep 24 03:56:24 2025] 127.0.0.1:53212 Accepted
+[Wed Sep 24 03:56:40 2025] 127.0.0.1:34550 Accepted
+[Wed Sep 24 03:56:42 2025] 127.0.0.1:53212 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:56:42 2025] 127.0.0.1:53212 Closing
+[Wed Sep 24 03:56:50 2025] 127.0.0.1:34550 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:56:50 2025] 127.0.0.1:34550 Closing
+[Wed Sep 24 03:56:50 2025] 127.0.0.1:50674 Accepted
+[Wed Sep 24 03:57:02 2025] 127.0.0.1:50674 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:57:02 2025] 127.0.0.1:50674 Closing
+[Wed Sep 24 03:57:46 2025] 127.0.0.1:33438 Accepted
+[Wed Sep 24 03:57:46 2025] 127.0.0.1:33440 Accepted
+[Wed Sep 24 03:57:47 2025] 127.0.0.1:33438 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:57:47 2025] 127.0.0.1:33438 Closing
+[Wed Sep 24 03:57:48 2025] 127.0.0.1:33440 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:57:48 2025] 127.0.0.1:33440 Closing
+[Wed Sep 24 03:58:02 2025] 127.0.0.1:43832 Accepted
+[Wed Sep 24 03:58:02 2025] 127.0.0.1:43848 Accepted
+[Wed Sep 24 03:58:03 2025] 127.0.0.1:43832 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:58:03 2025] 127.0.0.1:43832 Closing
+[Wed Sep 24 03:58:05 2025] 127.0.0.1:43848 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:58:05 2025] 127.0.0.1:43848 Closing
+[Wed Sep 24 03:58:19 2025] 127.0.0.1:48496 Accepted
+[Wed Sep 24 03:58:19 2025] 127.0.0.1:48504 Accepted
+[Wed Sep 24 03:58:20 2025] 127.0.0.1:48496 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:58:20 2025] 127.0.0.1:48496 Closing
+[Wed Sep 24 03:58:22 2025] 127.0.0.1:48504 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:58:22 2025] 127.0.0.1:48504 Closing
+[Wed Sep 24 03:58:52 2025] 127.0.0.1:37548 Accepted
+[Wed Sep 24 03:58:52 2025] 127.0.0.1:37560 Accepted
+[Wed Sep 24 03:58:54 2025] 127.0.0.1:37548 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:58:54 2025] 127.0.0.1:37548 Closing
+[Wed Sep 24 03:58:55 2025] 127.0.0.1:37560 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:58:55 2025] 127.0.0.1:37560 Closing
+[Wed Sep 24 03:59:13 2025] 127.0.0.1:40004 Accepted
+[Wed Sep 24 03:59:16 2025] 127.0.0.1:40004 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:59:16 2025] 127.0.0.1:40004 Closing
+[Wed Sep 24 03:59:44 2025] 127.0.0.1:60488 Accepted
+[Wed Sep 24 03:59:44 2025] 127.0.0.1:60502 Accepted
+[Wed Sep 24 03:59:47 2025] 127.0.0.1:60488 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 03:59:47 2025] 127.0.0.1:60488 Closing
+[Wed Sep 24 04:00:46 2025] 127.0.0.1:60502 Closed without sending a request; it was probably just an unused speculative preconnection
+[Wed Sep 24 04:00:46 2025] 127.0.0.1:60502 Closing

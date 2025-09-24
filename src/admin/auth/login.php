@@ -130,13 +130,13 @@ if (isset($_GET['error'])) {
         }
         
         .floating-animation {
-            animation: floating 6s ease-in-out infinite;
+            animation: floating 8s ease-in-out infinite;
         }
         
         @keyframes floating {
             0%, 100% { transform: translateY(0px) rotate(0deg); }
-            33% { transform: translateY(-20px) rotate(1deg); }
-            66% { transform: translateY(-10px) rotate(-1deg); }
+            33% { transform: translateY(-15px) rotate(0.5deg); }
+            66% { transform: translateY(-8px) rotate(-0.5deg); }
         }
         
         .gradient-text {
@@ -173,21 +173,237 @@ if (isset($_GET['error'])) {
         
         .particle {
             position: absolute;
-            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(15,52,96,0.15) 70%, transparent 100%);
             border-radius: 50%;
+            pointer-events: none;
+            filter: blur(1px);
+        }
+        
+        .subtle-dots {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
             pointer-events: none;
         }
         
-        .bg-animated {
-            background: linear-gradient(-45deg, #1e293b, #334155, #475569, #64748b);
-            background-size: 400% 400%;
-            animation: gradientBG 20s ease infinite;
+        .dot {
+            position: absolute;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: fadeInOut 10s ease-in-out infinite;
         }
         
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        .dot-small {
+            width: 2px;
+            height: 2px;
+        }
+        
+        .dot-medium {
+            width: 3px;
+            height: 3px;
+        }
+        
+        .dot-large {
+            width: 4px;
+            height: 4px;
+        }
+        
+        .flowing-line {
+            position: absolute;
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 30%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.08) 70%, transparent 100%);
+            transform-origin: left center;
+            animation: flowLine 18s ease-in-out infinite;
+            opacity: 0;
+        }
+        
+        @keyframes fadeInOut {
+            0%, 100% { 
+                opacity: 0.1;
+                transform: scale(0.9);
+            }
+            50% { 
+                opacity: 0.3;
+                transform: scale(1.1);
+            }
+        }
+        
+        @keyframes flowLine {
+            0%, 100% { 
+                opacity: 0;
+                transform: scaleX(0) translateX(0);
+            }
+            25% { 
+                opacity: 0.15;
+                transform: scaleX(0.5) translateX(10px);
+            }
+            50% { 
+                opacity: 0.25;
+                transform: scaleX(1) translateX(0);
+            }
+            75% { 
+                opacity: 0.15;
+                transform: scaleX(0.5) translateX(-10px);
+            }
+        }
+        
+        .ripple-waves {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        
+        .wave {
+            position: absolute;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 50%;
+            animation: rippleExpand 12s ease-out infinite;
+        }
+        
+        .wave-small {
+            width: 40px;
+            height: 40px;
+        }
+        
+        .wave-medium {
+            width: 80px;
+            height: 80px;
+        }
+        
+        .wave-large {
+            width: 120px;
+            height: 120px;
+        }
+        
+        @keyframes rippleExpand {
+            0% {
+                transform: scale(0);
+                opacity: 0.4;
+                border-width: 2px;
+            }
+            50% {
+                opacity: 0.2;
+                border-width: 1px;
+            }
+            100% {
+                transform: scale(3);
+                opacity: 0;
+                border-width: 0.5px;
+            }
+        }
+        
+        .floating-orbs {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        
+        .orb {
+            position: absolute;
+            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, rgba(15,52,96,0.1) 40%, transparent 70%);
+            border-radius: 50%;
+            animation: orbFloat 20s ease-in-out infinite;
+        }
+        
+        .orb-1 {
+            width: 60px;
+            height: 60px;
+        }
+        
+        .orb-2 {
+            width: 40px;
+            height: 40px;
+        }
+        
+        .orb-3 {
+            width: 80px;
+            height: 80px;
+        }
+        
+        @keyframes orbFloat {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+                opacity: 0.15;
+            }
+            25% {
+                transform: translate(20px, -25px) scale(1.05);
+                opacity: 0.25;
+            }
+            50% {
+                transform: translate(-15px, -15px) scale(0.95);
+                opacity: 0.2;
+            }
+            75% {
+                transform: translate(25px, 20px) scale(1.08);
+                opacity: 0.22;
+            }
+        }
+        
+        .bg-animated {
+            background: 
+                linear-gradient(45deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%),
+                radial-gradient(ellipse at top, #0f3460 0%, transparent 50%),
+                radial-gradient(ellipse at bottom, #533483 0%, transparent 50%);
+            background-attachment: fixed;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .bg-animated::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                repeating-linear-gradient(
+                    45deg,
+                    transparent 0,
+                    rgba(255,255,255,0.03) 1px,
+                    transparent 2px,
+                    transparent 20px
+                ),
+                repeating-linear-gradient(
+                    -45deg,
+                    transparent 0,
+                    rgba(255,255,255,0.02) 1px,
+                    transparent 2px,
+                    transparent 20px
+                );
+            animation: slidePattern 30s linear infinite;
+        }
+        
+        .bg-animated::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 30% 20%, rgba(15, 52, 96, 0.6) 0%, transparent 40%),
+                radial-gradient(circle at 70% 80%, rgba(83, 52, 131, 0.6) 0%, transparent 40%),
+                radial-gradient(circle at 20% 70%, rgba(22, 33, 62, 0.4) 0%, transparent 50%);
+            animation: breathingLights 20s ease-in-out infinite;
+        }
+        
+        @keyframes slidePattern {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(20px, 20px); }
+        }
+        
+        @keyframes breathingLights {
+            0%, 100% { 
+                opacity: 0.8;
+                transform: scale(1);
+            }
+            50% { 
+                opacity: 1;
+                transform: scale(1.1);
+            }
         }
         
         .tab-active {
@@ -280,7 +496,18 @@ if (isset($_GET['error'])) {
         
         .form-container {
             position: relative;
-            min-height: 500px;
+            min-height: 280px; /* Altura base aumentada */
+            transition: min-height 0.5s ease-in-out;
+        }
+        
+        /* Altura específica para login - más compacto */
+        .form-container.login-active {
+            min-height: 260px;
+        }
+        
+        /* Altura específica para registro - más flexible */
+        .form-container.register-active {
+            min-height: 430px;
         }
         
         .form-wrapper {
@@ -293,7 +520,15 @@ if (isset($_GET['error'])) {
         /* Responsividad mejorada */
         @media (max-width: 640px) {
             .form-container {
-                min-height: 450px;
+                min-height: 250px; /* Altura base para móvil reducida */
+            }
+            
+            .form-container.login-active {
+                min-height: 200px; /* Login MUY compacto en móvil */
+            }
+            
+            .form-container.register-active {
+                min-height: 330px; /* Registro más alto en móvil */
             }
             
             .floating-animation {
@@ -311,23 +546,85 @@ if (isset($_GET['error'])) {
         
         @media (max-width: 480px) {
             .form-container {
-                min-height: 500px;
+                min-height: 300px;
             }
             
-            .bg-animated {
-                animation-duration: 25s; /* Animación más lenta en móvil */
+            .form-container.login-active {
+                min-height: 240px; /* Login MUY compacto en móvil pequeño */
+            }
+            
+            .form-container.register-active {
+                min-height: 390px; /* Registro más espacioso en móvil pequeño */
+            }
+            
+            .bg-animated::before {
+                animation-duration: 40s; /* Patrón más lento en móvil */
+            }
+            
+            .bg-animated::after {
+                animation-duration: 25s; /* Luces más lentas en móvil */
+            }
+            
+            .subtle-dots {
+                opacity: 0.4; /* Puntos más sutiles en móvil */
+            }
+            
+            .flowing-line {
+                display: none; /* Ocultar líneas en móvil para mejor rendimiento */
+            }
+            
+            .ripple-waves {
+                opacity: 0.3; /* Ondas más sutiles en móvil */
+            }
+            
+            .floating-orbs {
+                display: none; /* Ocultar orbes en móvil para mejor rendimiento */
+            }
+            
+            .particle {
+                opacity: 0.6; /* Partículas más sutiles en móvil */
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .form-container {
+                min-height: 270px;
+            }
+            
+            .form-container.login-active {
+                min-height: 210px; /* Login ultra-compacto en móviles muy pequeños */
+            }
+            
+            .form-container.register-active {
+                min-height: 370px; /* Registro ajustado en móviles muy pequeños */
             }
         }
         
         @media (min-width: 768px) {
             .form-container {
-                min-height: 520px;
+                min-height: 260px;
+            }
+            
+            .form-container.login-active {
+                min-height: 240px; /* Login más compacto en tablet */
+            }
+            
+            .form-container.register-active {
+                min-height: 400px; /* Registro más espacioso en tablet */
             }
         }
         
         @media (min-width: 1024px) {
             .form-container {
-                min-height: 550px;
+                min-height: 310px;
+            }
+            
+            .form-container.login-active {
+                min-height: 290px; /* Login compacto en desktop */
+            }
+            
+            .form-container.register-active {
+                min-height: 460px; /* Registro espacioso en desktop */
             }
             
             .glass-effect {
@@ -337,7 +634,15 @@ if (isset($_GET['error'])) {
         
         @media (min-width: 1280px) {
             .form-container {
-                min-height: 500px;
+                min-height: 290px;
+            }
+            
+            .form-container.login-active {
+                min-height: 270px; /* Login muy compacto en pantallas grandes */
+            }
+            
+            .form-container.register-active {
+                min-height: 440px; /* Registro bien espaciado en pantallas grandes */
             }
         }
         
@@ -358,14 +663,47 @@ if (isset($_GET['error'])) {
     </style>
 </head>
 <body class="bg-animated min-h-screen relative no-scroll-mobile">
-    <!-- Partículas flotantes de fondo -->
+    <!-- Elementos decorativos de fondo - Minimalista elegante -->
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div class="particle floating-animation" style="width: 4px; height: 4px; top: 20%; left: 10%; animation-delay: 0s;"></div>
-        <div class="particle floating-animation" style="width: 6px; height: 6px; top: 60%; left: 20%; animation-delay: 2s;"></div>
-        <div class="particle floating-animation" style="width: 3px; height: 3px; top: 40%; left: 80%; animation-delay: 4s;"></div>
-        <div class="particle floating-animation" style="width: 5px; height: 5px; top: 80%; left: 70%; animation-delay: 1s;"></div>
-        <div class="particle floating-animation" style="width: 4px; height: 4px; top: 30%; left: 60%; animation-delay: 3s;"></div>
-        <div class="particle floating-animation" style="width: 7px; height: 7px; top: 70%; left: 40%; animation-delay: 5s;"></div>
+        <!-- Partículas sutiles -->
+        <div class="particle floating-animation" style="width: 3px; height: 3px; top: 15%; left: 8%; animation-delay: 0s;"></div>
+        <div class="particle floating-animation" style="width: 2px; height: 2px; top: 65%; left: 25%; animation-delay: 3s;"></div>
+        <div class="particle floating-animation" style="width: 4px; height: 4px; top: 35%; left: 85%; animation-delay: 6s;"></div>
+        <div class="particle floating-animation" style="width: 2px; height: 2px; top: 85%; left: 75%; animation-delay: 2s;"></div>
+        <div class="particle floating-animation" style="width: 3px; height: 3px; top: 25%; left: 55%; animation-delay: 4s;"></div>
+        
+        <!-- Puntos sutiles -->
+        <div class="subtle-dots">
+            <div class="dot dot-small" style="top: 18%; left: 12%; animation-delay: 0s;"></div>
+            <div class="dot dot-medium" style="top: 22%; left: 88%; animation-delay: 2s;"></div>
+            <div class="dot dot-small" style="top: 42%; left: 6%; animation-delay: 4s;"></div>
+            <div class="dot dot-large" style="top: 68%; left: 92%; animation-delay: 1s;"></div>
+            <div class="dot dot-small" style="top: 78%; left: 18%; animation-delay: 3s;"></div>
+            <div class="dot dot-medium" style="top: 32%; left: 76%; animation-delay: 5s;"></div>
+            <div class="dot dot-small" style="top: 58%; left: 38%; animation-delay: 2.5s;"></div>
+            <div class="dot dot-small" style="top: 48%; left: 62%; animation-delay: 4.5s;"></div>
+            
+            <!-- Líneas fluidas -->
+            <div class="flowing-line" style="top: 28%; left: 10%; width: 60px; transform: rotate(15deg); animation-delay: 3s;"></div>
+            <div class="flowing-line" style="top: 72%; left: 75%; width: 40px; transform: rotate(-25deg); animation-delay: 6s;"></div>
+            <div class="flowing-line" style="top: 52%; left: 25%; width: 50px; transform: rotate(35deg); animation-delay: 9s;"></div>
+        </div>
+        
+        <!-- Ondas expansivas -->
+        <div class="ripple-waves">
+            <div class="wave wave-small" style="top: 25%; left: 15%; animation-delay: 0s;"></div>
+            <div class="wave wave-medium" style="top: 60%; left: 80%; animation-delay: 3s;"></div>
+            <div class="wave wave-large" style="top: 80%; left: 25%; animation-delay: 6s;"></div>
+            <div class="wave wave-small" style="top: 40%; left: 70%; animation-delay: 2s;"></div>
+            <div class="wave wave-medium" style="top: 15%; left: 60%; animation-delay: 5s;"></div>
+        </div>
+        
+        <!-- Orbes flotantes -->
+        <div class="floating-orbs">
+            <div class="orb orb-1" style="top: 20%; left: 10%; animation-delay: 0s;"></div>
+            <div class="orb orb-2" style="top: 70%; left: 85%; animation-delay: 5s;"></div>
+            <div class="orb orb-3" style="top: 45%; left: 5%; animation-delay: 10s;"></div>
+        </div>
     </div>
 
     <div class="min-h-screen flex items-center justify-center py-4 sm:py-6 lg:py-8 px-4 sm:px-6 lg:px-8 relative z-10">
@@ -424,7 +762,7 @@ if (isset($_GET['error'])) {
                 <?php endif; ?>
 
                 <!-- Formularios con contenedor animado -->
-                <div class="form-container">
+                <div class="form-container login-active" id="formContainer">
                     <!-- Formulario de Login -->
                     <div id="loginFormWrapper" class="form-wrapper">
                         <form id="loginForm" method="POST" class="space-y-4 sm:space-y-6">
@@ -575,6 +913,11 @@ if (isset($_GET['error'])) {
             const registerWrapper = document.getElementById('registerFormWrapper');
             const loginTab = document.getElementById('loginTab');
             const registerTab = document.getElementById('registerTab');
+            const formContainer = document.getElementById('formContainer');
+            
+            // Cambiar altura del contenedor para login (más compacto)
+            formContainer.classList.remove('register-active');
+            formContainer.classList.add('login-active');
             
             // Animar salida del formulario de registro hacia la derecha
             registerWrapper.classList.add('form-slide-out-right');
@@ -609,6 +952,11 @@ if (isset($_GET['error'])) {
             const registerWrapper = document.getElementById('registerFormWrapper');
             const loginTab = document.getElementById('loginTab');
             const registerTab = document.getElementById('registerTab');
+            const formContainer = document.getElementById('formContainer');
+            
+            // Cambiar altura del contenedor para registro (más flexible)
+            formContainer.classList.remove('login-active');
+            formContainer.classList.add('register-active');
             
             // Animar salida del formulario de login hacia la izquierda
             loginWrapper.classList.add('form-slide-out-left');
