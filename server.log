@@ -1837,3 +1837,24 @@
 [Tue Sep 23 14:22:22 2025] 127.0.0.1:58256 Accepted
 [Tue Sep 23 14:22:22 2025] 127.0.0.1:58256 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
 [Tue Sep 23 14:22:22 2025] 127.0.0.1:58256 Closing
+[Wed Sep 24 02:26:17 2025] 127.0.0.1:47090 Accepted
+[Wed Sep 24 02:26:17 2025] 127.0.0.1:47104 Accepted
+[Wed Sep 24 02:26:17 2025] 127.0.0.1:47090 [302]: GET /src/admin/pages/reservas/
+[Wed Sep 24 02:26:17 2025] 127.0.0.1:47090 Closing
+[Wed Sep 24 02:26:18 2025] 127.0.0.1:47104 [200]: GET /src/admin/auth/login.php
+[Wed Sep 24 02:26:18 2025] 127.0.0.1:47104 Closing
+[Wed Sep 24 02:26:21 2025] 127.0.0.1:47106 Accepted
+[Wed Sep 24 02:26:22 2025] 127.0.0.1:47106 [302]: POST /src/admin/auth/login.php
+[Wed Sep 24 02:26:22 2025] 127.0.0.1:47106 Closing
+[Wed Sep 24 02:26:22 2025] 127.0.0.1:47108 Accepted
+[Wed Sep 24 02:26:31 2025] 127.0.0.1:47108 [200]: GET /src/admin/pages/dashboard/
+[Wed Sep 24 02:26:31 2025] 127.0.0.1:47108 Closing
+[Wed Sep 24 02:26:31 2025] 127.0.0.1:51960 Accepted
+[Wed Sep 24 02:26:31 2025] 127.0.0.1:51960 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Wed Sep 24 02:26:31 2025] 127.0.0.1:51960 Closing
+[Wed Sep 24 02:26:34 2025] 127.0.0.1:51964 Accepted
+[Wed Sep 24 02:26:36 2025] 127.0.0.1:51964 [200]: GET /src/admin/pages/ofertas/
+[Wed Sep 24 02:26:36 2025] 127.0.0.1:51964 Closing
+[Wed Sep 24 02:26:36 2025] 127.0.0.1:51968 Accepted
+[Wed Sep 24 02:26:36 2025] 127.0.0.1:51968 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Wed Sep 24 02:26:36 2025] 127.0.0.1:51968 Closing

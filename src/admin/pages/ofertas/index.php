@@ -996,12 +996,13 @@ function estaVigente($fecha_inicio, $fecha_fin, $estado) {
                         console.error('Response text:', text);
                         
                         // Mostrar más información del error para pausar
-                        if (text.includes('<?php') || text.includes('<!DOCTYPE') || text.includes('<html')) {
+                        // Verificar si la respuesta es HTML en lugar de JSON
+                        if (text.startsWith('<') || text.includes('DOCTYPE')) {
                             throw new Error('El servidor devolvió HTML en lugar de JSON. Revisa la consola para más detalles.');
                         } else if (text.length > 500) {
-                            throw new Error('Respuesta demasiado larga. Revisa la consola para más detalles.');
+                            throw new Error('Respuesta demasiado larga. Revisa la consola para más detalles.');  
                         } else {
-                            throw new Error('JSON inválido: "' + text.substring(0, 100) + '..."');
+                            throw new Error('JSON inválido: ' + text.substring(0, 100) + '...');
                         }
                     }
                 })
