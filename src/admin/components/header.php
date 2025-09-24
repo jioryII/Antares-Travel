@@ -3,7 +3,7 @@ require_once __DIR__ . '/../auth/middleware.php';
 $admin = obtenerAdminActual();
 ?>
 
-<header class="bg-gradient-to-r from-slate-50/95 via-white/95 to-gray-50/95 backdrop-blur-lg shadow-lg border-b border-gray-200/60 fixed top-0 left-0 right-0 z-20 before:absolute before:inset-0 before:bg-gradient-to-r before:from-blue-500/5 before:via-transparent before:to-purple-500/5 before:pointer-events-none">
+<header class="bg-gradient-to-r from-cyan-50/95 via-sky-50/95 to-teal-50/95 backdrop-blur-lg shadow-lg border-b border-cyan-200/50 fixed top-0 left-0 right-0 z-20 before:absolute before:inset-0 before:bg-gradient-to-r before:from-cyan-300/8 before:via-sky-300/6 before:to-teal-300/8 before:pointer-events-none">
     <div class="relative flex items-center justify-between px-4 lg:px-8 py-4">
         <!-- Espacio para el sidebar -->
         <div class="hidden lg:block" style="width: 256px;"></div>
@@ -36,7 +36,7 @@ $admin = obtenerAdminActual();
         <!-- Panel de usuario profesional -->
         <div class="flex items-center space-x-3 lg:space-x-4">
             <!-- Información del administrador - Completa para desktop -->
-            <div class="hidden lg:flex items-center space-x-3 bg-gray-50 rounded-lg px-4 py-2.5 border border-gray-200 hover:border-gray-300 transition-all duration-200">
+            <div class="hidden lg:flex items-center space-x-3 bg-cyan-50/90 backdrop-blur-sm rounded-lg px-4 py-2.5 border border-cyan-300/70 hover:border-cyan-400/80 hover:bg-cyan-100/90 transition-all duration-200 shadow-md">
                 <div class="flex items-center space-x-3">
                     <div class="relative">
                         <div class="w-9 h-9 bg-slate-900 rounded-lg flex items-center justify-center shadow-sm">
@@ -47,7 +47,7 @@ $admin = obtenerAdminActual();
                     <div>
                         <p class="text-sm font-semibold text-gray-900"><?php echo htmlspecialchars($admin['nombre']); ?></p>
                         <div class="flex items-center space-x-1">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-cyan-100 text-cyan-800 border border-cyan-300">
                                 <i class="fas fa-shield-alt mr-1 text-xs"></i>
                                 <?php echo htmlspecialchars($admin['rol'] ?? 'Administrador'); ?>
                             </span>
@@ -281,14 +281,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Agregar estilos elegantes al header
     const header = document.querySelector('header');
     if (header) {
-        // Crear el efecto glass elegante
+        // Crear el efecto glass elegante con tonos celeste suaves
         header.style.backgroundImage = `
-            linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.95) 50%, rgba(241,245,249,0.98) 100%),
-            radial-gradient(ellipse at top, rgba(59,130,246,0.1) 0%, transparent 50%),
-            radial-gradient(ellipse at bottom right, rgba(147,51,234,0.08) 0%, transparent 50%)
+            linear-gradient(135deg, rgba(236,254,255,0.98) 0%, rgba(240,253,255,0.96) 50%, rgba(236,254,254,0.98) 100%),
+            radial-gradient(ellipse at top, rgba(6,182,212,0.12) 0%, transparent 50%),
+            radial-gradient(ellipse at bottom right, rgba(20,184,166,0.10) 0%, transparent 50%)
         `;
-        header.style.backdropFilter = 'blur(16px) saturate(180%)';
-        header.style.borderImage = 'linear-gradient(90deg, rgba(59,130,246,0.3), rgba(147,51,234,0.2), rgba(59,130,246,0.3)) 1';
+        header.style.backdropFilter = 'blur(18px) saturate(200%)';
+        header.style.borderImage = 'linear-gradient(90deg, rgba(6,182,212,0.25), rgba(20,184,166,0.2), rgba(6,182,212,0.25)) 1';
     }
     
     // Funcionalidad del toggle del sidebar
@@ -331,20 +331,20 @@ document.addEventListener('DOMContentLoaded', function() {
         if (currentScroll <= 0) {
             header.classList.remove('shadow-2xl');
             header.classList.add('shadow-lg');
-            // Efecto más sutil en la parte superior
+            // Efecto más sutil en la parte superior con tonos celeste suaves
             header.style.backgroundImage = `
-                linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.95) 50%, rgba(241,245,249,0.98) 100%),
-                radial-gradient(ellipse at top, rgba(59,130,246,0.1) 0%, transparent 50%),
-                radial-gradient(ellipse at bottom right, rgba(147,51,234,0.08) 0%, transparent 50%)
+                linear-gradient(135deg, rgba(236,254,255,0.98) 0%, rgba(240,253,255,0.96) 50%, rgba(236,254,254,0.98) 100%),
+                radial-gradient(ellipse at top, rgba(6,182,212,0.12) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom right, rgba(20,184,166,0.10) 0%, transparent 50%)
             `;
         } else {
             header.classList.remove('shadow-lg');
             header.classList.add('shadow-2xl');
-            // Efecto más intenso al hacer scroll
+            // Efecto más intenso al hacer scroll con tonos celeste más vibrantes
             header.style.backgroundImage = `
-                linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.96) 50%, rgba(241,245,249,0.98) 100%),
-                radial-gradient(ellipse at top, rgba(59,130,246,0.15) 0%, transparent 60%),
-                radial-gradient(ellipse at bottom right, rgba(147,51,234,0.12) 0%, transparent 60%)
+                linear-gradient(135deg, rgba(207,250,254,0.98) 0%, rgba(212,251,255,0.97) 50%, rgba(204,251,241,0.98) 100%),
+                radial-gradient(ellipse at top, rgba(6,182,212,0.18) 0%, transparent 60%),
+                radial-gradient(ellipse at bottom right, rgba(20,184,166,0.15) 0%, transparent 60%)
             `;
         }
         
