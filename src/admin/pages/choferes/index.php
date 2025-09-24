@@ -177,6 +177,7 @@ function getSortUrl($campo, $orden_actual, $direccion_actual) {
         
         <!-- Contenido principal -->
         <div class="flex-1 lg:ml-64 pt-16 lg:pt-0 min-h-screen">
+            <br>
             <div class="p-4 lg:p-8">
                 <!-- Encabezado -->
                 <div class="mb-6 lg:mb-8">

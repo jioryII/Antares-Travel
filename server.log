@@ -1919,3 +1919,236 @@ Stack trace:
 [Wed Sep 24 02:47:01 2025] 127.0.0.1:35592 Accepted
 [Wed Sep 24 02:47:01 2025] 127.0.0.1:35592 [200]: GET /imagenes/antares_logozz2.png
 [Wed Sep 24 02:47:01 2025] 127.0.0.1:35592 Closing
+[Wed Sep 24 02:55:53 2025] 127.0.0.1:50444 Accepted
+[Wed Sep 24 02:55:53 2025] 127.0.0.1:50460 Accepted
+[Wed Sep 24 02:56:02 2025] 127.0.0.1:50444 [200]: GET /src/admin/pages/dashboard/
+[Wed Sep 24 02:56:02 2025] 127.0.0.1:50444 Closing
+[Wed Sep 24 02:56:02 2025] 127.0.0.1:50460 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Wed Sep 24 02:56:02 2025] 127.0.0.1:50460 Closing
+[Wed Sep 24 02:56:06 2025] 127.0.0.1:51560 Accepted
+[Wed Sep 24 02:56:08 2025] PHP Warning:  Undefined variable $page_title in /home/andi/vXcode/Antares-Travel/src/admin/pages/tours/index.php on line 49
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51560 [200]: GET /src/admin/pages/tours/
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51560 Closing
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51568 Accepted
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51568 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51568 Closing
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51570 Accepted
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51580 Accepted
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51590 Accepted
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51596 Accepted
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51598 Accepted
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51570 [200]: GET /uploads/tours/tour_new_1756737280.jpg
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51570 Closing
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51580 [200]: GET /uploads/tours/tour_new_1756737298.jpg
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51590 [404]: GET /uploads/tours/tour_new_1758569292.jpg - No such file or directory
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51590 Closing
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51596 [404]: GET /uploads/tours/tour_new_1758569260.jpg - No such file or directory
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51598 [200]: GET /uploads/tours/tour_new_1756737897.jpg
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51580 Closing
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51596 Closing
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51598 Closing
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51604 Accepted
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51610 Accepted
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51604 [200]: GET /uploads/tours/tour_new_1756737909.jpg
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51604 Closing
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51626 Accepted
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51610 [200]: GET /uploads/tours/tour_new_1756737968.jpg
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51610 Closing
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51628 Accepted
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51636 Accepted
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51626 [200]: GET /uploads/tours/tour_new_1756737984.jpg
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51626 Closing
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51638 Accepted
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51628 [200]: GET /uploads/tours/tour_new_1756737996.jpg
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51636 [200]: GET /uploads/tours/tour_new_1756738031.jpg
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51628 Closing
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51636 Closing
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51638 [200]: GET /uploads/tours/tour_new_1756738047.jpg
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51638 Closing
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51654 Accepted
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51660 Accepted
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51654 [404]: GET /uploads/tours/tour_new_1758569501.jpg - No such file or directory
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51654 Closing
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51660 [200]: GET /uploads/tours/tour_new_1756738076.jpg
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51660 Closing
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51676 Accepted
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51692 Accepted
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51702 Accepted
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51676 [404]: GET /uploads/tours/tour_new_1758569292.jpg - No such file or directory
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51676 Closing
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51692 [404]: GET /uploads/tours/tour_new_1758569260.jpg - No such file or directory
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51692 Closing
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51702 [404]: GET /uploads/tours/tour_new_1758569501.jpg - No such file or directory
+[Wed Sep 24 02:56:08 2025] 127.0.0.1:51702 Closing
+[Wed Sep 24 02:56:10 2025] 127.0.0.1:51712 Accepted
+[Wed Sep 24 02:56:10 2025] 127.0.0.1:51718 Accepted
+[Wed Sep 24 02:56:20 2025] 127.0.0.1:51712 [200]: GET /src/admin/pages/dashboard/
+[Wed Sep 24 02:56:20 2025] 127.0.0.1:51712 Closing
+[Wed Sep 24 02:56:20 2025] 127.0.0.1:51718 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Wed Sep 24 02:56:20 2025] 127.0.0.1:51718 Closing
+[Wed Sep 24 02:56:56 2025] 127.0.0.1:50622 Accepted
+[Wed Sep 24 02:56:56 2025] 127.0.0.1:50632 Accepted
+[Wed Sep 24 02:57:05 2025] 127.0.0.1:50622 [200]: GET /src/admin/pages/dashboard/
+[Wed Sep 24 02:57:05 2025] 127.0.0.1:50622 Closing
+[Wed Sep 24 02:57:05 2025] 127.0.0.1:50632 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Wed Sep 24 02:57:05 2025] 127.0.0.1:50632 Closing
+[Wed Sep 24 02:57:05 2025] 127.0.0.1:50640 Accepted
+[Wed Sep 24 02:57:05 2025] 127.0.0.1:50640 [200]: GET /imagenes/antares_logozz2.png
+[Wed Sep 24 02:57:05 2025] 127.0.0.1:50640 Closing
+[Wed Sep 24 02:57:08 2025] 127.0.0.1:41908 Accepted
+[Wed Sep 24 02:57:17 2025] 127.0.0.1:41908 [200]: GET /src/admin/pages/dashboard/
+[Wed Sep 24 02:57:17 2025] 127.0.0.1:41908 Closing
+[Wed Sep 24 02:57:17 2025] 127.0.0.1:41916 Accepted
+[Wed Sep 24 02:57:17 2025] 127.0.0.1:41916 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Wed Sep 24 02:57:17 2025] 127.0.0.1:41916 Closing
+[Wed Sep 24 02:57:19 2025] 127.0.0.1:52760 Accepted
+[Wed Sep 24 02:57:20 2025] PHP Warning:  Undefined variable $page_title in /home/andi/vXcode/Antares-Travel/src/admin/pages/tours/index.php on line 49
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52760 [200]: GET /src/admin/pages/tours/
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52760 Closing
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52764 Accepted
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52764 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52764 Closing
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52776 Accepted
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52778 Accepted
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52780 Accepted
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52792 Accepted
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52804 Accepted
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52776 [200]: GET /uploads/tours/tour_new_1756737280.jpg
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52776 Closing
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52778 [200]: GET /uploads/tours/tour_new_1756737298.jpg
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52780 [404]: GET /uploads/tours/tour_new_1758569292.jpg - No such file or directory
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52780 Closing
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52792 [404]: GET /uploads/tours/tour_new_1758569260.jpg - No such file or directory
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52792 Closing
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52804 [200]: GET /uploads/tours/tour_new_1756737897.jpg
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52778 Closing
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52804 Closing
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52814 Accepted
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52814 [200]: GET /uploads/tours/tour_new_1756737909.jpg
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52814 Closing
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52820 Accepted
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52832 Accepted
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52840 Accepted
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52820 [200]: GET /uploads/tours/tour_new_1756737968.jpg
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52848 Accepted
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52820 Closing
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52832 [200]: GET /uploads/tours/tour_new_1756737984.jpg
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52832 Closing
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52840 [200]: GET /uploads/tours/tour_new_1756737996.jpg
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52848 [200]: GET /uploads/tours/tour_new_1756738031.jpg
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52840 Closing
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52848 Closing
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52854 Accepted
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52862 Accepted
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52854 [200]: GET /uploads/tours/tour_new_1756738047.jpg
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52854 Closing
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52862 [404]: GET /uploads/tours/tour_new_1758569501.jpg - No such file or directory
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52862 Closing
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52868 Accepted
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52868 [200]: GET /uploads/tours/tour_new_1756738076.jpg
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52868 Closing
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52878 Accepted
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52892 Accepted
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52902 Accepted
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52878 [404]: GET /uploads/tours/tour_new_1758569292.jpg - No such file or directory
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52878 Closing
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52892 [404]: GET /uploads/tours/tour_new_1758569260.jpg - No such file or directory
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52892 Closing
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52902 [404]: GET /uploads/tours/tour_new_1758569501.jpg - No such file or directory
+[Wed Sep 24 02:57:20 2025] 127.0.0.1:52902 Closing
+[Wed Sep 24 02:57:22 2025] 127.0.0.1:52910 Accepted
+[Wed Sep 24 02:57:24 2025] 127.0.0.1:52910 [200]: GET /src/admin/pages/tours/tours_diarios.php
+[Wed Sep 24 02:57:24 2025] 127.0.0.1:52910 Closing
+[Wed Sep 24 02:57:24 2025] 127.0.0.1:52918 Accepted
+[Wed Sep 24 02:57:24 2025] 127.0.0.1:52918 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Wed Sep 24 02:57:24 2025] 127.0.0.1:52918 Closing
+[Wed Sep 24 02:57:26 2025] 127.0.0.1:46434 Accepted
+[Wed Sep 24 02:57:28 2025] 127.0.0.1:46434 [200]: GET /src/admin/pages/reservas/
+[Wed Sep 24 02:57:28 2025] 127.0.0.1:46434 Closing
+[Wed Sep 24 02:57:28 2025] 127.0.0.1:46450 Accepted
+[Wed Sep 24 02:57:28 2025] 127.0.0.1:46450 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Wed Sep 24 02:57:28 2025] 127.0.0.1:46450 Closing
+[Wed Sep 24 02:57:29 2025] 127.0.0.1:46454 Accepted
+[Wed Sep 24 02:57:30 2025] 127.0.0.1:46454 [200]: GET /src/admin/pages/usuarios/
+[Wed Sep 24 02:57:30 2025] 127.0.0.1:46454 Closing
+[Wed Sep 24 02:57:30 2025] 127.0.0.1:46470 Accepted
+[Wed Sep 24 02:57:31 2025] 127.0.0.1:46470 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Wed Sep 24 02:57:31 2025] 127.0.0.1:46470 Closing
+[Wed Sep 24 02:57:31 2025] 127.0.0.1:46480 Accepted
+[Wed Sep 24 02:57:31 2025] 127.0.0.1:46480 [200]: GET /storage/uploads/avatars/avatar_68cd06af54803.jpg
+[Wed Sep 24 02:57:31 2025] 127.0.0.1:46480 Closing
+[Wed Sep 24 02:58:13 2025] 127.0.0.1:37786 Accepted
+[Wed Sep 24 02:58:13 2025] 127.0.0.1:37802 Accepted
+[Wed Sep 24 02:58:15 2025] 127.0.0.1:37786 [200]: GET /src/admin/pages/usuarios/
+[Wed Sep 24 02:58:15 2025] 127.0.0.1:37786 Closing
+[Wed Sep 24 02:58:15 2025] 127.0.0.1:37802 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Wed Sep 24 02:58:15 2025] 127.0.0.1:37802 Closing
+[Wed Sep 24 02:58:15 2025] 127.0.0.1:37810 Accepted
+[Wed Sep 24 02:58:15 2025] 127.0.0.1:37810 [200]: GET /storage/uploads/avatars/avatar_68cd06af54803.jpg
+[Wed Sep 24 02:58:15 2025] 127.0.0.1:37810 Closing
+[Wed Sep 24 02:58:16 2025] 127.0.0.1:39646 Accepted
+[Wed Sep 24 02:58:17 2025] 127.0.0.1:39646 [200]: GET /src/admin/pages/guias/
+[Wed Sep 24 02:58:17 2025] 127.0.0.1:39646 Closing
+[Wed Sep 24 02:58:17 2025] 127.0.0.1:39650 Accepted
+[Wed Sep 24 02:58:17 2025] 127.0.0.1:39650 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Wed Sep 24 02:58:17 2025] 127.0.0.1:39650 Closing
+[Wed Sep 24 02:58:40 2025] 127.0.0.1:42246 Accepted
+[Wed Sep 24 02:58:41 2025] 127.0.0.1:42246 [200]: GET /src/admin/pages/guias/
+[Wed Sep 24 02:58:41 2025] 127.0.0.1:42246 Closing
+[Wed Sep 24 02:58:41 2025] 127.0.0.1:42260 Accepted
+[Wed Sep 24 02:58:41 2025] 127.0.0.1:42260 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Wed Sep 24 02:58:41 2025] 127.0.0.1:42260 Closing
+[Wed Sep 24 02:58:42 2025] 127.0.0.1:42272 Accepted
+[Wed Sep 24 02:58:45 2025] 127.0.0.1:42272 [200]: GET /src/admin/pages/choferes/
+[Wed Sep 24 02:58:45 2025] 127.0.0.1:42272 Closing
+[Wed Sep 24 02:58:45 2025] 127.0.0.1:42286 Accepted
+[Wed Sep 24 02:58:45 2025] 127.0.0.1:42286 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Wed Sep 24 02:58:45 2025] 127.0.0.1:42286 Closing
+[Wed Sep 24 02:59:17 2025] 127.0.0.1:59636 Accepted
+[Wed Sep 24 02:59:19 2025] 127.0.0.1:59636 [200]: GET /src/admin/pages/choferes/
+[Wed Sep 24 02:59:19 2025] 127.0.0.1:59636 Closing
+[Wed Sep 24 02:59:19 2025] 127.0.0.1:59652 Accepted
+[Wed Sep 24 02:59:19 2025] 127.0.0.1:59652 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Wed Sep 24 02:59:19 2025] 127.0.0.1:59652 Closing
+[Wed Sep 24 02:59:21 2025] 127.0.0.1:59658 Accepted
+[Wed Sep 24 02:59:23 2025] 127.0.0.1:59658 [200]: GET /src/admin/pages/vehiculos/
+[Wed Sep 24 02:59:23 2025] 127.0.0.1:59658 Closing
+[Wed Sep 24 02:59:23 2025] 127.0.0.1:59668 Accepted
+[Wed Sep 24 02:59:23 2025] 127.0.0.1:59668 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Wed Sep 24 02:59:23 2025] 127.0.0.1:59668 Closing
+[Wed Sep 24 02:59:38 2025] 127.0.0.1:36610 Accepted
+[Wed Sep 24 02:59:40 2025] 127.0.0.1:36610 [200]: GET /src/admin/pages/vehiculos/
+[Wed Sep 24 02:59:40 2025] 127.0.0.1:36610 Closing
+[Wed Sep 24 02:59:40 2025] 127.0.0.1:36618 Accepted
+[Wed Sep 24 02:59:40 2025] 127.0.0.1:36618 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Wed Sep 24 02:59:40 2025] 127.0.0.1:36618 Closing
+[Wed Sep 24 02:59:43 2025] 127.0.0.1:36632 Accepted
+[Wed Sep 24 02:59:45 2025] 127.0.0.1:36632 [200]: GET /src/admin/pages/ofertas/
+[Wed Sep 24 02:59:45 2025] 127.0.0.1:36632 Closing
+[Wed Sep 24 02:59:45 2025] 127.0.0.1:36646 Accepted
+[Wed Sep 24 02:59:45 2025] 127.0.0.1:36646 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Wed Sep 24 02:59:45 2025] 127.0.0.1:36646 Closing
+[Wed Sep 24 03:00:06 2025] 127.0.0.1:57100 Accepted
+[Wed Sep 24 03:00:09 2025] 127.0.0.1:57100 [200]: GET /src/admin/pages/ofertas/
+[Wed Sep 24 03:00:09 2025] 127.0.0.1:57100 Closing
+[Wed Sep 24 03:00:09 2025] 127.0.0.1:57106 Accepted
+[Wed Sep 24 03:00:09 2025] 127.0.0.1:57106 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Wed Sep 24 03:00:09 2025] 127.0.0.1:57106 Closing
+[Wed Sep 24 03:00:16 2025] 127.0.0.1:39470 Accepted
+[Wed Sep 24 03:00:17 2025] 127.0.0.1:39470 [200]: GET /src/admin/pages/root/administradores.php
+[Wed Sep 24 03:00:17 2025] 127.0.0.1:39470 Closing
+[Wed Sep 24 03:00:17 2025] 127.0.0.1:39474 Accepted
+[Wed Sep 24 03:00:17 2025] 127.0.0.1:39474 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Wed Sep 24 03:00:17 2025] 127.0.0.1:39474 Closing
+[Wed Sep 24 03:00:20 2025] 127.0.0.1:39478 Accepted
+[Wed Sep 24 03:00:20 2025] 127.0.0.1:39488 Accepted
+[Wed Sep 24 03:00:29 2025] 127.0.0.1:39478 [200]: GET /src/admin/pages/root/configuracion.php
+[Wed Sep 24 03:00:29 2025] 127.0.0.1:39478 Closing
+[Wed Sep 24 03:00:30 2025] 127.0.0.1:39488 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Wed Sep 24 03:00:30 2025] 127.0.0.1:39488 Closing
+[Wed Sep 24 03:01:08 2025] 127.0.0.1:59316 Accepted
+[Wed Sep 24 03:01:13 2025] 127.0.0.1:59316 [200]: GET /src/admin/pages/root/logs.php
+[Wed Sep 24 03:01:13 2025] 127.0.0.1:59316 Closing
+[Wed Sep 24 03:01:13 2025] 127.0.0.1:59330 Accepted
+[Wed Sep 24 03:01:13 2025] 127.0.0.1:59330 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Wed Sep 24 03:01:13 2025] 127.0.0.1:59330 Closing
