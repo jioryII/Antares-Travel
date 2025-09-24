@@ -1858,3 +1858,64 @@
 [Wed Sep 24 02:26:36 2025] 127.0.0.1:51968 Accepted
 [Wed Sep 24 02:26:36 2025] 127.0.0.1:51968 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
 [Wed Sep 24 02:26:36 2025] 127.0.0.1:51968 Closing
+[Wed Sep 24 02:43:22 2025] 127.0.0.1:47730 Accepted
+[Wed Sep 24 02:43:22 2025] 127.0.0.1:47734 Accepted
+[Wed Sep 24 02:43:30 2025] 127.0.0.1:47730 [200]: GET /src/admin/pages/mi_perfil/index.php
+[Wed Sep 24 02:43:30 2025] 127.0.0.1:47730 Closing
+[Wed Sep 24 02:43:30 2025] 127.0.0.1:40612 Accepted
+[Wed Sep 24 02:43:30 2025] 127.0.0.1:47734 [200]: GET /src/admin/pages/mi_perfil/styles.css
+[Wed Sep 24 02:43:30 2025] 127.0.0.1:40612 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Wed Sep 24 02:43:30 2025] 127.0.0.1:47734 Closing
+[Wed Sep 24 02:43:30 2025] 127.0.0.1:40612 Closing
+[Wed Sep 24 02:43:34 2025] 127.0.0.1:40626 Accepted
+[Wed Sep 24 02:43:35 2025] PHP Fatal error:  Uncaught Error: Undefined constant "SITE_NAME" in /home/andi/vXcode/Antares-Travel/src/admin/pages/soporte/settings.php:15
+Stack trace:
+#0 {main}
+  thrown in /home/andi/vXcode/Antares-Travel/src/admin/pages/soporte/settings.php on line 15
+[Wed Sep 24 02:43:35 2025] 127.0.0.1:40626 [500]: GET /src/admin/pages/soporte/settings.php - Uncaught Error: Undefined constant "SITE_NAME" in /home/andi/vXcode/Antares-Travel/src/admin/pages/soporte/settings.php:15
+Stack trace:
+#0 {main}
+  thrown in /home/andi/vXcode/Antares-Travel/src/admin/pages/soporte/settings.php on line 15
+[Wed Sep 24 02:43:35 2025] 127.0.0.1:40626 Closing
+[Wed Sep 24 02:43:35 2025] 127.0.0.1:40630 Accepted
+[Wed Sep 24 02:43:39 2025] 127.0.0.1:40630 [200]: GET /src/admin/pages/soporte/manual_usuario.php
+[Wed Sep 24 02:43:39 2025] 127.0.0.1:40630 Closing
+[Wed Sep 24 02:43:39 2025] 127.0.0.1:53370 Accepted
+[Wed Sep 24 02:43:39 2025] 127.0.0.1:53370 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Wed Sep 24 02:43:39 2025] 127.0.0.1:53370 Closing
+[Wed Sep 24 02:45:26 2025] 127.0.0.1:39658 Accepted
+[Wed Sep 24 02:45:26 2025] 127.0.0.1:39670 Accepted
+[Wed Sep 24 02:45:26 2025] 127.0.0.1:39658 [200]: GET /src/admin/pages/soporte/manual_usuario.php
+[Wed Sep 24 02:45:26 2025] 127.0.0.1:39658 Closing
+[Wed Sep 24 02:45:27 2025] 127.0.0.1:39670 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Wed Sep 24 02:45:27 2025] 127.0.0.1:39670 Closing
+[Wed Sep 24 02:45:27 2025] 127.0.0.1:39682 Accepted
+[Wed Sep 24 02:45:27 2025] 127.0.0.1:39682 [200]: GET /imagenes/antares_logozz2.png
+[Wed Sep 24 02:45:27 2025] 127.0.0.1:39682 Closing
+[Wed Sep 24 02:45:29 2025] 127.0.0.1:39692 Accepted
+[Wed Sep 24 02:45:38 2025] 127.0.0.1:39692 [200]: GET /src/admin/pages/dashboard/
+[Wed Sep 24 02:45:38 2025] 127.0.0.1:39692 Closing
+[Wed Sep 24 02:45:38 2025] 127.0.0.1:39700 Accepted
+[Wed Sep 24 02:45:38 2025] 127.0.0.1:39700 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Wed Sep 24 02:45:38 2025] 127.0.0.1:39700 Closing
+[Wed Sep 24 02:45:46 2025] 127.0.0.1:41854 Accepted
+[Wed Sep 24 02:45:46 2025] 127.0.0.1:41854 [200]: GET /src/admin/pages/soporte/manual_usuario.php
+[Wed Sep 24 02:45:46 2025] 127.0.0.1:41854 Closing
+[Wed Sep 24 02:45:46 2025] 127.0.0.1:41862 Accepted
+[Wed Sep 24 02:45:46 2025] 127.0.0.1:41862 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Wed Sep 24 02:45:46 2025] 127.0.0.1:41862 Closing
+[Wed Sep 24 02:45:49 2025] 127.0.0.1:41878 Accepted
+[Wed Sep 24 02:45:49 2025] 127.0.0.1:41878 [200]: GET /src/admin/pages/soporte/settings.php
+[Wed Sep 24 02:45:49 2025] 127.0.0.1:41878 Closing
+[Wed Sep 24 02:45:49 2025] 127.0.0.1:41890 Accepted
+[Wed Sep 24 02:45:49 2025] 127.0.0.1:41890 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Wed Sep 24 02:45:49 2025] 127.0.0.1:41890 Closing
+[Wed Sep 24 02:47:00 2025] 127.0.0.1:35576 Accepted
+[Wed Sep 24 02:47:00 2025] 127.0.0.1:35590 Accepted
+[Wed Sep 24 02:47:00 2025] 127.0.0.1:35576 [200]: GET /src/admin/pages/soporte/settings.php
+[Wed Sep 24 02:47:00 2025] 127.0.0.1:35576 Closing
+[Wed Sep 24 02:47:01 2025] 127.0.0.1:35590 [404]: GET /src/admin/imagenes/antares_logo.png - No such file or directory
+[Wed Sep 24 02:47:01 2025] 127.0.0.1:35590 Closing
+[Wed Sep 24 02:47:01 2025] 127.0.0.1:35592 Accepted
+[Wed Sep 24 02:47:01 2025] 127.0.0.1:35592 [200]: GET /imagenes/antares_logozz2.png
+[Wed Sep 24 02:47:01 2025] 127.0.0.1:35592 Closing

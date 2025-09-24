@@ -1,18 +1,22 @@
 <?php
+// Ejecutar toda la lógica PHP ANTES de cualquier salida HTML
+require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../auth/middleware.php';
+
+// Verificar sesión (puede hacer redirecciones)
 verificarSesionAdmin();
 $admin = obtenerAdminActual();
 $page_title = "Configuración y Ajustes del Sistema";
-?>
 
+// Solo después de todas las verificaciones, comenzar HTML
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $page_title; ?> - Antares Travel</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <title><?php echo $page_title; ?> - <?php echo SITE_NAME; ?></title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" type="image/png" href="../../../../imagenes/antares_logozz2.png">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
