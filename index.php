@@ -73,8 +73,13 @@ limitRequests($ip);
     <meta name="geo.position" content="-13.5167;-71.9781">
     <link rel="canonical" href="https://www.antarestravelperu.com<?php echo $current_lang == 'es' ? '' : '/en'; ?>">
     <link rel="icon" type="image/png" href="imagenes/antares_logozz3.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://accounts.google.com">
+    <link rel="preload" as="image" href="imagenes/fondo01.jpg">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script type="application/ld+json">
     {
@@ -209,9 +214,9 @@ body {
     background: 
         radial-gradient(circle at 20% 30%, rgba(162, 119, 65, 0.3) 0%, transparent 50%),
         radial-gradient(circle at 80% 70%, rgba(139, 99, 50, 0.2) 0%, transparent 50%),
-        linear-gradient(135deg, #8B6332 0%, #A27741 25%, #B8926A 50%, #5B797C 75%, #8B6332 100%);
+        linear-gradient(135deg, #8B6332 0%, #A27741 25%, #B8926A 50%,rgb(154, 142, 99) 75%, #8B6332 100%);
     background-size: 400% 400%, 300% 300%, 100% 100%;
-    animation: incaGradient 12s ease-in-out infinite;
+    animation: incaGradient 1s ease-in-out infinite;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -242,7 +247,7 @@ body {
             rgba(162, 119, 65, 0.06) 3px,
             rgba(162, 119, 65, 0.06) 6px
         );
-    animation: stoneTexture 20s ease-in-out infinite;
+    animation: stoneTexture 1s ease-in-out infinite;
 }
 
 .loading-screen::after {
@@ -258,7 +263,7 @@ body {
         radial-gradient(circle at 25% 85%, rgba(162, 119, 65, 0.2) 1px, transparent 1px),
         radial-gradient(circle at 75% 75%, rgba(91, 121, 124, 0.3) 1px, transparent 1px);
     background-size: 80px 80px, 60px 60px, 100px 100px, 70px 70px;
-    animation: incaStones 25s ease-in-out infinite;
+    animation: incaStones 1s ease-in-out infinite;
     opacity: 0.5;
 }
 
@@ -795,7 +800,7 @@ body {
     padding: var(--spacing-xs);
     border-radius: 32px;
     transition: var(--transition-smooth);
-    background: rgba(245, 245, 220, 0.1);
+    background: rgb(255, 255, 255);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(245, 245, 220, 0.2);
@@ -809,7 +814,7 @@ body {
 }
 
 .user-profile:hover {
-    background: rgba(245, 245, 220, 0.2);
+    background: rgba(255, 255, 255, 0.2);
     transform: translateY(-1px);
 }
 
@@ -1483,16 +1488,24 @@ body {
     perspective: 1000px;
 }
 
+
 .tour-card {
-    background: var(--white);
-    border-radius: var(--border-radius-lg);
+    box-shadow: 0 4px 16px rgb(0, 0, 0);
+    background: #FBF4E8;
+    border-radius: 20px;
     overflow: hidden;
-    box-shadow: var(--shadow-light);
     transition: var(--transition-slow);
     opacity: 0;
     transform: translateY(80px) rotateX(10deg) scale(0.9);
     position: relative;
-    border: 1px solid var(--border-light);
+    height: 500px;
+    display: flex;
+    flex-direction: column;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border: 1px solidrgba(248, 242, 232, 0.34);
+    isolation: isolate;
 }
 
 .tour-card.animate {
@@ -1500,49 +1513,71 @@ body {
     transform: translateY(0) rotateX(0) scale(1);
 }
 
+.tour-card {
+    box-shadow: 0 2px 8px rgba(128, 128, 128, 0.24), 
+                0 1px 3px rgba(128, 128, 128, 0.23); 
+}
 .tour-card:hover {
-    transform: translateY(-12px) scale(1.02) rotateX(-1deg);
-    box-shadow: var(--shadow-heavy);
+    transform: none;
 }
-
 .tour-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-    transition: var(--transition-quick);
-    z-index: 1;
-}
-
-.tour-card:hover::before {
-    left: 100%;
-}
-
-.tour-image {
-    height: 200px;
-    background-size: cover;
-    background-position: center;
-    position: relative;
-    overflow: hidden;
-}
-
-.tour-image::after {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.08));
-    transition: var(--transition-smooth);
+    background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        transparent 30%,
+        rgba(248, 242, 232, 0.05) 35%,
+        rgba(248, 242, 232, 0.15) 40%,
+        rgba(248, 242, 232, 0.35) 45%,
+        rgba(248, 242, 232, 0.55) 50%,
+        rgba(248, 242, 232, 0.75) 55%,
+        rgba(248, 242, 232, 0.9) 60%,
+        rgb(248, 242, 232) 65%
+    );
+    pointer-events: none;
+    z-index: 1;
+    border-radius: var(--border-radius-lg);
+}
+.tour-card:hover::before {
+    background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        transparent 30%,
+        rgba(248, 242, 232, 0.02) 35%,
+        rgba(248, 242, 232, 0.1) 40%,
+        rgba(248, 242, 232, 0.25) 45%,
+        rgba(248, 242, 232, 0.45) 50%,
+        rgba(248, 242, 232, 0.65) 55%,
+        rgba(248, 242, 232, 0.85) 60%,
+        rgb(248, 242, 232) 65%
+    );
+}
+.tour-image {
+    display: none;
 }
 
-.tour-card:hover .tour-image::after {
-    background: linear-gradient(to bottom, transparent 20%, rgba(0,0,0,0.15));
+.tour-image::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px; 
+    background: linear-gradient(
+        to bottom, 
+        rgba(162, 119, 65, 0) 0%,           
+        rgba(162, 119, 65, 0.02) 30%,     
+        rgba(162, 119, 65, 0.05) 70%,      
+        rgba(162, 119, 65, 0.08) 100%      
+    );
 }
+
+
 
 .tour-header {
     padding: var(--spacing-lg);
@@ -1552,11 +1587,66 @@ body {
 }
 
 .tour-title {
-    margin: 0 0 var(--spacing-sm) 0;
     font-size: 18px;
     font-weight: 600;
+    color: var(--primary-dark);
+    margin: 0 0 var(--spacing-md) 0;
     line-height: 1.3;
     letter-spacing: -0.2px;
+    height: 48px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-shadow: 0 4px 6px rgba(255, 255, 255, 0.9);
+    position: relative;
+    z-index: 3;
+    flex-shrink: 0;
+}
+.tour-info {
+    flex: 1;
+    max-height: none; 
+    overflow: visible; 
+    margin-bottom: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+}
+.tour-info-fixed {
+    flex-shrink: 0; 
+    margin-bottom: var(--spacing-sm);
+}
+.tour-info-variable {
+    flex: 1;
+    overflow: hidden;
+    max-height: 60px;
+}
+.tour-info-item.duration,
+.tour-info-item.schedule {
+    flex-shrink: 0; 
+    margin-bottom: var(--spacing-xs);
+}
+.tour-info-item.description {
+    max-height: 40px;
+    overflow: hidden;
+}
+
+.tour-info-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-xs);
+    font-size: 14px;
+    color: var(--text-medium);
+    line-height: 1.3;
+    min-height: 20px;
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.6);
+}
+.tour-info-item i {
+    color: var(--primary-color);
+    margin-right: var(--spacing-sm);
+    font-size: 13px;
+    margin-top: 2px;
+    width: 16px;
+    flex-shrink: 0;
 }
 
 .tour-schedule {
@@ -1564,9 +1654,46 @@ body {
     opacity: 0.9;
     font-weight: 400;
 }
+.tour-includes {
+    color: var(--text-light);
+    font-size: 13px;
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+.tour-duration,
+.tour-schedule {
+    color: var(--text-medium);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: visible;
+}
 
 .tour-content {
+    flex: 1;
     padding: var(--spacing-lg);
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    position: relative;
+    z-index: 2;
+    margin-top: 200px;
+    min-height: 240px;
+}
+
+
+.tour-content::before {
+    display: none;
+}
+.tour-title,
+.tour-info,
+.tour-actions {
+    position: relative;
+    z-index: 3;
 }
 
 .tour-details {
@@ -1587,12 +1714,43 @@ body {
 }
 
 .tour-actions {
-    margin-top: var(--spacing-lg);
     text-align: center;
+    margin-top: auto; 
+    padding-top: var(--spacing-sm);
+    flex-shrink: 0; 
 }
 
+.tour-actions .btn::before {
+    display: none; 
+}
+
+.tour-actions .btn {
+    background: var(--gradient-primary);
+    color: var(--white);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 13px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    transition: all 0.3s ease; 
+    box-shadow: 0 2px 12px rgba(162, 119, 65, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+.tour-actions .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgb(235, 163, 74);
+    background: var(--primary-dark);
+}
+.tour-actions .btn i {
+    font-size: 12px;
+}
 .guias-section {
-    background: var(--white);
+    background: #F4EBDC;
     position: relative;
 }
 
@@ -2149,7 +2307,6 @@ body {
     transition: var(--transition-smooth);
     box-shadow: var(--shadow-medium);
     animation: whatsappPulse 2.5s infinite;
-    border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
 @keyframes whatsappPulse {
@@ -2701,7 +2858,7 @@ body {
     }
 
     .tour-header {
-        padding: var(--spacing-md);
+        display: none;
     }
 
     .tour-title {
@@ -2718,10 +2875,8 @@ body {
     }
 
     .tour-details {
-        font-size: 13px;
-        margin: var(--spacing-sm) 0;
-    }
-
+    display: none;
+}
     .guia-card {
         padding: var(--spacing-lg);
     }
@@ -2791,10 +2946,6 @@ body {
     .hero-buttons .btn {
         width: 100%;
         max-width: 240px;
-    }
-
-    .tour-card {
-        margin: 0 var(--spacing-xs);
     }
 
     .section-title {
@@ -2993,6 +3144,576 @@ body {
         font-size: 14px;
     }
 }
+@media (max-width: 768px) {
+    .tour-card {
+        height: 380px;
+    }
+    
+    .tour-image {
+        height: 50%;
+    }
+    
+    .tour-content {
+        padding: var(--spacing-md);
+    }
+    
+    .tour-title {
+        font-size: 16px;
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .tour-info-item {
+        font-size: 13px;
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .tour-actions .btn {
+        padding: 8px 16px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .tour-card {
+        height: 360px;
+    }
+    
+    .tour-image {
+        height: 48%;
+    }
+    
+    .tour-title {
+        font-size: 15px;
+    }
+    
+    .tour-info-item {
+        font-size: 12px;
+    }
+}
+
+.tours-loading {
+    position: relative;
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: scale(0.9);
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.tours-loading.active {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.tours-loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid transparent;
+    border-top: 3px solid var(--primary-color);
+    border-right: 3px solid var(--primary-light);
+    border-radius: 50%;
+    animation: toursLoadingSpin 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+    position: relative;
+}
+
+.tours-loading-spinner::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: calc(100% - 6px);
+    height: calc(100% - 6px);
+    border: 2px solid transparent;
+    border-bottom: 2px solid var(--secondary-color);
+    border-radius: 50%;
+    animation: toursLoadingSpinReverse 1s ease-in-out infinite;
+}
+
+.tours-loading-text {
+    margin-top: 16px;
+    color: var(--primary-color);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+@keyframes toursLoadingSpin {
+    0% { 
+        transform: rotate(0deg); 
+        border-top-color: var(--primary-color);
+        border-right-color: var(--primary-light);
+    }
+    50% { 
+        transform: rotate(180deg); 
+        border-top-color: var(--primary-light);
+        border-right-color: var(--secondary-color);
+    }
+    100% { 
+        transform: rotate(360deg); 
+        border-top-color: var(--primary-color);
+        border-right-color: var(--primary-light);
+    }
+}
+
+@keyframes toursLoadingSpinReverse {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(-360deg); }
+}
+
+.tours-container.filtering {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.tours-container.showing {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+/*
+ * Mural de fotos
+ */
+.mural-container {
+    background: #FFFAF0;
+    position: relative;
+    padding: 40px 20px;
+    min-height: 600px;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+.photos-mural {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+.polaroid-frame {
+    background: #fff;
+    padding: 12px 12px 48px 12px;
+    box-shadow: 
+        0 4px 6px rgba(0,0,0,0.1),
+        0 1px 3px rgba(0,0,0,0.08),
+        0 8px 15px rgba(0,0,0,0.05);
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    max-width: 280px;
+    margin: 0 auto;
+    will-change: transform;
+}
+
+.polaroid-frame:nth-child(1) {
+    transform: rotate(-3deg);
+    background: linear-gradient(135deg, #fff 0%, #faf8f6 100%);
+}
+
+.polaroid-frame:nth-child(2) {
+    transform: rotate(2deg);
+    background: linear-gradient(135deg, #fff 0%, #f6f8fa 100%);
+}
+
+.polaroid-frame:nth-child(3) {
+    transform: rotate(-4deg);
+    background: linear-gradient(135deg, #fff 0%, #faf6f8 100%);
+}
+
+.polaroid-frame:nth-child(4) {
+    transform: rotate(1deg);
+    background: linear-gradient(135deg, #fff 0%, #f6faf7 100%);
+}
+
+.polaroid-frame:nth-child(5) {
+    transform: rotate(-2deg);
+    background: linear-gradient(135deg, #fff 0%, #faf7f6 100%);
+}
+
+.polaroid-frame:nth-child(6) {
+    transform: rotate(3deg);
+    background: linear-gradient(135deg, #fff 0%, #f6f7fa 100%);
+}
+
+.polaroid-frame:nth-child(7) {
+    transform: rotate(-1deg);
+    background: linear-gradient(135deg, #fff 0%, #f8faf6 100%);
+}
+
+.polaroid-frame:nth-child(8) {
+    transform: rotate(2deg);
+    background: linear-gradient(135deg, #fff 0%, #faf6f7 100%);
+}
+
+.polaroid-frame:hover {
+    transform: rotate(0deg) scale(1.05);
+    box-shadow: 
+        0 8px 16px rgba(0,0,0,0.15),
+        0 3px 6px rgba(0,0,0,0.1),
+        0 16px 32px rgba(0,0,0,0.08);
+    z-index: 10;
+}
+
+.polaroid-image-container {
+    position: relative;
+    width: 100%;
+    background: #1a1a1a;
+    overflow: hidden;
+}
+
+.polaroid-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+    transition: opacity 0.3s ease;
+}
+
+.polaroid-image.portrait {
+    aspect-ratio: 3/4;
+}
+
+.polaroid-image.landscape {
+    aspect-ratio: 4/3;
+}
+
+.polaroid-image.square {
+    aspect-ratio: 1/1;
+}
+
+.polaroid-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 8px 4px 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: 'Courier New', monospace;
+}
+
+.polaroid-user {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #4a4a4a;
+    font-weight: 500;
+    max-width: 60%;
+}
+
+.polaroid-user img {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #e0e0e0;
+}
+
+.polaroid-user span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.polaroid-date {
+    font-size: 10px;
+    color: #888;
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .mural-container {
+        padding: 30px 15px;
+        min-height: 500px;
+    }
+    
+    .photos-mural {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 20px;
+    }
+    
+    .polaroid-frame {
+        padding: 8px 8px 36px 8px;
+        max-width: 200px;
+    }
+    
+    .polaroid-info {
+        padding: 6px 3px 4px;
+    }
+    
+    .polaroid-user {
+        font-size: 10px;
+    }
+    
+    .polaroid-user img {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .polaroid-date {
+        font-size: 9px;
+    }
+}
+
+@media (max-width: 480px) {
+    .photos-mural {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 15px;
+    }
+    
+    .polaroid-frame {
+        max-width: 180px;
+        padding: 6px 6px 32px 6px;
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+    opacity: 0;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+.polaroid-frame:nth-child(1) { animation-delay: 0.1s; }
+.polaroid-frame:nth-child(2) { animation-delay: 0.2s; }
+.polaroid-frame:nth-child(3) { animation-delay: 0.3s; }
+.polaroid-frame:nth-child(4) { animation-delay: 0.4s; }
+.polaroid-frame:nth-child(5) { animation-delay: 0.5s; }
+.polaroid-frame:nth-child(6) { animation-delay: 0.6s; }
+.polaroid-frame:nth-child(7) { animation-delay: 0.7s; }
+.polaroid-frame:nth-child(8) { animation-delay: 0.8s; }
+.comentarios-carousel {
+    width: 100%;
+    height: 450px;
+    overflow: hidden;
+    position: relative;
+    background: var(--primary-bg);
+    border-radius: var(--border-radius-lg);
+    margin: 48px 0;
+}
+
+.comentarios-track {
+    display: flex;
+    height: 100%;
+    will-change: transform;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.comentarios-track:active {
+    cursor: grabbing;
+}
+
+.comentarios-track.dragging {
+    cursor: grabbing;
+}
+
+.comentario-card {
+    background: #F1E9DB;
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-2xl);
+    margin-right: var(--spacing-lg);
+    min-width: 300px;
+    max-width: 300px;
+    height: 370px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-shadow: var(--shadow-medium);
+    transition: var(--transition-smooth);
+    border: 1px solid var(--border-light);
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.comentario-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gradient-primary);
+    transform: scaleX(0);
+    transition: var(--transition-smooth);
+}
+
+.comentario-card:hover::before {
+    transform: scaleX(1);
+}
+
+.comentario-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-heavy);
+}
+
+.comentario-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid var(--primary-light);
+    object-fit: cover;
+    margin-bottom: var(--spacing-sm);
+    transition: var(--transition-smooth);
+    position: relative;
+    flex-shrink: 0;
+}
+
+.comentario-avatar::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 50%;
+    background: var(--gradient-primary);
+    opacity: 0;
+    transition: var(--transition-smooth);
+    z-index: -1;
+}
+
+.comentario-card:hover .comentario-avatar {
+    transform: scale(1.05);
+}
+
+.comentario-card:hover .comentario-avatar::before {
+    opacity: 1;
+    animation: avatarPulse 2s infinite;
+}
+
+.comentario-texto {
+    flex: 1;
+    font-style: italic;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--text-medium);
+    margin: var(--spacing-md) 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 8;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-align: justify;
+    hyphens: auto;
+}
+
+.comentario-info {
+    margin-top: auto;
+    flex-shrink: 0;
+}
+
+.comentario-nombre {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 14px;
+    margin-bottom: 2px;
+    letter-spacing: -0.1px;
+}
+
+.comentario-fecha {
+    font-size: 11px;
+    color: var(--text-light);
+    opacity: 0.7;
+}
+
+@keyframes slideInfinite {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(calc(-324px * var(--total-cards)));
+    }
+}
+
+@keyframes avatarPulse {
+    0%, 100% {
+        transform: scale(1.05);
+        opacity: 0.6;
+    }
+    50% {
+        transform: scale(1.08);
+        opacity: 0.3;
+    }
+}
+
+@media (max-width: 768px) {
+    .comentarios-carousel {
+        height: 380px;
+        margin: 32px 0;
+    }
+    
+    .comentario-card {
+        min-width: 260px;
+        max-width: 260px;
+        height: 320px;
+        padding: var(--spacing-md);
+    }
+    
+    .comentario-avatar {
+        width: 44px;
+        height: 44px;
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .comentario-texto {
+        font-size: 14px;
+        -webkit-line-clamp: 6;
+        margin: var(--spacing-sm) 0;
+    }
+    
+    .comentario-nombre {
+        font-size: 13px;
+    }
+    
+    .comentario-fecha {
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .comentarios-carousel {
+        height: 340px;
+    }
+    
+    .comentario-card {
+        min-width: 220px;
+        max-width: 220px;
+        height: 280px;
+        padding: var(--spacing-sm);
+    }
+    
+    .comentario-avatar {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .comentario-texto {
+        font-size: 13px;
+        -webkit-line-clamp: 5;
+    }
+    
+    .comentario-nombre {
+        font-size: 12px;
+    }
+    
+    .comentario-fecha {
+        font-size: 9px;
+    }
+}
     </style>
 </head>
 <body>
@@ -3144,8 +3865,9 @@ body {
         <div class="hero-image" style="background-image: url('imagenes/fondo05.jpg')"></div>
         <div class="hero-bg"></div>
         <div class="container">
-            <div class="hero-content">
-                <h1><?php echo $current_lang == 'es' ? 'Turismo en Cusco y Machu Picchu con Antares Travel Perú' : 'Cusco and Machu Picchu Tourism with Antares Travel Peru'; ?></h1>
+        <div class="hero-content">
+                
+                <h1><?php echo $current_lang == 'es' ? 'Turismo en Cusco - Antares Travel Perú' : 'Cusco Tourism with Antares Travel Peru'; ?></h1>
                 <p><?php echo $lang['hero_subtitle']; ?></p>
                 <div class="hero-buttons">
                     <a href="#tours" class="btn btn-primary">
@@ -3200,9 +3922,9 @@ body {
                             strpos($titulo_lower, 'laguna') !== false) {
                             $categoria = 'aventura';
                         } elseif (strpos($titulo_lower, 'dias') !== false || 
-                                 strpos($titulo_lower, 'noche') !== false ||
-                                 strpos($titulo_lower, 'inka jungle') !== false ||
-                                 strpos($titulo_lower, 'salkantay') !== false) {
+                                strpos($titulo_lower, 'noche') !== false ||
+                                strpos($titulo_lower, 'inka jungle') !== false ||
+                                strpos($titulo_lower, 'salkantay') !== false) {
                             $categoria = 'multi-day';
                         }
                         
@@ -3215,32 +3937,58 @@ body {
                         ?>
                         <div class="tour-card" data-category="<?php echo $categoria; ?>">
                             <div class="tour-image" style="background-image: url('<?php echo $tour['imagen_principal'] ?: $imagen_url; ?>')"></div>
-                            <div class="tour-header">
-                                <h3 class="tour-title"><?php echo htmlspecialchars($tour['titulo']); ?></h3>
-                                <div class="tour-schedule"><?php echo htmlspecialchars($tour['duracion'] ?: $lang['tour_card_duration']); ?></div>
-                                <?php if ($tour['guia_nombre']): ?>
-                                    <div class="tour-guide"><?php echo $lang['tour_card_guide']; ?>: <?php echo htmlspecialchars($tour['guia_nombre']); ?></div>
-                                <?php endif; ?>
-                            </div>
+                            
                             <div class="tour-content">
-                                <?php if ($tour['descripcion']): ?>
-                                    <div class="tour-description">
-                                        <p><?php echo htmlspecialchars(substr($tour['descripcion'], 0, 100)) . '...'; ?></p>
-                                    </div>
-                                <?php endif; ?>
+                                <h3 class="tour-title"><?php echo htmlspecialchars($tour['titulo']); ?></h3>
                                 
-                                <div class="tour-details">
-                                    <?php if ($tour['lugar_salida']): ?>
-                                        <div><i class="fas fa-map-marker-alt"></i> <?php echo $lang['tour_card_departure']; ?>: <?php echo htmlspecialchars($tour['lugar_salida']); ?></div>
-                                    <?php endif; ?>
-                                    <?php if ($tour['hora_salida']): ?>
-                                        <div><i class="fas fa-clock"></i> <?php echo $lang['tour_card_time']; ?>: <?php echo date('H:i', strtotime($tour['hora_salida'])); ?></div>
-                                    <?php endif; ?>
+                                <div class="tour-info">
+
+                                    <div class="tour-info-fixed">
+
+                                    <div class="tour-info-variable">
+                                        <?php if ($tour['descripcion']): ?>
+                                            <div class="tour-info-item description">
+                                                <i class="fas fa-check-circle"></i>
+                                                <div>
+                                                    <span><?php echo $current_lang == 'es' ? 'Incluye' : 'Includes'; ?>:</span>
+                                                    <div class="tour-includes">
+                                                        <?php echo htmlspecialchars(substr($tour['descripcion'], 0, 80) . '...'); ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+
+                                        <?php if ($tour['duracion']): ?>
+                                            <div class="tour-info-item duration">
+                                                <i class="fas fa-clock"></i>
+                                                <div>
+                                                    <span><?php echo $current_lang == 'es' ? 'Duración' : 'Duration'; ?>:</span>
+                                                    <div class="tour-duration"><?php echo htmlspecialchars($tour['duracion']); ?></div>
+                                                </div>
+                                            </div>
+                                        <?php endif; ?>
+
+                                        <?php if ($tour['hora_salida']): ?>
+                                            <div class="tour-info-item schedule">
+                                                <i class="fas fa-calendar-alt"></i>
+                                                <div>
+                                                    <span><?php echo $current_lang == 'es' ? 'Horario' : 'Schedule'; ?>:</span>
+                                                    <div class="tour-schedule">
+                                                        <?php echo date('H:i', strtotime($tour['hora_salida'])); ?> - 
+                                                        <?php echo $tour['hora_llegada'] ? date('H:i', strtotime($tour['hora_llegada'])) : '19:00'; ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                    
+
                                 </div>
 
                                 <div class="tour-actions">
                                     <a href="src/detalles.php?id_tour=<?php echo $tour['id_tour']; ?>" class="btn btn-primary">
-                                        <i class="fas fa-info-circle"></i> <?php echo $lang['tour_card_details']; ?>
+                                        <i class="fas fa-info-circle"></i> <?php echo $current_lang == 'es' ? 'Más información' : 'More information'; ?>
                                     </a>
                                 </div>
                             </div>
@@ -3339,93 +4087,111 @@ body {
             </div>
 
             <h3 style="text-align: center; color: var(--primary-color); margin-bottom: 30px;" class="animate-on-scroll"><?php echo $lang['experiences_gallery_title']; ?></h3>
-            <div class="photos-mural stagger-animation">
-                <?php 
-                if ($experiencias_result) $experiencias_result->data_seek(0);
-                $photos = [];
-                if($experiencias_result) {
-                    while ($experiencia = $experiencias_result->fetch_assoc()): 
-                        if ($experiencia['imagen_url']):
-                            $photos[] = $experiencia;
-                        endif;
-                    endwhile;
-                }
-                ?>
-                
-                <?php if (!empty($photos)): ?>
-                    <?php foreach ($photos as $photo): ?>
-                        <div class="photo-item">
-                            <img src="<?php echo htmlspecialchars($photo['imagen_url']); ?>" alt="<?php echo $current_lang == 'es' ? 'Foto de experiencia en Cusco' : 'Cusco experience photo'; ?>" loading="lazy">
-                            <div class="photo-info">
-                                <img src="<?php echo htmlspecialchars($photo['avatar_url'] ?: 'imagenes/default-avatar.png'); ?>" 
-                                    alt="<?php echo $current_lang == 'es' ? 'Avatar de usuario' : 'User avatar'; ?>" class="small-avatar" loading="lazy">
-                                <span><?php echo htmlspecialchars($photo['nombre'] ?: $lang['experiences_anonymous']); ?></span>
-                                <span><?php echo date('d/m/Y', strtotime($photo['fecha_publicacion'])); ?></span>
+            <div class="mural-container">
+                <div class="photos-mural">
+                    <?php
+                    $photos_query = "SELECT e.imagen_url, e.fecha_publicacion, u.nombre, u.avatar_url 
+                                    FROM experiencias e 
+                                    LEFT JOIN usuarios u ON e.id_usuario = u.id_usuario 
+                                    WHERE e.imagen_url IS NOT NULL AND e.imagen_url != ''
+                                    ORDER BY e.fecha_publicacion DESC 
+                                    LIMIT 8";
+                    $photos_result = $conn->query($photos_query);
+                    
+                    if ($photos_result && $photos_result->num_rows > 0):
+                        while ($photo = $photos_result->fetch_assoc()):
+                            $image_url = $photo['imagen_url'];
+                            list($width, $height) = @getimagesize($image_url) ?: [4, 3];
+                            $ratio = $width / $height;
+                            $orientation = 'square';
+                            if ($ratio > 1.2) $orientation = 'landscape';
+                            elseif ($ratio < 0.9) $orientation = 'portrait';
+                    ?>
+                        <div class="polaroid-frame fade-in">
+                            <div class="polaroid-image-container">
+                                <img src="<?php echo htmlspecialchars($photo['imagen_url']); ?>" 
+                                    alt="Foto de experiencia" 
+                                    class="polaroid-image <?php echo $orientation; ?>"
+                                    loading="lazy">
+                            </div>
+                            <div class="polaroid-info">
+                                <div class="polaroid-user">
+                                    <img src="<?php echo htmlspecialchars($photo['avatar_url'] ?: 'imagenes/default-avatar.png'); ?>" 
+                                        alt="Avatar">
+                                    <span><?php echo htmlspecialchars($photo['nombre'] ?: 'Anónimo'); ?></span>
+                                </div>
+                                <div class="polaroid-date">
+                                    <?php echo date('d/m/y', strtotime($photo['fecha_publicacion'])); ?>
+                                </div>
                             </div>
                         </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <p style="text-align: center; color: var(--text-light);"><?php echo $lang['experiences_photos_soon']; ?></p>
-                <?php endif; ?>
+                    <?php 
+                        endwhile;
+                    else:
+                    ?>
+                        <p style="grid-column: 1/-1; text-align: center; color: #666; font-style: italic;">
+                            Las fotos aparecerán aquí pronto...
+                        </p>
+                    <?php endif; ?>
+                </div>
             </div>
 
             <div class="carousel-container animate-on-scroll">
                 <h3 style="text-align: center; color: var(--primary-color); margin-bottom: 30px;"><?php echo $lang['experiences_comments_title']; ?></h3>
-                <div class="carousel" id="commentsCarousel">
-                    <?php 
-                    if ($experiencias_result) $experiencias_result->data_seek(0);
-                    $comments = [];
-                    if($experiencias_result) {
-                        while ($experiencia = $experiencias_result->fetch_assoc()): 
-                            if ($experiencia['comentario']):
-                                $comments[] = $experiencia;
-                            endif;
-                        endwhile;
-                    }
-                    ?>
-                    
-                    <?php if (!empty($comments)): ?>
-                        <?php foreach ($comments as $index => $comment): ?>
-                            <div class="carousel-item <?php echo $index === 0 ? 'active' : ''; ?>">
-                                <div class="experiencia-card">
-                                    <div class="experiencia-content">
-                                        <div class="experiencia-user">
-                                            <img src="<?php echo htmlspecialchars($comment['avatar_url'] ?: 'imagenes/default-avatar.png'); ?>" 
-                                                 alt="<?php echo $current_lang == 'es' ? 'Avatar de usuario' : 'User avatar'; ?>" class="experiencia-avatar" loading="lazy">
-                                            <div>
-                                                <div class="experiencia-name"><?php echo htmlspecialchars($comment['nombre'] ?: $lang['experiences_anonymous_user']); ?></div>
-                                                <div class="experiencia-date"><?php echo date('d/m/Y', strtotime($comment['fecha_publicacion'])); ?></div>
-                                            </div>
-                                        </div>
-                                        <blockquote style="font-style: italic; font-size: 1.1rem; color: var(--text-light); border-left: 4px solid var(--primary-light); padding-left: 20px; margin: 0; line-height: 1.6;">
-                                            "<?php echo htmlspecialchars($comment['comentario']); ?>"
-                                        </blockquote>
+
+                <div class="comentarios-carousel">
+                    <div class="comentarios-track" id="comentariosTrack">
+                        <?php 
+                        if ($experiencias_result) $experiencias_result->data_seek(0);
+                        $comments = [];
+                        if($experiencias_result) {
+                            while ($experiencia = $experiencias_result->fetch_assoc()): 
+                                if ($experiencia['comentario']):
+                                    $comments[] = $experiencia;
+                                endif;
+                            endwhile;
+                        }
+                        
+                        if (!empty($comments)):
+                            $comments = array_merge($comments, $comments, $comments);
+                            foreach ($comments as $comment):
+                        ?>
+                            <div class="comentario-card">
+                                <img src="<?php echo htmlspecialchars($comment['avatar_url'] ?: 'imagenes/default-avatar.png'); ?>" 
+                                    alt="<?php echo $current_lang == 'es' ? 'Avatar de usuario' : 'User avatar'; ?>" 
+                                    class="comentario-avatar" 
+                                    loading="lazy">
+                                
+                                <div class="comentario-texto">
+                                    "<?php echo htmlspecialchars($comment['comentario']); ?>"
+                                </div>
+                                
+                                <div class="comentario-info">
+                                    <div class="comentario-nombre">
+                                        <?php echo htmlspecialchars($comment['nombre'] ?: $lang['experiences_anonymous_user']); ?>
+                                    </div>
+                                    <div class="comentario-fecha">
+                                        <?php echo date('d/m/Y', strtotime($comment['fecha_publicacion'])); ?>
                                     </div>
                                 </div>
                             </div>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <div class="carousel-item active">
-                            <div class="experiencia-card">
-                                <div class="experiencia-content">
-                                    <p style="color: var(--text-light); font-size: 1.1rem; text-align: center;">
-                                        <?php echo $lang['experiences_comments_soon']; ?>
-                                    </p>
+                        <?php 
+                            endforeach;
+                        else:
+                        ?>
+                            <div class="comentario-card">
+                                <div class="comentario-avatar" style="background: var(--gradient-primary);"></div>
+                                <div class="comentario-texto">
+                                    <?php echo $lang['experiences_comments_soon']; ?>
+                                </div>
+                                <div class="comentario-info">
+                                    <div class="comentario-nombre">Antares Travel</div>
+                                    <div class="comentario-fecha"><?php echo date('d/m/Y'); ?></div>
                                 </div>
                             </div>
-                        </div>
-                    <?php endif; ?>
+                        <?php endif; ?>
+                    </div>
                 </div>
-                
-                <?php if (count($comments) > 1): ?>
-                    <button class="carousel-nav prev" onclick="moveCarousel('commentsCarousel', -1)">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <button class="carousel-nav next" onclick="moveCarousel('commentsCarousel', 1)">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                <?php endif; ?>
-            </div>
 
             <div class="add-experiencia animate-on-scroll">
                 <button onclick="toggleExperienciaForm()" class="btn btn-primary"><?php echo $lang['add_experience_button']; ?></button>
@@ -3496,25 +4262,52 @@ body {
 
         document.addEventListener('DOMContentLoaded', function() {
             initializeLoadingScreen();
-            initializeHeroCarousel();
-            initializeScrollAnimations();
             initializeNavbar();
-            initializeGoogleSignin();
-            filterGuias();
+            
+            setTimeout(() => {
+                initializeHeroCarousel();
+                initializeScrollAnimations();
+            }, 100);
+            
+            setTimeout(() => {
+                initializeGoogleSignin();
+                filterGuias();
+            }, 500);
         });
 
         function initializeLoadingScreen() {
             setTimeout(() => {
-                const loadingScreen = document.getElementById('loadingScreen');
-                loadingScreen.classList.add('hidden');
+                document.getElementById('loadingScreen').classList.add('hidden');
                 isLoading = false;
-                
-                setTimeout(() => {
-                    triggerScrollAnimations();
-                }, 500);
-            }, 2000);
+            }, 500);
         }
 
+        function lazyLoadContent() {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '200px'
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const section = entry.target;
+                        if (section.id === 'guias' && !section.dataset.loaded) {
+                            loadGuiasContent();
+                            section.dataset.loaded = 'true';
+                        }
+                        if (section.id === 'experiencias' && !section.dataset.loaded) {
+                            loadExperienciasContent();
+                            section.dataset.loaded = 'true';
+                        }
+                    }
+                });
+            }, observerOptions);
+            
+            document.querySelectorAll('#guias, #experiencias').forEach(section => {
+                observer.observe(section);
+            });
+        }
         function initializeHeroCarousel() {
 
             setInterval(() => {
@@ -3662,26 +4455,60 @@ body {
         function filterTours(category) {
             const tourCards = document.querySelectorAll('.tour-card');
             const categoryButtons = document.querySelectorAll('.category-btn');
+            const toursContainer = document.getElementById('toursContainer');
             
             categoryButtons.forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
+            toursContainer.classList.add('filtering');
+            toursContainer.classList.remove('showing');
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'tours-loading';
+            loadingDiv.innerHTML = `
+                <div>
+                    <div class="tours-loading-spinner"></div>
+                    <div class="tours-loading-text">${category === 'all' ? 'Cargando todos los tours...' : 'Filtrando tours...'}</div>
+                </div>
+            `;
             
-            tourCards.forEach((card, index) => {
-                card.style.transform = 'translateY(20px) scale(0.95)';
-                card.style.opacity = '0';
+            toursContainer.parentNode.insertBefore(loadingDiv, toursContainer.nextSibling);
+            
+            setTimeout(() => {
+                loadingDiv.classList.add('active');
+            }, 50);
+            
+            setTimeout(() => {
+                let visibleCards = [];
                 
-                setTimeout(() => {
+                tourCards.forEach(card => {
                     if (category === 'all' || card.dataset.category === category) {
+                        visibleCards.push(card);
                         card.style.display = 'block';
-                        setTimeout(() => {
-                            card.style.transform = 'translateY(0) scale(1)';
-                            card.style.opacity = '1';
-                        }, 50 + (index * 50));
                     } else {
                         card.style.display = 'none';
                     }
-                }, index * 50);
-            });
+                });
+                
+                loadingDiv.classList.remove('active');
+                
+                setTimeout(() => {
+                    loadingDiv.remove();
+                    toursContainer.classList.remove('filtering');
+                    toursContainer.classList.add('showing');
+                    
+                    visibleCards.forEach((card, index) => {
+                        card.style.opacity = '0';
+                        card.style.transform = 'translateY(30px) scale(0.95)';
+                        
+                        setTimeout(() => {
+                            card.style.transition = 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                            card.style.opacity = '1';
+                            card.style.transform = 'translateY(0) scale(1)';
+                        }, 100 + (index * 80));
+                    });
+                    
+                }, 300);
+                
+            }, 1000); 
         }
 
         function filterGuias() {
@@ -3928,7 +4755,116 @@ body {
                 timeout = setTimeout(later, wait);
             };
         } 
+        function initializeInfiniteComments() {
+    const track = document.getElementById('comentariosTrack');
+    if (!track) return;
+    
+    const cards = track.querySelectorAll('.comentario-card');
+    if (cards.length === 0) return;
+    
+    const cardWidth = 324;
+    const totalOriginalCards = cards.length / 3;
+    
+    let translateX = 0;
+    let isDragging = false;
+    let startX = 0;
+    let startTranslateX = 0;
+    let animationId = null;
+    const speed = 0.5;
+    
+    function updatePosition() {
+        track.style.transform = `translateX(${translateX}px)`;
+    }
+    
+    function animate() {
+        if (!isDragging) {
+            translateX -= speed;
+            
+            if (translateX <= -(cardWidth * totalOriginalCards)) {
+                translateX = 0;
+            }
+            
+            updatePosition();
+        }
+        animationId = requestAnimationFrame(animate);
+    }
+    
+    function handleStart(e) {
+        isDragging = true;
+        track.classList.add('dragging');
+        
+        const clientX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
+        startX = clientX;
+        startTranslateX = translateX;
+        
+        e.preventDefault();
+        
+        document.addEventListener('mousemove', handleMove, { passive: false });
+        document.addEventListener('touchmove', handleMove, { passive: false });
+        document.addEventListener('mouseup', handleEnd);
+        document.addEventListener('touchend', handleEnd);
+    }
+    
+    function handleMove(e) {
+        if (!isDragging) return;
+        
+        e.preventDefault();
+        
+        const clientX = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX;
+        const deltaX = clientX - startX;
+        
+        translateX = startTranslateX + deltaX;
+        
+        const minTranslate = -(cardWidth * totalOriginalCards);
+        const maxTranslate = cardWidth;
+        
+        if (translateX > maxTranslate) {
+            translateX = minTranslate + (translateX - maxTranslate);
+        } else if (translateX < minTranslate) {
+            translateX = maxTranslate + (translateX - minTranslate);
+        }
+        
+        updatePosition();
+    }
+    
+    function handleEnd() {
+        isDragging = false;
+        track.classList.remove('dragging');
+        
+        document.removeEventListener('mousemove', handleMove);
+        document.removeEventListener('touchmove', handleMove);
+        document.removeEventListener('mouseup', handleEnd);
+        document.removeEventListener('touchend', handleEnd);
+    }
+    
+    track.addEventListener('mousedown', handleStart);
+    track.addEventListener('touchstart', handleStart, { passive: false });
+    track.addEventListener('dragstart', (e) => e.preventDefault());
+    track.addEventListener('selectstart', (e) => e.preventDefault());
+    
+    animate();
+    
+    return () => {
+        if (animationId) {
+            cancelAnimationFrame(animationId);
+        }
+    };
+}
 
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(initializeInfiniteComments, 1000);
+    const tourCards = document.querySelectorAll('.tour-card');
+    
+    tourCards.forEach(card => {
+        const tourImage = card.querySelector('.tour-image');
+        if (tourImage) {
+            const backgroundImage = tourImage.style.backgroundImage;
+            if (backgroundImage) {
+                card.style.backgroundImage = backgroundImage;
+            }
+        }
+    });
+});
         window.changeHeroImage = changeHeroImage;
         window.toggleMobileMenu = toggleMobileMenu;
         window.toggleGoogleSignin = toggleGoogleSignin;
